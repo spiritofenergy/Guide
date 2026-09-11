@@ -10,8 +10,21 @@
         <item>Авто</item>
         <item>Электроника</item>
         <item>Развлечения</item>
+        <item>Новости</item>
         <item>Разное</item>
         <item>Все</item>
+    </string-array>
+
+
+    <string-array name="publish_period">
+        <item>1</item>
+        <item>3</item>
+        <item>7</item>
+        <item>14</item>
+        <item>30</item>
+        <item>90</item>
+        <item>180</item>
+        <item>365</item>
     </string-array>
 
     <string-array name="category_admin">
@@ -19,7 +32,8 @@
         <item>Добавить</item>
         <item>Вход</item>
         <item>Выход</item>
-        <item>Карта</item>
+        <item>Сохраненные</item>
+        <item>Мои объявления</item>
         <item>Настройки</item>
     </string-array>
 

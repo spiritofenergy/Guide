@@ -65,7 +65,7 @@ fun HomeScreen(
     onAdminClick: () -> Unit,
     onAnonymousClick: () -> Unit,
     onLoginClick: () -> Unit,
-    onAddBookClick: () -> Unit,
+    onAddClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onCategoryClick: () -> Unit,
     onRegistrationNeeded: () -> Unit,
@@ -166,25 +166,11 @@ fun HomeScreen(
                 }
                 DrawerBody(
                     onAdminClick = onAdminClick,
-                    onAddBookClick = onAddBookClick,
-                   /* onAdmin = { isAdmin ->
-                        viewModel.isAdminState.value = isAdmin
-                    },*/
-                    onCategoryClick = { categoryIndex ->
-                        if (categoryIndex == BookCategories.SAVED) {
-                            viewModel.selectedBottomItemState.intValue =
-                                BottomMenuItem.Saved.titleId
-                            Log.d("MyLog", "onCategoryClick FAVORITES")
-                            //savedInstanceState.value = BottomMenuItem.Favorite.titleId
-                            coroutineScope.launch { drawerState.close() }
-                        } else {
-                            viewModel.getAllBooksFromCategory(categoryIndex)
-                            viewModel.selectedBottomItemState.intValue = BottomMenuItem.Home.titleId
-                            Log.d("MyLog", "categoryIndex: $categoryIndex")
-                            coroutineScope.launch { drawerState.close() }
-                        }
+                    onAddBookClick = onAddClick,
+                    onCategoryClick = { category ->
+                        viewModel.onCategorySelected(category) // Вся логика теперь в ViewModel
+                        coroutineScope.launch { drawerState.close() }
                     },
-
                     onLoginClick = {
                         onLoginClick()
                         coroutineScope.launch { drawerState.close() }
@@ -221,7 +207,7 @@ fun HomeScreen(
             // FAB добавляется здесь
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { onAddBookClick() },
+                    onClick = { onAddClick() },
                     containerColor = Orange.copy(alpha = 0.6F),
                     contentColor = Color.White,
 
@@ -256,7 +242,7 @@ fun HomeScreen(
                     BottomMenu(
                         viewModel.selectedBottomItemState.intValue,
                         onCategoryClick = {
-                            viewModel.getAllBooksFromCategory(category = BookCategories.SAVED)
+                            viewModel.getAllBooksFromCategory(category = BookCategories.OTHER)
                             viewModel.selectedBottomItemState.intValue =
                                 BottomMenuItem.Saved.titleId
 

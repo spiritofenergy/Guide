@@ -56,6 +56,7 @@ fun MainTopBar(
     var targetState by remember { mutableStateOf(false) }
     var queryText by remember { mutableStateOf("") }
     var expandedState by remember { mutableStateOf(false) }
+    val categoryList = stringArrayResource(id = R.array.category_array)
 
     // 1. Создаем FocusRequester для управления фокусом
     val focusRequester = remember { FocusRequester() }
@@ -87,7 +88,7 @@ fun MainTopBar(
                             Log.d("MyLog", "Query onQueryChange text: $text")
                         },
 
-                        onSearch = {text ->
+                        onSearch = { text ->
                             onSearch(text)
                             Log.d("MyLog", "Query onSearch text: $text")
 
@@ -95,7 +96,7 @@ fun MainTopBar(
                         },
                         expanded = false,
                         onExpandedChange = { exp ->
-                          //  expandedState = exp
+                            //  expandedState = exp
                         },
                         trailingIcon = {
                             IconButton(
@@ -133,7 +134,9 @@ fun MainTopBar(
             TopAppBar(
                 title = {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = {
@@ -145,13 +148,12 @@ fun MainTopBar(
                             )
                         }
 
-                    Text( text = when (category){
-                        BookCategories.FAVORITES -> stringResource(id = R.string.faves)
-                        BookCategories.ALL -> stringResource(id = R.string.all)
-                        else -> stringArrayResource(id = R.array.category_array)[category.id]
+                        // ✅ Берем название из массива по id категории
+                        Text(
+                            text = categoryList[category.id],
+                            maxLines = 1
+                        )
                     }
-                    )
-                        }
                 },
 
                 actions = {
@@ -202,6 +204,6 @@ fun MainTopBar(
 
 @Preview(showBackground = true)
 @Composable
-fun ShowMainTopBar(){
+fun ShowMainTopBar() {
 
 }

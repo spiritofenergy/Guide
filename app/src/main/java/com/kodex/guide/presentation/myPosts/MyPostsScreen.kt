@@ -1,6 +1,17 @@
 package com.kodex.guide.presentation.myPosts
 
-import androidx.compose.foundation.layout.*
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -9,9 +20,20 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Publish
-import androidx.compose.material3.*
-import androidx.compose.material3.AlertDialogDefaults.containerColor
-import androidx.compose.material3.ListItemDefaults.contentColor
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,11 +41,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.kodex.guide.domain.model.Book
+import com.kodex.guide.ui.theme.ButtonColorBlue
 import com.kodex.guide.ui.theme.Orange
 import kotlinx.coroutines.flow.collectLatest
 
@@ -36,11 +61,16 @@ fun MyPostsScreen(
     onBack: () -> Unit
 ) {
     val posts by viewModel.myPosts.collectAsState()
+    val context = LocalContext.current
 
+    // ✅ Показываем события ViewModel (тосты)
     LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
             when (event) {
-                is MyPostsEvent.Toast -> {/* можно показать Snackbar */}
+                is MyPostsViewModel.MyPostsEvent.Toast ->
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+
+                 is MyPostsViewModel.MyPostsEvent.RestoreDraft -> TODO()
             }
         }
     }
@@ -56,7 +86,6 @@ fun MyPostsScreen(
                 }
             )
         },
-        // FAB добавляется здесь
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onAddClick() },
@@ -69,7 +98,7 @@ fun MyPostsScreen(
                     contentDescription = "Добавить объявление"
                 )
             }
-        },
+        }
     ) { padding ->
         if (posts.isEmpty()) {
             Box(
@@ -85,7 +114,12 @@ fun MyPostsScreen(
                         color = Color.Gray
                     )
                     Spacer(Modifier.height(8.dp))
-                    Button(onClick = onAddClick) {
+                    Button(modifier = Modifier,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2196F3), // цвет фона (например, синий)
+                            contentColor = Color.White          // цвет текста и иконки
+                        ),
+                        onClick = onAddClick) {
                         Text("Создать первое")
                     }
                 }
@@ -117,7 +151,7 @@ fun MyPostCard(
     onDelete: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),   // ✅ было: fillMaxW idth
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -136,6 +170,7 @@ fun MyPostCard(
             }
             Spacer(Modifier.height(4.dp))
             Text(
+                // ✅ было: book.de scription
                 text = book.description.take(100) + if (book.description.length > 100) "..." else "",
                 fontSize = 14.sp,
                 color = Color.Gray
@@ -145,9 +180,13 @@ fun MyPostCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedButton(
+                OutlinedButton(                      // ✅ было: OutlinedBut ton
                     onClick = onEdit,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Orange, // цвет фона (например, синий)
+                        contentColor = Color.White          // цвет текста и иконки
+                    )
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = null)
                     Spacer(Modifier.width(4.dp))
@@ -156,7 +195,11 @@ fun MyPostCard(
                 if (!book.isUploaded) {
                     Button(
                         onClick = onUpload,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2196F3), // цвет фона (например, синий)
+                            contentColor = Color.White          // цвет текста и иконки
+                        )
                     ) {
                         Icon(Icons.Default.Publish, contentDescription = null)
                         Spacer(Modifier.width(4.dp))
@@ -166,7 +209,7 @@ fun MyPostCard(
                     Spacer(Modifier.weight(1f))
                 }
                 IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, tint = Color.Red, contentDescription = null)
+                    Icon(Icons.Default.Delete, tint = Orange, contentDescription = null)
                 }
             }
         }
@@ -179,7 +222,6 @@ fun StatusBadge(isUploaded: Boolean) {
     else Color(0xFFF59E0B).copy(alpha = 0.15f)
     val text = if (isUploaded) "Опубликован" else "Черновик"
     val color = if (isUploaded) Color(0xFF10B981) else Color(0xFFF59E0B)
-
     Surface(shape = MaterialTheme.shapes.small, color = bg) {
         Text(
             text = text,
@@ -188,5 +230,145 @@ fun StatusBadge(isUploaded: Boolean) {
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
         )
+    }
+}
+
+
+// Предпросмотр экрана с несколькими объявлениями
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, name = "With posts")
+@Composable
+fun MyPostsScreenWithPostsPreview() {
+    // Фиктивные книги для демонстрации
+    val sampleBooks = listOf(
+        Book(
+            key = "1",
+            title = "Война и мир",
+            description = "Роман-эпопея Льва Толстого о жизни русского общества в эпоху наполеоновских войн. Огромное произведение с множеством персонажей.",
+            isUploaded = true
+        ),
+        Book(
+            key = "2",
+            title = "Преступление и наказание",
+            description = "Роман Фёдора Достоевского о студенте Раскольникове и его теории о «праве на кровь по совести».",
+            isUploaded = false
+        ),
+        Book(
+            key = "3",
+            title = "Мастер и Маргарита",
+            description = "Роман Михаила Булгакова, сочетающий сатиру, фантастику и любовную линию.",
+            isUploaded = true
+        )
+    )
+
+    // Обёртка в тему приложения (если используется своя тема – замените на KodexGuideTheme)
+    MaterialTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Мои объявления") },
+                    navigationIcon = {
+                        IconButton(onClick = {}) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                        }
+                    }
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = {},
+                    containerColor = Orange.copy(alpha = 0.6F),
+                    contentColor = Color.White,
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Добавить объявление")
+                }
+            }
+        ) { padding ->
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(sampleBooks, key = { it.key }) { book ->
+                    MyPostCard(
+                        book = book,
+                        onEdit = {},
+                        onUpload = {},
+                        onDelete = {}
+                    )
+                }
+            }
+        }
+    }
+}
+
+// Предпросмотр пустого состояния
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, name = "Empty")
+@Composable
+fun MyPostsScreenEmptyPreview() {
+    MaterialTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Мои объявления") },
+                    navigationIcon = {
+                        IconButton(onClick = {}) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                        }
+                    }
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = {},
+                    containerColor = Orange.copy(alpha = 0.6F),
+                    contentColor = Color.White,
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Добавить объявление")
+                }
+            }
+        ) { padding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "У вас пока нет объявлений",
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Button(onClick = {}) {
+                        Text("Создать первое")
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Дополнительно – предпросмотр отдельной карточки
+@Preview(showBackground = true, name = "Card")
+@Composable
+fun MyPostCardPreview() {
+    MaterialTheme {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            MyPostCard(
+                book = Book(
+                    key = "1",
+                    title = "Пример книги",
+                    description = "Краткое описание книги, которое обрезается по длине, если превышает 100 символов.",
+                    isUploaded = false
+                ),
+                onEdit = {},
+                onUpload = {},
+                onDelete = {}
+            )
+        }
     }
 }

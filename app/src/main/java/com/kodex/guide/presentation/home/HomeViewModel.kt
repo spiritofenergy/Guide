@@ -62,6 +62,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.text.Typography.registered
 
 // ✅ События для UI (диалоги, навигация)
 sealed class AuthEvent {
@@ -246,6 +247,7 @@ class HomeViewModel @Inject constructor(
 
     private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
         val currentUser = auth.currentUser
+        Log.d("ROLE_DEBUG", "authStateListener: user=$currentUser, uid=${currentUser?.uid}")
 
         refreshAccessFlags()
         if (currentUser == null) {
@@ -262,6 +264,8 @@ class HomeViewModel @Inject constructor(
             .document(currentUser.uid)
             .get()
             .addOnSuccessListener { doc ->
+                Log.d("ROLE_DEBUG", "authStateListener: doc.exists=${doc.exists()}, data=${doc.data}")
+
                 if (!doc.exists()) {
                     // ✅ Используем маппер вместо хардкода
                     val user = currentUser.toUser(role = UserRole.USER)
@@ -291,6 +295,12 @@ class HomeViewModel @Inject constructor(
     }
 
     init {
+        Log.d("ROLE_DEBUG", "=== init START ===")
+        Log.d("ROLE_DEBUG", "Firebase.auth.currentUser?.uid = ${Firebase.auth.currentUser?.uid}")
+        Log.d("ROLE_DEBUG", "authStateProvider.currentUser()?.uid = ${authStateProvider.currentUser()?.uid}")
+        Log.d("ROLE_DEBUG", "cached user = ${preferenceDataSource.getUser()}")
+     //   Log.d("ROLE_DEBUG", "cached role = ${preferenceDataSource.getRole()}")
+
         // миграция: кеш пуст, но пользователь залогинен — заполняем кеш
         if (preferenceDataSource.getUser() == null) {
             authDataSource.getCurrentUser()?.let { preferenceDataSource.saveUser(it) }
@@ -300,6 +310,7 @@ class HomeViewModel @Inject constructor(
         authDataSource.getCurrentUser()?.let { user ->
             _userRole.value = user.role
             _isAuthorized.value = true
+
         }
 
         // ✅ ДОБАВЛЕНО: Регистрируем слушатель состояния авторизации
@@ -307,6 +318,8 @@ class HomeViewModel @Inject constructor(
         // Если уже авторизован - загружаем роль
         Firebase.auth.currentUser?.uid?.let { loadUserRole(it) }
         refreshAccessFlags()
+
+
     }
 
     fun refreshHeader() {
@@ -316,6 +329,7 @@ class HomeViewModel @Inject constructor(
     private var roleJob: Job? = null
 
     private fun loadUserRole(uid: String) {
+        Log.d("ROLE_DEBUG", "loadUserRole: START for uid=$uid")
         roleJob?.cancel()
         roleJob = viewModelScope.launch {
             userRoleRepository.observeUserRole(uid)
@@ -323,11 +337,14 @@ class HomeViewModel @Inject constructor(
                     Log.e("MyLog", "Ошибка загрузки роли: ${error.message}")
                 }
                 .collect { role ->
+                    Log.d("ROLE_DEBUG", "loadUserRole COLLECT: role=$role (uid=$uid)")
                     _userRole.value = role
                     _isAuthorized.value = true
 
                     preferenceDataSource.saveRole(role)
                     refreshHeader()
+                    Log.d("ROLE_DEBUG", "loadUserRole: после saveRole → _userRole=${_userRole.value}")
+
                 }
         }
     }
@@ -480,6 +497,30 @@ class HomeViewModel @Inject constructor(
             searchText
         }
     }
+
+    // В HomeViewModel.kt
+
+    /**
+     * Обрабатывает выбор категории из Drawer или BottomMenu.
+     * Инкапсулирует логику фильтрации и синхронизации состояния нижнего меню.
+     */
+    fun onCategorySelected(category: BookCategories) {
+        // 1. Обновляем состояние категории и применяем фильтр
+        categoryState.value = category
+        clearTempBookList()
+      //  refreshFavoritesKeys()
+        bookFilterStateFlow.update { it.copy(category = category) }
+
+        // 2. Синхронизируем состояние нижнего меню (BottomNavigation)
+        if (category == BookCategories.OTHER) {
+            selectedBottomItemState.intValue = BottomMenuItem.Saved.titleId
+        } else {
+            selectedBottomItemState.intValue = BottomMenuItem.Home.titleId
+        }
+
+        Log.d("MyLog", "Категория изменена на: $category")
+    }
+
     fun getAllBooksFromCategory(category: BookCategories) {
         categoryState.value = category
         clearTempBookList()
@@ -657,14 +698,18 @@ class HomeViewModel @Inject constructor(
         val uid = authStateProvider.currentUser()?.uid
 
         if (uid == null) {
+            Log.d("ROLE_DEBUG", "refreshAccessFlags: uid=null → сбрасываем флаги")
+
+
             _isAdminState.value = false
             isRegisterState.value = false
             return
         }
-
         viewModelScope.launch {
             _isAdminState.value = userAccessRepository.isAdmin(uid)
             isRegisterState.value = userAccessRepository.isRegistered(uid)
+            Log.d("ROLE_DEBUG", "refreshAccessFlags: isAdmin($uid)=$, isRegistered($uid)=$registered")
+
         }
     }
  /*!   // 2. ИСПРАВЛЕНИЕ: Убираем !! чтобы избежать краша у неавторизованных пользователей

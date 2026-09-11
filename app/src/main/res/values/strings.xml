@@ -9,10 +9,11 @@
     <string name="home">Home</string>
     <string name="faves">Favorite</string>
     <string name="saved">Saved</string>
+    <string name="news">News</string>
     <string name="delivery">Delivery</string>
     <string name="location">Show of map</string>
     <string name="card_payment">Card payment</string>
-    <string name="сreate_post">Create post</string>
+    <string name="create_post">Create post</string>
     <string name="settings">Settings</string>
     <!--AddScreen -->
     <string name="check_data">Check the data</string>
@@ -51,7 +52,14 @@
     <string name="exit">Exit"</string>
     <!-- DriverMenu-->
     <string name="all">All</string>
-
+     <string name="animals">Животные</string>
+    <string name="plants">Растения</string>
+    <string name="work">Работа</string>
+    <string name="services">Услуги</string>
+    <string name="real_estate">Недвижимость</string>
+    <string name="auto">Авто</string>
+    <string name="electronics">Электроника</string>
+    <string name="entertainments">Развлечения</string>
     <!-- -->
     <string name="empty_list">Empty_list</string>
     <string name="added_to_memory">Post added to Memory</string>

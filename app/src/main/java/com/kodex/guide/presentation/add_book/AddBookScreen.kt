@@ -24,6 +24,7 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,7 +66,13 @@ fun AddBookScreen(
     viewModel: AddBookViewModel = hiltViewModel(),
     viewModelHome: HomeViewModel = hiltViewModel(),
     ) {
-
+     // ✅ Сохраняем черновик при каждом изменении значимых полей
+     // Или используйте DisposableEffect для сохранения при уходе со экрана
+     DisposableEffect(Unit) {
+         onDispose {
+             viewModel.saveCurrentAsDraft() // Автосохранение при закрытии экрана
+         }
+     }
      // ✅ Декодируем Base64 в Bitmap только один раз при старте (для режима редактирования)
      val initialBitmap = remember(navData.imageUrl) {
          if (navData.imageUrl.isNotEmpty()) {
@@ -169,7 +176,7 @@ fun AddBookScreen(
              )
 
              Text(
-                 text = stringResource(R.string.сreate_post),
+                 text = stringResource(R.string.create_post),
                  color = Color.White,
                  fontSize = 30.sp,
                  fontWeight = FontWeight.Bold,

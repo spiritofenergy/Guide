@@ -2,20 +2,64 @@ package com.kodex.guide.data.source.local
 
 import android.content.Context
 import androidx.core.content.edit
+import com.kodex.guide.domain.model.PostDraftState
 import com.kodex.guide.domain.model.User
 import com.kodex.guide.domain.model.UserRole
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
-// ✅ ключи карты
+
+const val POST_DRAFT_KEY = "post_draft_key"
 const val CARD_NUMBER_KEY = "card_number_key"
 const val CARD_EXPIRY_KEY = "card_expiry_key"
+
 
 @Singleton
 class PreferenceDataSource @Inject constructor(@ApplicationContext
     context: Context
 ) {
+// В PreferenceDataSource.kt
 
+    fun savePostDraft(draft: PostDraftState) {
+        pref.edit {
+            putString(POST_DRAFT_KEY, Json.encodeToString(draft))
+        }
+    }
+    fun getPostDraft(): PostDraftState? {
+        return try {
+            val json = pref.getString(POST_DRAFT_KEY, null) ?: return null
+            Json.decodeFromString(json)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun clearPostDraft() {
+        pref.edit { remove(POST_DRAFT_KEY) }
+    }
+  /*  // ✅ Сохранение черновика
+    fun savePostDraft1(draft: PostDraftState) {
+        pref.edit {
+            putString(POST_DRAFT_KEY, Json.encodeToString(PostDraftState.serializer(), draft))
+        }
+    }
+
+    // ✅ Загрузка черновика
+    fun getPostDraft1(): PostDraftState? {
+        return try {
+            val json = pref.getString(POST_DRAFT_KEY, null) ?: return null
+            Json.decodeFromString(PostDraftState.serializer(), json)
+        } catch (e: Exception) {
+            null
+        }
+    }*/
+
+    // ✅ Очистка черновика после успешной публикации
+    fun clearPostDraft1() {
+        pref.edit { remove(POST_DRAFT_KEY) }
+    }
     //  ключи карты
 
     // ===== Сохранение данных карты (кроме CVV!) =====

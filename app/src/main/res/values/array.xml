@@ -11,8 +11,20 @@
         <item>Auto</item>
         <item>Electronics</item>
         <item>Entertainments</item>
-        <item>Saved</item>
+        <item>News</item>
+        <item>Other</item>
         <item>All</item>
+    </string-array>
+
+    <string-array name="publish_period">
+        <item>1</item>
+        <item>3</item>
+        <item>7</item>
+        <item>14</item>
+        <item>30</item>
+        <item>90</item>
+        <item>180</item>
+        <item>365</item>
     </string-array>
 
 
@@ -23,7 +35,8 @@
         <item>Add</item>
         <item>Enter</item>
         <item>Output</item>
-        <item>Map</item>
+        <item>Saved</item>//9
+        <item>My ads</item>
         <item>Settings</item>
     </string-array>
 

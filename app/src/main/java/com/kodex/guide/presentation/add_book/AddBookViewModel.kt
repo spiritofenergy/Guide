@@ -9,11 +9,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kodex.bookmarketcompose.R
 import com.kodex.guide.data.images.BitmapEncoder
+import com.kodex.guide.data.source.local.PreferenceDataSource
 import com.kodex.guide.data.source.remote.FirebaseAuthDataSource
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.presentation.navigation.NavRoutes
 import com.kodex.guide.presentation.home.HomeViewModel
 import com.kodex.guide.domain.model.BookCategories
+import com.kodex.guide.domain.model.PostDraftState
 import com.kodex.guide.domain.repository.BooksRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,6 +28,7 @@ class AddBookViewModel @Inject constructor(
     private val booksRepo: BooksRepo,
     private val bitmapEncoder: BitmapEncoder,
     private val authRepository: FirebaseAuthDataSource, // или UserSession
+    private val preferenceDataSource: PreferenceDataSource, // ✅ Внедряем хранилище
 
 ) : ViewModel() {
 
@@ -59,16 +62,69 @@ class AddBookViewModel @Inject constructor(
     fun convertImageToBase64(uri: Uri): String {
         return bitmapEncoder.imageToBase64(uri)
     }
-    // ✅ НОВЫЙ МЕТОД: Асинхронная конвертация в Base64 (не блокирует UI)
-  /*  fun convertImageToBase64Async(uri: Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val base64String = bitmapEncoder.imageToBase64(uri)
-            withContext(Dispatchers.Main) {
-                imageBase64.value = base64String
+    init {
+        loadSavedDraft() // ✅ При создании VM пытаемся восстановить черновик
+    }
+    /**
+     * Загружает сохраненный черновик и заполняет поля формы.
+     * Вызывается один раз при инициализации или явно пользователем.
+     */
+    private fun loadSavedDraft() {
+        viewModelScope.launch {
+            preferenceDataSource.getPostDraft()?.let { draft ->
+                title.value = draft.title
+                description.value = draft.description
+                price.intValue = draft.price
+                telephone.value = draft.telephone
+                village.value = draft.village
+                street.value = draft.street
+                house.value = draft.house
+                flat.value = draft.flat
+                selectedCategory.value = BookCategories.fromId(draft.categoryId)
+                delivery.value = draft.delivery
+                payment.value = draft.payment
+                location.value = draft.location
+                imageBase64.value = draft.imageUrl
+
+                // Если есть сохраненное фото, конвертируем его обратно в Uri для отображения
+                if (draft.imageUrl.isNotEmpty()) {
+                    // Логика восстановления Uri из Base64 если нужна
+                }
             }
         }
     }
-*/
+    /**
+     * Автоматически сохраняет текущее состояние формы в черновик.
+     * Можно вызывать в LaunchedEffect на каждое изменение поля
+     * ИЛИ вызывать перед выходом со экрана / сворачиванием приложения.
+     */
+    fun saveCurrentAsDraft() {
+        viewModelScope.launch {
+            val draft = PostDraftState(
+                title = title.value,
+                description = description.value,
+                price = price.intValue,
+                telephone = telephone.value,
+                village = village.value,
+                street = street.value,
+                house = house.value,
+                flat = flat.value,
+                categoryId = selectedCategory.value.id,
+                delivery = delivery.value,
+                payment = payment.value,
+                location = location.value,
+                imageUrl = imageBase64.value
+            )
+            preferenceDataSource.savePostDraft(draft)
+        }
+    }
+    /**
+     * Вызывается при УСПЕШНОЙ публикации. Черновик больше не нужен.
+     */
+    fun onPostPublishedSuccessfully() {
+        preferenceDataSource.clearPostDraft()
+    }
+
     // Функция валидации
     fun validateBook(context: Context): Boolean {
         val errors = mutableListOf<String>()

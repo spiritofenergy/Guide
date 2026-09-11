@@ -1,47 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">Тамань</string>
-<string name="create_account">Создать аккаунт</string>
-<string name="email_send">Письмо для сброса пароля отправлено</string>
-<string name="reset_password_dialog">Ссылка для сброса пароля отправлена на вашу почту. Пожалуйста, следуйте инструкциям для восстановления пароля.</string>
+    <string name="app_name">Тамань</string>
+    <string name="create_account">Создать аккаунт</string>
+    <string name="email_send">Письмо для сброса пароля отправлено</string>
+    <string name="reset_password_dialog">Ссылка для сброса пароля отправлена на вашу почту. Пожалуйста, следуйте инструкциям для восстановления пароля.</string>
 
-<!-- LoginScreen -->
-<string name="warning">Внимание</string>
-<string name="you_want_to_delete">Вы действительно хотите удалить?</string>
-<string name="mark_post">Отметить пост</string>
+    <!-- LoginScreen -->
+    <string name="warning">Внимание</string>
+    <string name="you_want_to_delete">Вы действительно хотите удалить?</string>
+    <string name="mark_post">Отметить пост</string>
+    <string name="user_name">Имя пользователя: </string>
+    <string name="phone_number">Номер телефона: </string>
+    <string name="login">Логин: </string>
+    <string name="password">Пароль: </string>
+    <string name="taman">Тамань</string>
+    <string name="taman_peninsula">Таманский полуостров</string>
+    <string name="guide">Гид</string>
+    <string name="enter">Войти</string>
+    <string name="recover_the_password">Восстановить пароль</string>
+    <string name="authorization">Авторизация</string>
+    <string name="remind_password">Напомнить пароль"</string>
+    <string name="exit">Выход"</string>
 
-<!-- BottomMenu-->
-<string name="home">Главная</string>
-<string name="faves">Избранное</string>
-<string name="settings">Настройки</string>
+    <!-- BottomMenu-->
+    <string name="home">Главная</string>
+    <string name="faves">Избранное</string>
+    <string name="settings">Настройки</string>
+    <string name="saved">Сохраненные</string>
+    <string name="news">Новости</string>
+    <string name="delivery">Доставка</string>
+    <string name="location">Показать на карте</string>
+    <string name="card_payment">Оплата картой</string>
+    <string name="create_post">Создать пост</string>
 
-<!-- DriverMenu-->
-<string name="all">Все</string>
-<string name="taman_peninsula">Таманский полуостров</string>
+    <!-- AddScreen -->
+    <string name="check_data">Проверьте данные</string>
+    <string name="title">Название</string>
+    <string name="description">Описание</string>
+    <string name="village">Станица</string>
+    <string name="street">Улица</string>
+    <string name="house">Дом</string>
+    <string name="flat">Квартира</string>
+    <string name="price">Цена</string>
+    <string name="select_photo">Выбрать фото</string>
+    <string name="clear">Очистить</string>
 
-<!-- General -->
-<string name="empty_list">Список пуст</string>
-<string name="added_to_favorites">Добавлено в избранное</string>
-<string name="deleted_from_favorites">Удалено из избранного</string>
+    <!-- validateBook -->
+    <string name="title_is_required">• Название обязательно</string>
+    <string name="description_is_required">• Описание обязательно</string>
+    <string name="please_specify_the_village">• Укажите станицу</string>
+    <string name="enter_a_valid_price">• Введите корректную цену</string>
+    <string name="please_add_a_photo">• Пожалуйста, добавьте фото</string>
 
-<!-- MenuScreen -->
-<string name="attention">Внимание</string>
-<string name="want_to_delete_this_message">Вы действительно хотите удалить это сообщение?</string>
+    <!-- DriverMenu-->
+    <string name="all">Все</string>
+     <string name="animals">Животные</string>
+    <string name="plants">Растения</string>
+    <string name="work">Работа</string>
+    <string name="services">Услуги</string>
+    <string name="real_estate">Недвижимость</string>
+    <string name="auto">Авто</string>
+    <string name="electronics">Электроника</string>
+    <string name="entertainments">Развлечения</string>
+    <!-- General -->
+    <string name="empty_list">Список пуст</string>
+    <string name="added_to_favorites">Добавлено в избранное</string>
+    <string name="deleted_from_favorites">Удалено из избранного</string>
+    <string name="added_to_memory">Пост добавлен в память</string>
+    <string name="deleted_from_memory">Пост удален из памяти</string>
 
-<!-- DetailScreen -->
-<string name="rate_this_book">Оцените эту книгу</string>
-<string name="submit">Отправить</string>
-<string name="message">Сообщение</string>
-<string name="yes">Да</string>
-<string name="ok">OK</string>
-<string name="cancel">Отмена</string>
-<string name="comments">Комментарии</string>
+    <!-- MenuScreen -->
+    <string name="attention">Внимание</string>
+    <string name="want_to_delete_this_message">Вы действительно хотите удалить это сообщение?</string>
 
-<!-- SettingsScreen -->
-<string name="enter_track_name">Введите название трека</string>
-<string name="delete_dialog_massage">Вы уверены, что хотите удалить этот трек?</string>
-<string name="you_account_was_deleted">Ваш аккаунт был удален</string>
-<string name="deleted_account_massage">Вы уверены, что хотите удалить свой аккаунт?</string>
-<string name="delete">Удалить</string>
-<string name="the_fields_on_may_be_empty">Поля не могут быть пустыми</string>
+    <!-- DetailScreen -->
+    <string name="rate_this_book">Оцените эту книгу</string>
+    <string name="call">Позвонить</string>
+    <string name="submit">Отправить</string>
+    <string name="message">Сообщение</string>
+    <string name="yes">Да</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Отмена</string>
+    <string name="comments">Комментарии</string>
+    <string name="estimate">Оценить</string>
+
+    <!-- SettingsScreen -->
+    <string name="enter_track_name">Введите название трека</string>
+    <string name="delete_dialog_massage">Вы уверены, что хотите удалить этот трек?</string>
+    <string name="you_account_was_deleted">Ваш аккаунт был удален</string>
+    <string name="deleted_account_massage">Вы уверены, что хотите удалить свой аккаунт?</string>
+    <string name="delete">Удалить</string>
+    <string name="the_fields_on_may_be_empty">Поля не могут быть пустыми</string>
 </resources>

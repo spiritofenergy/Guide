@@ -57,6 +57,7 @@ import com.kodex.guide.presentation.detailScreen.DetailsScreenViewModel
 import com.kodex.bookmarketcompose.R
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
+import com.kodex.guide.presentation.components.ActionSheetButton
 import com.kodex.guide.presentation.events.DetailUiEvents
 import com.kodex.guide.presentation.home.BookListItemUi
 import com.kodex.guide.presentation.home.HomeViewModel
@@ -369,38 +370,3 @@ fun ParallaxScreen(
         )
     }
 }
-
-@Composable
-fun ActionSheetButton(
-    text: String,
-    icon: ImageVector? = null,
-    containerColor: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier.height(52.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            contentColor = Color.White
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        // ✅ РИСУЕМ ИКОНКУ, если она передана
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(12.dp))
-        }
-        Text(
-            text = text,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-    }
-}
-

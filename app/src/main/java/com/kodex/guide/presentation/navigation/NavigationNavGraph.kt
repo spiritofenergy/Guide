@@ -1,7 +1,6 @@
 package com.kodex.guide.presentation.navigation
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -87,8 +86,8 @@ fun NavigationNavGraph (navController: NavHostController){
                    navController.navigate(NavRoutes.HomeDataObject(
                        uid = "", email = ""))
                },
-                onAddBookClick = {
-                    navController.navigate(NavRoutes.AddScreenObject())
+                onAddClick = {
+                    navController.navigate(NavRoutes.MyPostEditorNavObject())
                 },
                 onRegistrationNeeded = {
                     // ✅ Запуск регистрации
@@ -109,7 +108,26 @@ fun NavigationNavGraph (navController: NavHostController){
                 },
             )
         }
+        composable<NavRoutes.MyPostsNavObject> {
+            MyPostsScreen(
+                onEditClick = { book ->
+                    navController.navigate(NavRoutes.MyPostEditorNavObject(bookKey = book.key))
+                },
+                onAddClick = {
+                    navController.navigate(NavRoutes.MyPostEditorNavObject(bookKey = ""))
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
 
+        composable<NavRoutes.MyPostEditorNavObject> { navEntry ->
+            val navData = navEntry.toRoute<NavRoutes.MyPostEditorNavObject>()
+            MyPostEditorScreen(
+                bookKey = navData.bookKey,
+                onSaved = { navController.popBackStack() },
+                onBack = { navController.popBackStack() }
+            )
+        }
         composable<NavRoutes.AddScreenObject> { navEntry ->
             val navData = navEntry.toRoute<NavRoutes.AddScreenObject>()
             AddBookScreen(
@@ -178,29 +196,6 @@ fun NavigationNavGraph (navController: NavHostController){
                 onRelatedBookClick = { relatedBook ->
                     navController.navigate(relatedBook.toParallaxNavObject())
                 },
-            )
-        }
-
-        composable<NavRoutes.MyPostsNavObject> {
-            MyPostsScreen(
-                onEditClick = { book ->
-                    navController.navigate(
-                        NavRoutes.MyPostEditorNavObject(bookKey = book.key)
-                    )
-                },
-                onAddClick = {
-                    navController.navigate(NavRoutes.MyPostEditorNavObject(bookKey = ""))
-                },
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<NavRoutes.MyPostEditorNavObject> { navEntry ->
-            val navData = navEntry.toRoute<NavRoutes.MyPostEditorNavObject>()
-            MyPostEditorScreen(
-                bookKey = navData.bookKey,
-                onSaved = { navController.popBackStack() },
-                onBack = { navController.popBackStack() }
             )
         }
 
