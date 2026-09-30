@@ -8,7 +8,7 @@ data class BookFirestore(
     val description: String = "",
     val price: Int = 0,
     val telephone: String = "",
-    val categoryIndex: Int = BookCategories.ALL.id, // Сохраняем как Int
+    val categoryIndex: Int = BookCategories.OTHER.id, // Сохраняем как Int
     val imageUrl: String = "",
     val isFavorite: Boolean = false,
     val isAuthor: Boolean = false,

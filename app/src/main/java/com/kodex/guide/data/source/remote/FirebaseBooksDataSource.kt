@@ -37,8 +37,8 @@ class FirebaseBooksDataSource(
             .orderBy(bookFilter.filterData.filterType.toFirebaseFields())
 
         query = when (bookFilter.category) {
-            BookCategories.ALL -> query
-            BookCategories.SERVICES -> query.whereIn(FieldPath.of(KEY), keysFavesList.ifEmpty { listOf("-1") })
+            BookCategories.OTHER -> query
+           // BookCategories.SERVICES -> query.whereIn(FieldPath.of(KEY), keysFavesList.ifEmpty { listOf("-1") })
             else -> query.whereEqualTo(CATEGORY_INDEX, bookFilter.category.id)
         }
 

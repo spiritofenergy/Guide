@@ -47,9 +47,9 @@ class GetRelatedBooksUseCaseTest {
 
     @Test
     fun `передает категорию и excludeKey в репозиторий`() = runTest {
-        useCase(BookCategories.ALL, excludeKey = "abc")
+        useCase(BookCategories.OTHER, excludeKey = "abc")
 
-        assertEquals(BookCategories.ALL, fakeRepo.capturedCategory)
+        assertEquals(BookCategories.OTHER, fakeRepo.capturedCategory)
         assertEquals("abc", fakeRepo.capturedExcludeKey)
     }
 
@@ -57,7 +57,7 @@ class GetRelatedBooksUseCaseTest {
     fun `ошибка репозитория пробрасывается наружу`() = runTest {
         fakeRepo.shouldFail = true
 
-        val result = useCase(BookCategories.ALL, excludeKey = "x")
+        val result = useCase(BookCategories.OTHER, excludeKey = "x")
 
         assertTrue(result.isFailure)
     }

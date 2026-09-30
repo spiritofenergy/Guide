@@ -11,15 +11,14 @@ enum class BookCategories(
     AUTO(5),          // "Авто"
     ELECTRONICS(6),   // "Электроника"
     ENTERTAINMENTS(7),// "Развлечения"
-    OTHER(8),         // "Сохраненные"
-    NEWS(9),           // "Все" (id=0, но в коде стоит внизу)
-    ALL(10);
+    NEWS(8),           // "Все" (id=0, но в коде стоит внизу)
+    OTHER(9);
 
     companion object{
         fun fromId(id: Int): BookCategories{
             return entries.firstOrNull{ entry ->
                 entry.id == id
-            } ?: ALL
+            } ?: OTHER
         }
     }
  }

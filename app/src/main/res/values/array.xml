@@ -13,7 +13,7 @@
         <item>Entertainments</item>
         <item>News</item>
         <item>Other</item>
-        <item>All</item>
+
     </string-array>
 
     <string-array name="category_top">

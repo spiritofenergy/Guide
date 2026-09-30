@@ -13,15 +13,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -29,22 +26,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -60,10 +51,7 @@ import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.presentation.components.ActionSheetButton
 import com.kodex.guide.presentation.events.DetailUiEvents
 import com.kodex.guide.presentation.home.BookListItemUi
-import com.kodex.guide.presentation.home.HomeViewModel
 import com.kodex.guide.presentation.home.SavedPostsViewModel
-import com.kodex.guide.presentation.login.LoginButton
-import com.kodex.guide.ui.theme.ButtonColor
 import com.kodex.guide.ui.theme.IconBgLight
 import com.kodex.guide.ui.theme.Orange
 import com.kodex.guide.ui.theme.TextDark
@@ -78,10 +66,10 @@ fun ParallaxScreen(
     onBackPressed: () -> Unit,
     onNavigateToReviews: () -> Unit,
     onCommentClick: () -> Unit,
-    bookCategory: BookCategories = BookCategories.ALL,
+    bookCategory: BookCategories = BookCategories.OTHER,
     onRelatedBookClick: (Book) -> Unit = {},
 
-) {
+    ) {
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val collapsedHeight = 280.dp

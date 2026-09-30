@@ -243,25 +243,26 @@ fun HomeScreen(
                 if (!isLandscape)
                     BottomMenu(
                         viewModel.selectedBottomItemState.intValue,
-                        onCategoryClick = {
+                   /*     onCategoryClick = {
                             viewModel.getAllBooksFromCategory(category = BookCategories.OTHER)
                             viewModel.selectedBottomItemState.intValue =
                                 BottomMenuItem.Saved.titleId
 
 
-                        },
+                        },*/
                         onHomeClick = {
                             // получаем список с иыентификатором и
                             viewModel.selectedBottomItemState.intValue = BottomMenuItem.Home.titleId
-                            viewModel.getAllBooksFromCategory(category = BookCategories.ALL)
+                            viewModel.getAllBooksFromCategory(category = BookCategories.OTHER)
                         },
-                        onSettingsClick = {
+                   /*     onSettingsClick = {
                             onSettingsClick()
                             viewModel.selectedBottomItemState.intValue =
                                 BottomMenuItem.Settings.titleId
 
-                        },
+                        },*/
                         onSavedClick = {
+                            viewModel.selectedBottomItemState.intValue = BottomMenuItem.Saved.titleId
                             onSavedClick()
 
                         }

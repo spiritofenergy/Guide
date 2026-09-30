@@ -47,7 +47,7 @@ class AddBookViewModel @Inject constructor(
 
     val validationError = mutableStateOf<String?>(null)
 
-    val selectedCategory = mutableStateOf(BookCategories.ALL)
+    val selectedCategory = mutableStateOf(BookCategories.OTHER)
     val selectedImageUri = mutableStateOf<Uri?>(null)
     val showLoadingIndicator = mutableStateOf(false)
 

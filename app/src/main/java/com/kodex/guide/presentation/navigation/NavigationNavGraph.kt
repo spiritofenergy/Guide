@@ -106,7 +106,8 @@ fun NavigationNavGraph (navController: NavHostController){
                         uid = ""
                     ))
                 }, onSavedClick = {
-
+                    navController.navigate(NavRoutes.HomeDataObject(
+                        uid = "", email = ""))
                 },
             )
         }
