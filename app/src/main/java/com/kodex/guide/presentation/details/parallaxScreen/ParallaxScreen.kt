@@ -88,12 +88,11 @@ fun ParallaxScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val imageHeight = remember { Animatable(expandedHeight.value) }
-    var bitmap: Bitmap? = null
-
-    try {
-        val base64Image = Base64.decode(navObject.imageUrl, Base64.DEFAULT)
-        bitmap = BitmapFactory.decodeByteArray(base64Image, 0, base64Image.size)
-    } catch (e: IllegalArgumentException) {
+    val bitmap by remember(navObject.imageUrl) {
+        mutableStateOf<Bitmap?>(runCatching {
+            val base64Image = Base64.decode(navObject.imageUrl, Base64.DEFAULT)
+            BitmapFactory.decodeByteArray(base64Image, 0, base64Image.size)
+        }.getOrNull())
     }
 
     val listState = rememberLazyListState()
@@ -103,6 +102,8 @@ fun ParallaxScreen(
     val savedViewModel: SavedPostsViewModel = hiltViewModel()
     val savedKeys by savedViewModel.savedKeys.collectAsStateWithLifecycle()
     val relatedBooks by viewModel.relatedBooks.collectAsStateWithLifecycle()
+    val detailsUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val ratingsList = detailsUiState.comments.mapNotNull { it.rating }
 
     val gridState = rememberLazyStaggeredGridState()
     var showActionsSheet by remember { mutableStateOf(false) }
@@ -171,13 +172,14 @@ fun ParallaxScreen(
                 // ✅ ОСНОВНОЙ ПОСТ — НА ВСЮ ШИРИНУ
                 item(span = StaggeredGridItemSpan.FullLine) {
                     MainContent(
-                        navObject = navObject,
+                        navObject = navObject.copy(ratingsList = ratingsList),
                         isOpenNow = isOpenNow,
                         onCommentClick = { onCommentClick() },
                         onNavigateToReviews = onNavigateToReviews,
                         onShowMapClick = { showMap = true },
                         onShowImageClick = { showFullScreenImage = true },
-                        onBackPressed = { onBackPressed() }
+                        onBackPressed = { onBackPressed() },
+                        viewModel = viewModel
                     )
                 }
                 // ✅ ПОСТЫ ЭТОЙ ЖЕ КАТЕГОРИИ
@@ -220,8 +222,8 @@ fun ParallaxScreen(
                         // слева: рейтинг + количество отзывов
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = if (navObject.ratingsList.isNotEmpty()) {
-                                    String.format("%.1f", navObject.ratingsList.average())
+                                text = if (ratingsList.isNotEmpty()) {
+                                    String.format("%.1f", ratingsList.average())
                                 } else {
                                     "0.0"
                                 },
@@ -239,7 +241,7 @@ fun ParallaxScreen(
                             Spacer(Modifier.width(6.dp))
                             // ✅ КОЛИЧЕСТВО ОТЗЫВОВ
                             Text(
-                                text = "(${navObject.ratingsList.size})",
+                                text = "(${ratingsList.size})",
                                 fontSize = 14.sp,
                                 color = Color.Gray
                             )
@@ -351,7 +353,8 @@ fun ParallaxScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .fillMaxHeight(),
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.Fit,
+                   // transition = androidx.compose.animation.core.tween(durationMillis = 300)
                 )
                 IconButton(
                     onClick = { showFullScreenImage = false },

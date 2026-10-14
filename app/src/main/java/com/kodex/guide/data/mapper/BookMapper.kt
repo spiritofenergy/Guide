@@ -7,7 +7,7 @@ import kotlin.String
 
 fun BookDTO.toBook(): Book {
     return Book(
-        id = id,
+       // id = id,
         key = key,
         title = title,
         searchTitle = title.lowercase(),
@@ -39,7 +39,7 @@ fun BookDTO.toBook(): Book {
 
 fun Book.toBookDTO(): BookDTO {
     return BookDTO(
-        id = id,
+       // id = id,
         key = key,
         title = title,
         searchTitle = title.lowercase(),

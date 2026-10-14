@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.sp
 fun DrawerMenuItem(
     iconDrawableId: ImageVector,
     text: String,
+    suffixText: String? = null,
     onItemClick: () -> Unit
 ) {
     Row(
@@ -37,15 +39,22 @@ fun DrawerMenuItem(
         Spacer(modifier = Modifier.width(14.dp))
         Text(
             text = text,
-            // color = Color.White,
             fontSize = 18.sp,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier
-                .fillMaxWidth()
-
+            modifier = Modifier.weight(1f)
         )
+        if (suffixText != null) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = suffixText,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Gray
+            )
+        }
     }
 }
+
 @Composable
 @Preview(showBackground = true)
 fun DrawerListItemPreview() {

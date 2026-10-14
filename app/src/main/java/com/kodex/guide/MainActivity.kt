@@ -26,7 +26,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            NavigationNavGraph(navController)
+            NavigationNavGraph(
+                navController = navController,
+                onExitApp = { finish() }
+            )
 
         }
     }
@@ -38,5 +41,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 

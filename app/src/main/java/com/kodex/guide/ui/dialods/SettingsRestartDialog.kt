@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.sp
 import com.kodex.guide.ui.theme.DrawerColorBlue
 
 @Composable
-fun MyDialog(
+fun SettingsRestartDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
@@ -44,7 +44,7 @@ fun MyDialog(
                         containerColor = DrawerColorBlue
                     )
                 ) {
-                    Text(text = "Cansel")
+                    Text(text = "Отмена")
 
                 }
             },

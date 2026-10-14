@@ -48,15 +48,23 @@ class UserRoleRepoImpl @Inject constructor() : UserRoleRepo {
     override suspend fun updateUserRole(
         uid: String,
         role: UserRole
-    ): Result<Unit> = suspendCancellableCoroutine { continuation ->
-        firestore.collection("users")
-            .document(uid)
-            .update("role", role.name)
-            .addOnSuccessListener {
-                continuation.resume(Result.success(Unit))
-            }
-            .addOnFailureListener { error ->
-                continuation.resume(Result.failure(error))
-            }
+    ): Result<Unit> {
+        if (role != UserRole.USER) {
+            return Result.failure(
+                IllegalStateException("Роль может быть назначена только доверенным сервером")
+            )
+        }
+
+        return suspendCancellableCoroutine { continuation ->
+            firestore.collection("users")
+                .document(uid)
+                .update("role", role.name)
+                .addOnSuccessListener {
+                    continuation.resume(Result.success(Unit))
+                }
+                .addOnFailureListener { error ->
+                    continuation.resume(Result.failure(error))
+                }
+        }
     }
 }

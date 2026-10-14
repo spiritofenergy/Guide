@@ -2,7 +2,7 @@ package com.kodex.guide.domain.model
 
 
 data class BookFilterState(
-    val category: BookCategories = BookCategories.OTHER,
+    val category: BookCategories = BookCategories.ALL,
     val author: String? = null,
     val searchText: String = "",
     val filterData: FilterData = FilterData()

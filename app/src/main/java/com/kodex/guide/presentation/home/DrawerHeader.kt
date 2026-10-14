@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -24,25 +26,25 @@ import androidx.compose.ui.unit.sp
 import com.kodex.bookmarketcompose.R
 import com.kodex.guide.domain.model.User
 import com.kodex.guide.domain.model.UserRole
-import com.kodex.guide.ui.theme.DrawerColorBlue
-
+import com.kodex.guide.ui.theme.ButtonColorBlue
 
 @Composable
 fun DrawerHeader(
-    user: User?,                      // ✅ передаём весь класс User
-    modifier: Modifier = Modifier) {
-    // ✅ Все данные достаём из user уже здесь
+    user: User?,
+    modifier: Modifier = Modifier
+) {
     val userName = user?.userName?.takeIf { it.isNotBlank() }
     val email = user?.email.orEmpty()
     val role = user?.role ?: UserRole.ANONYMOUS
 
     Column(
-        Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(200.dp)
-            .background(DrawerColorBlue),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+            .background(ButtonColorBlue.copy(alpha = 0.6f)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Spacer(modifier = Modifier.height(10.dp))
         Image(
@@ -59,7 +61,6 @@ fun DrawerHeader(
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold
         )
-        // ✅ Имя пользователя (показываем, только если задано)
         if (!userName.isNullOrEmpty()) {
             Text(
                 text = userName,
@@ -67,8 +68,6 @@ fun DrawerHeader(
                 fontSize = 16.sp
             )
         }
-
-        // Email (показываем, только если есть)
         if (email.isNotEmpty()) {
             Text(
                 text = email,
@@ -76,17 +75,14 @@ fun DrawerHeader(
                 color = Color.White.copy(alpha = 0.8f)
             )
         }
-
-        // Тариф
         Text(
             text = "Тариф: ${getRoleDisplayName(role)}",
             style = MaterialTheme.typography.bodyMedium,
             color = Color.White
         )
     }
-
 }
-// ✅ Отображаемое имя тарифа
+
 private fun getRoleDisplayName(role: UserRole): String {
     return when (role) {
         UserRole.ANONYMOUS -> "Анонимный"
@@ -96,12 +92,3 @@ private fun getRoleDisplayName(role: UserRole): String {
         UserRole.ADMIN -> "Администратор"
     }
 }
-/*
-*//** Человекочитаемая подпись роли *//*
-private fun roleLabel(role: UserRole): String = when (role) {
-    UserRole.ANONYMOUS -> "Гость"
-    UserRole.USER -> "Пользователь"
-    UserRole.BUSINESS -> "Бизнес"
-    UserRole.PREMIUM -> "Премиум"
-    UserRole.ADMIN -> "Администратор"
-}*/

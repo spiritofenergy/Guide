@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,19 +24,31 @@ fun ActionSheetButton(
     icon: ImageVector? = null,
     containerColor: Color,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    isLoading: Boolean = false,
+    loadingText: String? = null,
     onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
         modifier = modifier.height(52.dp),
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = Color.White
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
-        // ✅ РИСУЕМ ИКОНКУ, если она передана
-        if (icon != null) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = Color.White,
+                strokeWidth = 2.dp
+            )
+            if (loadingText != null) {
+                Spacer(Modifier.width(12.dp))
+            }
+        } else if (icon != null) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
@@ -44,10 +57,9 @@ fun ActionSheetButton(
             Spacer(Modifier.width(12.dp))
         }
         Text(
-            text = text,
+            text = if (isLoading) loadingText ?: text else text,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold
         )
     }
 }
-

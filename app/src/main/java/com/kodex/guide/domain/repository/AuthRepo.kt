@@ -23,9 +23,6 @@ interface AuthRepo {
     /** ✅ Получение роли */
     suspend fun getUserRole(uid: String): UserRole
 
-    /** ✅ Повышение до BUSINESS */
-    suspend fun upgradeToBusiness(uid: String)
-
     /** Проверка прав */
     fun hasPermission(permission: Permission): Boolean
 

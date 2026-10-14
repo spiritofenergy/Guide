@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,8 +34,9 @@ import coil.compose.AsyncImage
 import com.kodex.bookmarketcompose.R
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.PostEditorState
-import com.kodex.guide.ui.theme.ButtonColorBlue
 import com.kodex.guide.ui.theme.Orange
+import com.kodex.guide.presentation.components.ActionSheetButton
+import com.kodex.guide.ui.theme.ButtonColorBlue
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -212,7 +213,8 @@ fun MyPostEditorScreen(
                         model = imageUri,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+
                     )
 
                     existingImageUrl.isNotEmpty() && !existingImageUrl.startsWith("http") -> {
@@ -254,14 +256,14 @@ fun MyPostEditorScreen(
 
             OutlinedTextField(
                 value = title,
-                onValueChange = { title = it },
+                onValueChange = { title = it.capitalizeFirst() },
                 label = { Text("Заголовок") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
             OutlinedTextField(
                 value = description,
-                onValueChange = { description = it },
+                onValueChange = { description = it.capitalizeFirst() },
                 label = { Text("Описание") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -279,7 +281,7 @@ fun MyPostEditorScreen(
                 )
                 OutlinedTextField(
                     value = telephone,
-                    onValueChange = { telephone = it },
+                    onValueChange = { telephone = it.capitalizeFirst() },
                     label = { Text("Телефон") },
                     modifier = Modifier.weight(1f),
                     singleLine = true
@@ -295,9 +297,9 @@ fun MyPostEditorScreen(
 
             AddressSection(
                 village,
-                { village = it },
+                { village = it.capitalizeFirst() },
                 street,
-                { street = it },
+                { street = it.capitalizeFirst() },
                 house,
                 { house = it },
                 flat,
@@ -337,62 +339,32 @@ fun MyPostEditorScreen(
                 }
 
                 // Кнопка "Сохранить как черновик"
-                OutlinedButton(
+                ActionSheetButton(
+                    text = if (isSavingOrUploading && !isPublishing) "Сохранение…" else "Сохранить",
+                    icon = Icons.Default.Star,
+                    containerColor = Orange,
+                    enabled = !isSavingOrUploading,
+                    isLoading = isSavingOrUploading && !isPublishing,
+                    loadingText = "Сохранение…",
                     onClick = {
                         viewModel.savePost(state = getCurrentState(), publish = false)
                     },
-                    modifier = Modifier.weight(1f),
-                    enabled = !isSavingOrUploading,
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = Orange
-                    )
-                ) {
-                    if (isSavingOrUploading && !isPublishing) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text("Сохранение…")
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text("Сохранить")
-                    }
-                }
+                    modifier = Modifier.weight(1f)
+                )
 
                 // Кнопка "Опубликовать"
-                Button(
+                ActionSheetButton(
+                    text = if (isSavingOrUploading && isPublishing) "Отправка…" else "Отправить",
+                    icon = Icons.Default.Star,
+                    containerColor = ButtonColorBlue,
+                    enabled = !isSavingOrUploading,
+                    isLoading = isSavingOrUploading && isPublishing,
+                    loadingText = "Отправка…",
                     onClick = {
                         viewModel.savePost(state = getCurrentState(), publish = true)
                     },
-                    modifier = Modifier.weight(1f),
-                    enabled = !isSavingOrUploading,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = ButtonColorBlue
-                    )
-                ) {
-                    if (isSavingOrUploading && isPublishing) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text("Отправка…")
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Call,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text("Отправить")
-                    }
-                }
+                    modifier = Modifier.weight(1f)
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -411,9 +383,11 @@ fun CategoryDropdown(
     onCategoryChange: (BookCategories) -> Unit,
     onExpandedChange: (Boolean) -> Unit
 ) {
+    val availableCategories = BookCategories.entries.filter { it.id in names.indices }
+
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = onExpandedChange) {
         OutlinedTextField(
-            value = names[category.id],
+            value = names.getOrNull(category.id) ?: names.lastOrNull().orEmpty(),
             onValueChange = {},
             readOnly = true,
             label = { Text("Категория") },
@@ -423,7 +397,7 @@ fun CategoryDropdown(
                 .fillMaxWidth()
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }) {
-            BookCategories.entries.forEach { c ->
+            availableCategories.forEach { c ->
                 DropdownMenuItem(text = { Text(names[c.id]) }, onClick = { onCategoryChange(c) })
             }
         }
@@ -438,4 +412,8 @@ fun decodeBase64ToBitmap(base64String: String): android.graphics.Bitmap? {
         e.printStackTrace()
         null
     }
+}
+
+fun String.capitalizeFirst(): String {
+    return if (isEmpty()) this else this[0].uppercase() + this.substring(1)
 }

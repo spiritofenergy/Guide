@@ -52,7 +52,7 @@ fun AccountDialog(
                         containerColor = DrawerColorBlue
                     )
                 ) {
-                    Text(text = "Canсel")
+                    Text(text = "Отмена")
 
                 }
             },

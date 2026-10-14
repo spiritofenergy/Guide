@@ -12,6 +12,9 @@
         <item>Развлечения</item>
         <item>Новости</item>
         <item>Разное</item>
+        <item>Строительство</item>
+        <item>Продукты питания</item>
+        <item>Все</item>
         <item>Все</item>
     </string-array>
 
@@ -26,6 +29,8 @@
         <item>Развлечения</item>
         <item>Новости</item>
         <item>Разное</item>
+        <item>Строительство</item>
+        <item>Продукты питания</item>
         <item>Все</item>
         <item>Сохраненные</item>
     </string-array>
@@ -41,6 +46,8 @@
         <item>Развлечения</item>
         <item>Новости</item>
         <item>Разное</item>
+        <item>Строительство</item>
+        <item>Продукты питания</item>
     </string-array>
 
 
@@ -62,6 +69,7 @@
         <item>Выход</item>
         <item>Сохраненные</item>
         <item>Мои объявления</item>
+        <item>Боковое меню</item>
         <item>Настройки</item>
     </string-array>
 

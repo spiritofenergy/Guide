@@ -2,7 +2,6 @@ package com.kodex.guide.presentation.comments
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,6 +50,8 @@ fun CommentsScreen(
             navObject.bookId
         ))*/
          }
+    val comments = viewModel.commentsState.value
+    val ratings = comments.mapNotNull { it.rating }
     // Information
     Column(
         modifier = Modifier
@@ -62,15 +62,14 @@ fun CommentsScreen(
         Column(modifier = Modifier.fillMaxWidth().padding(top = 25.dp),
             horizontalAlignment = Alignment.CenterHorizontally)
         {
-                if (navObject.ratingsList.isNotEmpty()) {
-                    Log.d("MyLog", "DetailScreen ratingsList: ${navObject.ratingsList}")
+                if (ratings.isNotEmpty()) {
                     Text(
-                        text = String.format("%.1f", navObject.ratingsList.average()),
+                        text = String.format("%.1f", ratings.average()),
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
                     Text(
-                        text =  "(${navObject.ratingsList.size})",
+                        text = "(${ratings.size})",
                         fontWeight = FontWeight.Light,
                         fontSize = 18.sp
                     )
@@ -89,11 +88,11 @@ fun CommentsScreen(
             Spacer(Modifier.height(10.dp))
 
             //Comments
-            if ( viewModel.commentsState.value.isNotEmpty()) {
+            if (comments.isNotEmpty()) {
                 Spacer(Modifier.height(10.dp))
                 LazyRow(modifier = Modifier
                     .fillMaxSize()) {
-                    items(viewModel.commentsState.value) { ratingData ->
+                    items(comments) { ratingData ->
                             CommentListItem(
                                 onClick = {
 
@@ -446,6 +445,4 @@ fun DetailScreen1(
              )
         )
  }*/
-
-
 

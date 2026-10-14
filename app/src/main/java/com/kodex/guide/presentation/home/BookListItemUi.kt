@@ -54,6 +54,7 @@ fun BookListItemUi(
     titleIndex: Int,
     showEditButton: Boolean = true,
     book: Book = Book(),
+    ratings: List<Int> = book.ratingsList,
     isSaved: Boolean = false,
     onEditClick: (Book) -> Unit = {},
     onDeleteClick: (Book) -> Unit = {},
@@ -153,22 +154,33 @@ fun BookListItemUi(
                     .padding(horizontal = 10.dp, vertical = 15.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                 if (book.ratingsList.isNotEmpty()) {
+                 if (ratings.isNotEmpty()) {
                 Text(
-                    text = String.format("%.1f", book.ratingsList.average()),
+                    text = String.format("%.1f", ratings.average()),
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
                   } else {
-                Text(text = "0.0")
+                Text(
+                    text = "0.0",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
             }
-                Spacer(modifier = Modifier.width(5.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Icon(
-                    modifier = Modifier.size(22.dp),
+                    modifier = Modifier.size(18.dp),
                     imageVector = Icons.Default.Star,
                     contentDescription = "Star",
                     tint = Orange
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "(${ratings.size})",
+                    color = Color.White,
+                    fontSize = 13.sp
                 )
         }
     }
@@ -274,4 +286,3 @@ fun BookListItemUi(
         }
     }
 }
-

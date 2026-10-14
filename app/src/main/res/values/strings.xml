@@ -76,7 +76,10 @@
     <string name="message">Message</string>
     <string name="yes">Yes</string>
     <string name="ok">OK</string>
-    <string name="cancel">Cansel</string>
+    <string name="cancel">Cancel</string>
+    <string name="exit_app_title">Exit app</string>
+    <string name="exit_app_message">Are you sure you want to exit?</string>
+    <string name="exit_app_confirm">Exit</string>
     <string name="comments">Comments</string>
     <string name="estimate">Estimate</string>
 
@@ -88,6 +91,17 @@
     <string name="deleted_account_massage">Are you sure you want to delete your account?</string>
     <string name="delete">Delete</string>
     <string name="the_fields_on_may_be_empty">The fields on may be empty</string>
+
+    <string name="back">Back</string>
+    <string name="settings_personal_data">Personal data</string>
+    <string name="settings_address">Address</string>
+    <string name="settings_password">Password</string>
+    <string name="settings_create_post">Create listing</string>
+    <string name="settings_my_posts">My listings</string>
+    <string name="settings_delete_account">Delete account</string>
+    <string name="settings_logout">Log out</string>
+    <string name="name">name</string>
+    <string name="email">email\n</string>
 
 
 </resources>

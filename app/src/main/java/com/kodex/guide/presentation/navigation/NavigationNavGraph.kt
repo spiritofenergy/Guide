@@ -2,13 +2,23 @@ package com.kodex.guide.presentation.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.activity.compose.BackHandler
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
-import androidx.compose.runtime.remember
+import com.kodex.bookmarketcompose.R
 import com.kodex.guide.data.mapper.ParallaxImageCache
 import com.kodex.guide.data.mapper.toParallaxNavObject
 import com.kodex.guide.presentation.admin_panel.AdminPanelScreen
@@ -25,7 +35,19 @@ import com.kodex.guide.presentation.settingsScreen.SettingsScreen
 
  @RequiresApi(Build.VERSION_CODES.O)
  @Composable
-fun NavigationNavGraph (navController: NavHostController){
+fun NavigationNavGraph(
+    navController: NavHostController,
+    onExitApp: () -> Unit
+) {
+    var showExitDialog by remember { mutableStateOf(false) }
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val isRootDestination = currentBackStackEntry != null &&
+            navController.previousBackStackEntry == null
+
+    BackHandler(enabled = isRootDestination) {
+        showExitDialog = true
+    }
+
     NavHost(
     navController = navController,
    // startDestination = NavRoutes.LoginNavObject,
@@ -149,9 +171,19 @@ fun NavigationNavGraph (navController: NavHostController){
             ModerationScreen()
         }
         composable<NavRoutes.SettingsNavObject> { navEntry ->
+            val homeEntry = navController.getBackStackEntry<NavRoutes.HomeDataObject>()
+            val homeViewModel: HomeViewModel = hiltViewModel(homeEntry)
             SettingsScreen(
+                viewModelHome = homeViewModel,
+                user = homeViewModel.headerUser.value,
                 onBackClick = {
                     navController.popBackStack()
+                },
+                onMyPostsClick = {
+                    navController.navigate(NavRoutes.MyPostsNavObject(uid = ""))
+                },
+                onAddPostClick = {
+                    navController.navigate(NavRoutes.MyPostEditorNavObject(bookKey = ""))
                 },
                 onCloseAccountClick = {
                     navController.popBackStack(
@@ -197,5 +229,23 @@ fun NavigationNavGraph (navController: NavHostController){
                 navObject = navData
             )
         }
+    }
+
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = { Text(stringResource(R.string.exit_app_title)) },
+            text = { Text(stringResource(R.string.exit_app_message)) },
+            confirmButton = {
+                TextButton(onClick = onExitApp) {
+                    Text(stringResource(R.string.exit_app_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }

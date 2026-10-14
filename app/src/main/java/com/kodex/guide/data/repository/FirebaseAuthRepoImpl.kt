@@ -72,7 +72,7 @@ class FirebaseAuthRepoImpl @Inject constructor(
         Firebase.firestore
             .collection("users")
             .document(user.uid)
-            .set(user.toDTO())
+            .set(user.copy(role = UserRole.USER).toDTO())
             .addOnSuccessListener {
                 Log.d("MyLog", "Профиль создан для ${user.uid}")
             }
@@ -92,13 +92,6 @@ class FirebaseAuthRepoImpl @Inject constructor(
         } catch (e: Exception) {
             UserRole.USER
         }
-    }
-
-    override suspend fun upgradeToBusiness(uid: String) {
-        Firebase.firestore.collection("users")
-            .document(uid)
-            .update("role", UserRole.BUSINESS.name)
-            .await()
     }
 
     override fun hasPermission(permission: Permission): Boolean {

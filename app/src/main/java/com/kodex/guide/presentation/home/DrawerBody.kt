@@ -7,27 +7,33 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddHomeWork
 import androidx.compose.material.icons.filled.Agriculture
+import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.CrueltyFree
-import androidx.compose.material.icons.filled.Dialpad
 import androidx.compose.material.icons.filled.ElectricalServices
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.MiscellaneousServices
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.LocalGroceryStore
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -36,16 +42,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.kodex.bookmarketcompose.R
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.UserRole
-import com.kodex.guide.ui.theme.ButtonColorBlue
-import com.kodex.guide.ui.theme.GrayLite
 
-/**
- * Модель элемента бокового меню.
- */
 private data class DrawerCategoryItem(
     val icon: ImageVector,
     val category: BookCategories,
-   // @StringRes val titleResId: Int
 )
 
 @Composable
@@ -62,119 +62,159 @@ fun DrawerBody(
     onCategoryClick: (BookCategories) -> Unit = {},
     showMyPosts: Boolean = true,
     onMyPostsClick: () -> Unit = {},
-    onCloseDrawer: () -> Unit = {}   // ✅ передаём закрытие снаружи
+    onCloseDrawer: () -> Unit = {}
 ) {
-    // Собираем состояния один раз
     val userRole by viewModelHome.userRole.collectAsState()
     val isAdmin by viewModelHome.isAdminState.collectAsState()
     val isAuthorized by viewModelHome.isAuthorized.collectAsState()
+    val categoryCounts by viewModelHome.categoryCounts.collectAsState()
 
     val categoryList = stringArrayResource(id = R.array.category_drawer)
     val categoryAdmin = stringArrayResource(id = R.array.category_admin)
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(ButtonColorBlue)
+            .background(Color.White)
     ) {
-        // background first Screen
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(GrayLite)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DrawerMenuItem(
-                iconDrawableId = Icons.Default.CrueltyFree,
-                text = categoryList[0],
+            // Categories with counts
+            DrawerCategoryItem(
+                icon = Icons.Default.CrueltyFree,
+                category = BookCategories.ANIMALS,
+                categoryName = categoryList[0],
+                postCount = categoryCounts[BookCategories.ANIMALS] ?: 0,
                 onItemClick = {
                     onCategoryClick(BookCategories.ANIMALS)
                     onCloseDrawer()
                 }
             )
-            DrawerMenuItem(
-                iconDrawableId = Icons.Default.Celebration,
-                text = categoryList[1],
+            DrawerCategoryItem(
+                icon = Icons.Default.Celebration,
+                category = BookCategories.PLANTS,
+                categoryName = categoryList[1],
+                postCount = categoryCounts[BookCategories.PLANTS] ?: 0,
                 onItemClick = {
                     onCategoryClick(BookCategories.PLANTS)
                     onCloseDrawer()
                 }
             )
-            DrawerMenuItem(
-                iconDrawableId = Icons.Default.CleaningServices,
-                text = categoryList[2],
+            DrawerCategoryItem(
+                icon = Icons.Default.CleaningServices,
+                category = BookCategories.WORK,
+                categoryName = categoryList[2],
+                postCount = categoryCounts[BookCategories.WORK] ?: 0,
                 onItemClick = {
                     onCategoryClick(BookCategories.WORK)
                     onCloseDrawer()
                 }
             )
-            DrawerMenuItem(
-                iconDrawableId = Icons.Default.MiscellaneousServices,
-                text = categoryList[3],
+            DrawerCategoryItem(
+                icon = Icons.Default.MiscellaneousServices,
+                category = BookCategories.SERVICES,
+                categoryName = categoryList[3],
+                postCount = categoryCounts[BookCategories.SERVICES] ?: 0,
                 onItemClick = {
                     onCategoryClick(BookCategories.SERVICES)
                     onCloseDrawer()
                 }
             )
-            DrawerMenuItem(
-                iconDrawableId = Icons.Default.AddHomeWork,
-                text = categoryList[4],
+            DrawerCategoryItem(
+                icon = Icons.Default.AddHomeWork,
+                category = BookCategories.REAL_ESTATE,
+                categoryName = categoryList[4],
+                postCount = categoryCounts[BookCategories.REAL_ESTATE] ?: 0,
                 onItemClick = {
                     onCategoryClick(BookCategories.REAL_ESTATE)
                     onCloseDrawer()
                 }
             )
-            DrawerMenuItem(
-                iconDrawableId = Icons.Default.Agriculture,
-                text = categoryList[5],
+            DrawerCategoryItem(
+                icon = Icons.Default.Agriculture,
+                category = BookCategories.AUTO,
+                categoryName = categoryList[5],
+                postCount = categoryCounts[BookCategories.AUTO] ?: 0,
                 onItemClick = {
                     onCategoryClick(BookCategories.AUTO)
                     onCloseDrawer()
                 }
             )
-            DrawerMenuItem(
-                iconDrawableId = Icons.Default.ElectricalServices,
-                text = categoryList[6],
+            DrawerCategoryItem(
+                icon = Icons.Default.ElectricalServices,
+                category = BookCategories.ELECTRONICS,
+                categoryName = categoryList[6],
+                postCount = categoryCounts[BookCategories.ELECTRONICS] ?: 0,
                 onItemClick = {
                     onCategoryClick(BookCategories.ELECTRONICS)
                     onCloseDrawer()
                 }
             )
-            DrawerMenuItem(
-                iconDrawableId = Icons.Default.AutoAwesome,
-                text = categoryList[7],
+            DrawerCategoryItem(
+                icon = Icons.Default.AutoAwesome,
+                category = BookCategories.ENTERTAINMENTS,
+                categoryName = categoryList[7],
+                postCount = categoryCounts[BookCategories.ENTERTAINMENTS] ?: 0,
                 onItemClick = {
                     onCategoryClick(BookCategories.ENTERTAINMENTS)
                     onCloseDrawer()
                 }
             )
-            DrawerMenuItem(
-                iconDrawableId = Icons.Default.Dialpad,
-                text = categoryList[8],
+            DrawerCategoryItem(
+                icon = Icons.Default.Article,
+                category = BookCategories.NEWS,
+                categoryName = categoryList[8],
+                postCount = categoryCounts[BookCategories.NEWS] ?: 0,
+                onItemClick = {
+                    onCategoryClick(BookCategories.NEWS)
+                    onCloseDrawer()
+                }
+            )
+            DrawerCategoryItem(
+                icon = Icons.Default.MoreHoriz,
+                category = BookCategories.OTHER,
+                categoryName = categoryList[9],
+                postCount = categoryCounts[BookCategories.OTHER] ?: 0,
                 onItemClick = {
                     onCategoryClick(BookCategories.OTHER)
                     onCloseDrawer()
                 }
             )
+            DrawerCategoryItem(
+                icon = Icons.Default.Build,
+                category = BookCategories.CONSTRUCTION,
+                categoryName = categoryList[10],
+                postCount = categoryCounts[BookCategories.CONSTRUCTION] ?: 0,
+                onItemClick = {
+                    onCategoryClick(BookCategories.CONSTRUCTION)
+                    onCloseDrawer()
+                }
+            )
+            DrawerCategoryItem(
+                icon = Icons.Default.LocalGroceryStore,
+                category = BookCategories.FOOD,
+                categoryName = categoryList[11],
+                postCount = categoryCounts[BookCategories.FOOD] ?: 0,
+                onItemClick = {
+                    onCategoryClick(BookCategories.FOOD)
+                    onCloseDrawer()
+                }
+            )
+
             Spacer(modifier = Modifier.height(15.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(1.dp)
-                    .background(GrayLite)
+                    .background(Color.LightGray.copy(alpha = 0.3f))
             )
             Spacer(modifier = Modifier.height(15.dp))
 
-            // Админ-пункт
             if (isAdmin) {
                 DrawerMenuItem(
                     iconDrawableId = Icons.Default.Security,
@@ -186,14 +226,13 @@ fun DrawerBody(
                 )
             }
 
-            // Пункты для авторизованных / анонимных
             if (userRole.hasAccessTo(UserRole.ANONYMOUS)) {
                 DrawerMenuItem(
                     iconDrawableId = Icons.Default.Add,
-                    text = stringResource(id = R.string.create_post), // ✅ вынесли в strings.xml
+                    text = stringResource(id = R.string.create_post),
                     onItemClick = {
                         onAddBookClick()
-                        onCloseDrawer() // ✅ теперь drawer закрывается
+                        onCloseDrawer()
                     }
                 )
 
@@ -209,15 +248,31 @@ fun DrawerBody(
                 if (showMyPosts && userRole.hasAccessTo(UserRole.USER)) {
                     DrawerMenuItem(
                         iconDrawableId = Icons.Default.Person,
-                        text = categoryAdmin[5], // ✅ добавили именованный параметр
+                        text = categoryAdmin[5],
                         onItemClick = {
                             onMyPostsClick()
                             onCloseDrawer()
                         }
                     )
                 }
+                Spacer(modifier = Modifier.height(46.dp))
             }
         }
     }
+}
 
+@Composable
+fun DrawerCategoryItem(
+    icon: ImageVector,
+    category: BookCategories,
+    categoryName: String,
+    postCount: Int,
+    onItemClick: () -> Unit
+) {
+    DrawerMenuItem(
+        iconDrawableId = icon,
+        text = "$categoryName",
+        suffixText = if (postCount > 0) postCount.toString() else null,
+        onItemClick = onItemClick
+    )
 }

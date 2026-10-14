@@ -15,6 +15,7 @@ import javax.inject.Singleton
 const val POST_DRAFT_KEY = "post_draft_key"
 const val CARD_NUMBER_KEY = "card_number_key"
 const val CARD_EXPIRY_KEY = "card_expiry_key"
+const val SHOW_DRAWER_KEY = "show_drawer_key"
 
 
 @Singleton
@@ -155,4 +156,11 @@ class PreferenceDataSource @Inject constructor(@ApplicationContext
         const val IS_ANONYMOUS_KEY = "is_anonymous_key"
         const val IS_REGISTERED_KEY = "is_registered_key"
     }
+
+    fun saveShowDrawer(show: Boolean) {
+        pref.edit { putBoolean(SHOW_DRAWER_KEY, show) }
     }
+
+    fun getShowDrawer(): Boolean =
+        pref.getBoolean(SHOW_DRAWER_KEY, true)
+}

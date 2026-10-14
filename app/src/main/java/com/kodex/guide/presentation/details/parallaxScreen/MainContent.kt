@@ -57,6 +57,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
+import java.text.SimpleDateFormat
+import java.util.Locale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -103,12 +105,11 @@ fun MainContent(
     val telephone = navObject.telephone
     val scope = rememberCoroutineScope()
 
-    var bitmap: Bitmap? = null
-
-    try {
-        val base64Image = Base64.decode(navObject.imageUrl, Base64.DEFAULT)
-        bitmap = BitmapFactory.decodeByteArray(base64Image, 0, base64Image.size)
-    } catch (e: IllegalArgumentException) {
+    val bitmap by remember(navObject.imageUrl) {
+        mutableStateOf<Bitmap?>(runCatching {
+            val base64Image = Base64.decode(navObject.imageUrl, Base64.DEFAULT)
+            BitmapFactory.decodeByteArray(base64Image, 0, base64Image.size)
+        }.getOrNull())
     }
     DialogRating(
         ratingData = uiState.value.ratingData,
@@ -148,7 +149,8 @@ fun MainContent(
                         if (bitmap != null) Modifier.clickable(onClick = onShowImageClick)
                         else Modifier
                     ),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+               // transition = androidx.compose.animation.core.tween(durationMillis = 300)
             )
 
             // Затемнение снизу для читаемости текста
@@ -599,6 +601,17 @@ fun MainContent(
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
+
+                // Дата публикации
+                val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+                val publicationDate = dateFormat.format(navObject.timestamp)
+                Text(
+                    text = "Дата публикации: $publicationDate",
+                    fontSize = 14.sp,
+                    color = TextGray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
             }
 
             // ===== Секция: Отзывы =====

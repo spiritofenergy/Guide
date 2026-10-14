@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -85,7 +86,6 @@ class HomeViewModel @Inject constructor(
     private val observeSavedKeysUseCase: ObserveSavedKeysUseCase,
     ) : ViewModel() {
     val showPaymentSheet = mutableStateOf(false)
-    val paymentInProgress = mutableStateOf(false)
     val minPriceValue = mutableFloatStateOf(0f)
     val maxPriceValue = mutableFloatStateOf(0f)
     val isFilterByTitle = mutableStateOf(true)
@@ -100,7 +100,7 @@ class HomeViewModel @Inject constructor(
     val showAuthDialog = mutableStateOf(false)
     val isLogoutDialog = mutableStateOf(false)
     var isRegisterState = mutableStateOf(false)
-    val categoryState = mutableStateOf(BookCategories.OTHER)
+    val categoryState = mutableStateOf(BookCategories.ALL)
     val hasSelectedCategory = mutableStateOf(false)
     private val bookListUpdate = MutableStateFlow<List<ChangedTempBook>>(emptyList())
     private val bookFilterStateFlow = MutableStateFlow(BookFilterState())
@@ -113,6 +113,16 @@ class HomeViewModel @Inject constructor(
     // ✅ Желательный тариф для установки после регистрации
     val desiredRole = mutableStateOf<UserRole?>(null)
     val bookToDelete = mutableStateOf<Book?>(null)
+
+    // ✅ Показ бокового меню
+    private val _showDrawer = MutableStateFlow(preferenceDataSource.getShowDrawer())
+    val showDrawer: StateFlow<Boolean> = _showDrawer.asStateFlow()
+
+    fun setShowDrawer(show: Boolean) {
+        _showDrawer.value = show
+        preferenceDataSource.saveShowDrawer(show)
+    }
+
     fun onDeleteRequested(book: Book) {
         bookToDelete.value = book
     }
@@ -174,6 +184,38 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableSharedFlow<MainUiState>()
     val uiState = _uiState.asSharedFlow()
 
+    private val _ratingsByBook = MutableStateFlow<Map<String, List<Int>>>(emptyMap())
+    val ratingsByBook: StateFlow<Map<String, List<Int>>> = _ratingsByBook.asStateFlow()
+    private val ratingsJobs = mutableMapOf<String, Job>()
+
+    fun loadRatingsForBooks(books: List<Book>) {
+        books.asSequence()
+            .map(Book::key)
+            .filter(String::isNotBlank)
+            .distinct()
+            .filterNot { bookId ->
+                _ratingsByBook.value.containsKey(bookId) || ratingsJobs.containsKey(bookId)
+            }
+            .forEach { bookId ->
+                ratingsJobs[bookId] = viewModelScope.launch {
+                    try {
+                        booksRepo.getBookComments(bookId).fold(
+                            onSuccess = { comments ->
+                                _ratingsByBook.update { ratings ->
+                                    ratings + (bookId to comments.mapNotNull { it.rating })
+                                }
+                            },
+                            onFailure = { error ->
+                                Log.e("HomeViewModel", "Failed to load ratings for $bookId", error)
+                            }
+                        )
+                    } finally {
+                        ratingsJobs.remove(bookId)
+                    }
+                }
+            }
+    }
+
     // ===== Роль и авторизация — только StateFlow =====
     private val _userRole = MutableStateFlow(UserRole.ANONYMOUS)
     val userRole: StateFlow<UserRole> = _userRole.asStateFlow()
@@ -187,7 +229,8 @@ class HomeViewModel @Inject constructor(
     // ... где-то в функции обновления ...
     fun updateRole(role: UserRole) {
         // 4. Обновляем значение через .value
-        _userRole.value = role       // ✅ Правильно
+        _userRole.value = role
+        _isAdminState.value = role == UserRole.ADMIN
         _isAuthorized.value = true   // ✅ Правильно
     }
 
@@ -323,12 +366,39 @@ class HomeViewModel @Inject constructor(
         // Если уже авторизован - загружаем роль
         Firebase.auth.currentUser?.uid?.let { loadUserRole(it) }
         refreshAccessFlags()
-
-
+       // observeCategoryCounts()
     }
 
+    /**
+     * Количество постов по категориям.
+     */
+     val _categoryCounts = MutableStateFlow<Map<BookCategories, Int>>(emptyMap())
+    val categoryCounts: StateFlow<Map<BookCategories, Int>> = _categoryCounts.asStateFlow()
+
+  /*      private fun observeCategoryCounts() {
+        viewModelScope.launch {
+            booksRepo.getBooks(
+                emptyList(),
+                BookFilterState.Category(category = BookCategories.ALL, author = null)
+            )
+            .map { pagingData ->
+                pagingData.itemSnapshotList.items
+            }
+            .collect { items ->
+                if (items.isNotEmpty()) {
+                    val counts = items
+                        .map { it.categoryIndex }
+                        .groupingBy { it }
+                        .eachCount()
+                        .mapKeys { (key, _) -> key as BookCategories }
+                    _categoryCounts.value = counts
+                }
+            }
+        }
+    }*/
+
     fun refreshHeader() {
-        headerUser.value = preferenceDataSource.getUser()
+        headerUser.value = preferenceDataSource.getUser()?.copy(role = _userRole.value)
     }
 
     private var roleJob: Job? = null
@@ -343,12 +413,15 @@ class HomeViewModel @Inject constructor(
                 }
                 .collect { role ->
                     Log.d("ROLE_DEBUG", "loadUserRole COLLECT: role=$role (uid=$uid)")
-                    _userRole.value = role
+                    val isAdmin = _isAdminState.value || role == UserRole.ADMIN
+                    _isAdminState.value = isAdmin
+                    val effectiveRole = if (isAdmin) UserRole.ADMIN else role
+                    _userRole.value = effectiveRole
                     _isAuthorized.value = true
 
-                    preferenceDataSource.saveRole(role)
+                    preferenceDataSource.saveRole(effectiveRole)
                     refreshHeader()
-                    Log.d("ROLE_DEBUG", "loadUserRole: после saveRole → _userRole=${_userRole.value}")
+                    Log.d("ROLE_DEBUG", "loadUserRole: after saveRole → _userRole=${_userRole.value}")
 
                 }
         }
@@ -366,31 +439,6 @@ class HomeViewModel @Inject constructor(
                 Log.e("MyLog", "Ошибка создания профиля: ${e.message}")
             }
     }
-
-    // ✅ Оплата и повышение до платного тарифа (BUSINESS или PREMIUM — из desiredRole)
-    fun upgradeToBusiness(
-        uid: String,
-        onSuccess: () -> Unit = {},
-        onError: (String) -> Unit = {}
-    ) {
-        viewModelScope.launch {
-            paymentInProgress.value = true
-            upgradeManager.applyPaidUpgrade(uid)
-                .onSuccess { role ->
-                    paymentInProgress.value = false
-                    applyRoleLocally(role)
-                    Log.d("MyLog", "Оплата успешна: роль повышена до ${role.name}")
-                    onSuccess()
-                }
-                .onFailure { error ->
-                    paymentInProgress.value = false
-                    Log.e("MyLog", "Ошибка повышения: ${error.message}")
-                    onError(error.message ?: "Неизвестная ошибка")
-                }
-        }
-    }
-
-
 
     // ✅ Сохранить/получить/очистить данные карты
     fun saveCardData(cardNumber: String, expiry: String) {
@@ -518,11 +566,7 @@ class HomeViewModel @Inject constructor(
         bookFilterStateFlow.update { it.copy(category = category) }
 
         // 2. Синхронизируем состояние нижнего меню (BottomNavigation)
-        if (category == BookCategories.OTHER) {
-            selectedBottomItemState.intValue = BottomMenuItem.Saved.titleId
-        } else {
-            selectedBottomItemState.intValue = BottomMenuItem.Home.titleId
-        }
+        selectedBottomItemState.intValue = BottomMenuItem.Home.titleId
 
         Log.d("MyLog", "Категория изменена на: $category")
     }
@@ -664,6 +708,12 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun showLogoutTariffDialog() {
+        isLogoutDialog.value = true
+        showAuthDialog.value = true
+    }
+
+
 /*!    // ✅ Анонимный вход
     fun loginAnonymously() = viewModelScope.launch {
         try {
@@ -713,9 +763,18 @@ class HomeViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            _isAdminState.value = userAccessRepository.isAdmin(uid)
+            val isAdmin = userAccessRepository.isAdmin(uid) || _userRole.value == UserRole.ADMIN
+            _isAdminState.value = isAdmin
+            if (isAdmin) {
+                _userRole.value = UserRole.ADMIN
+                preferenceDataSource.saveRole(UserRole.ADMIN)
+                refreshHeader()
+            }
             isRegisterState.value = userAccessRepository.isRegistered(uid)
-            Log.d("ROLE_DEBUG", "refreshAccessFlags: isAdmin($uid)=$, isRegistered($uid)=$registered")
+            Log.d(
+                "ROLE_DEBUG",
+                "refreshAccessFlags: isAdmin($uid)=$isAdmin, isRegistered($uid)=${isRegisterState.value}"
+            )
 
         }
     }
@@ -756,6 +815,3 @@ class HomeViewModel @Inject constructor(
             }
     }*/
 }
-
-
-

@@ -1,208 +1,274 @@
 package com.kodex.guide.presentation.home
 
-import android.util.Log
-import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.size
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Microwave
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kodex.bookmarketcompose.R
-
-import com.kodex.guide.ui.theme.DarkBlue
-import com.kodex.guide.ui.theme.PurpleGrey80
 import com.kodex.guide.domain.model.BookCategories
+import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.DarkBlue
+import com.kodex.guide.ui.theme.GuideTheme
+import com.kodex.guide.ui.theme.Orange
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainTopBar(
-
     category: BookCategories,
-    viewModel: HomeViewModel = hiltViewModel(),
+    isListLayout: Boolean = false,
     onSearch: (String) -> Unit,
     onTab: () -> Unit,
     onFilter: () -> Unit,
     onMenu: () -> Unit,
+    isCollapsed: Boolean = false,
+    isSavedSelected: Boolean = false
 ) {
-    var targetState by remember { mutableStateOf(false) }
+    var searchMode by remember { mutableStateOf(false) }
     var queryText by remember { mutableStateOf("") }
-    var expandedState by remember { mutableStateOf(false) }
-    val categoryList = stringArrayResource(id = R.array.category_drawer)
-
-    // 1. Создаем FocusRequester для управления фокусом
+    var wasCollapsed by remember { mutableStateOf(isCollapsed) }
+    val categoryList = stringArrayResource(id = R.array.category_top)
     val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    
+    // Читаем showDrawer из preferences
+    val pref: HomeViewModel = hiltViewModel()
+    val currentShowDrawer by pref.showDrawer.collectAsStateWithLifecycle()
 
-    Crossfade(targetState) { target ->
-        if (target) {
-            // 2. Запрашиваем фокус, когда SearchBar появляется в композиции
-            // Это заставит систему автоматически показать клавиатуру
-            LaunchedEffect(Unit) {
-                focusRequester.requestFocus()
+    LaunchedEffect(searchMode, isCollapsed) {
+        if (searchMode && !isCollapsed) {
+            focusRequester.requestFocus()
+        }
+    }
+
+    LaunchedEffect(isCollapsed) {
+        if (wasCollapsed && !isCollapsed) {
+            queryText = ""
+            onSearch("")
+        }
+        wasCollapsed = isCollapsed
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
+        color = ButtonColorBlue.copy(alpha = 0.6f),
+        shadowElevation = 4.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = if (currentShowDrawer) 0.dp else 24.dp,
+                    end = 8.dp,
+                    top = 50.dp,
+                    bottom = 6.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+        ) {
+            if (currentShowDrawer) {
+                IconButton(onClick = onMenu) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Открыть меню",
+                        tint = Color.White
+                    )
+                }
             }
-            SearchBar(
-                modifier = Modifier.fillMaxWidth(),
-                inputField = {
-                    SearchBarDefaults.InputField(
-                        // 3. Передаем FocusRequester в модификатор InputField
-                        modifier = Modifier.focusRequester(focusRequester),
-                        colors = TextFieldDefaults.colors(
-                            focusedTrailingIconColor = DarkBlue,
-                            unfocusedTrailingIconColor = DarkBlue
-                        ),
-                        query = queryText,
-                        placeholder = {
-                            Text(text = "Search...")
-                        },
 
-                        onQueryChange = { text ->
-                            queryText = text
-                            Log.d("MyLog", "Query onQueryChange text: $text")
-                        },
-
-                        onSearch = { text ->
-                            onSearch(text)
-                            Log.d("MyLog", "Query onSearch text: $text")
-
-
-                        },
-                        expanded = false,
-                        onExpandedChange = { exp ->
-                            //  expandedState = exp
-                        },
-                        trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    expandedState = false
-                                    targetState = false
-                                    queryText = ""
-                                    onSearch("")
-                                }
-                            ) {
+            Box(modifier = Modifier.weight(1f)) {
+                Crossfade(
+                    targetState = isCollapsed || searchMode,
+                    animationSpec = tween(durationMillis = 450),
+                    label = "topBarContent"
+                ) { isCompact ->
+                    if (isCompact) {
+                        TextField(
+                            value = queryText,
+                            onValueChange = { queryText = it },
+                            modifier = Modifier
+                                .height(45.dp)
+                                .fillMaxWidth()
+                                .then(
+                                    if (searchMode && !isCollapsed) {
+                                        Modifier.focusRequester(focusRequester)
+                                    } else {
+                                        Modifier
+                                    }
+                                ),
+                            placeholder = {
+                                Text("", color = DarkBlue.copy(alpha = 0.6f))
+                            },
+                            leadingIcon = {
                                 Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = "Close"
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                    tint = DarkBlue
+                                )
+                            },
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = {
+                                        queryText = ""
+                                        onSearch("")
+                                        if (!isCollapsed) {
+                                            searchMode = false
+                                            keyboardController?.hide()
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Mic,
+                                        contentDescription = "Очистить поиск",
+                                        tint = DarkBlue
+                                    )
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(28.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                disabledContainerColor = Color.White,
+                                focusedTextColor = DarkBlue,
+                                unfocusedTextColor = DarkBlue,
+                                cursorColor = Orange,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent
+                            ),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    onSearch(queryText)
+                                    keyboardController?.hide()
+                                }
+                            )
+                        )
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = if (isSavedSelected) {
+                                    categoryList.getOrElse(11) { categoryList.last() }
+                                } else {
+                                    categoryList.getOrElse(category.id) { categoryList.last() }
+                                },
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1,
+                                fontSize = 20.sp,
+                                color = Color.White
+                            )
+
+                            IconButton(onClick = { searchMode = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Поиск",
+                                    tint = Color.White
+                                )
+                            }
+
+                            IconButton(onClick = onTab) {
+                                Icon(
+                                    painter = painterResource(
+                                        if (isListLayout) {
+                                            R.drawable.big_cards
+                                        } else {
+                                            R.drawable.litle_cards
+                                        }
+                                    ),
+                                    contentDescription = "Изменить вид",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            IconButton(onClick = onFilter) {
+                                Icon(
+                                    painter = painterResource(R.drawable.filter_alt),
+                                    contentDescription = "Фильтр",
+                                    tint = Color.White
                                 )
                             }
                         }
-                    )
-                },
-                expanded = expandedState,
-                onExpandedChange = { expo ->
-                    expandedState = expo
-                },
-                content = {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(25) {
-                            Text(
-                                text = "Сообщение № $it",
-                                modifier = Modifier.padding(10.dp)
-                            )
-                        }
                     }
                 }
-            )
-        } else {
-            TopAppBar(
-                title = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = {
-                            onMenu()
-                        }) {
-                            Icon(
-                                Icons.Default.Menu,
-                                contentDescription = "Burger"
-                            )
-                        }
-
-                        // ✅ Берем название из массива по id категории
-                        Text(
-                            text = categoryList[category.id],
-                            maxLines = 1
-                        )
-                    }
-                },
-
-                actions = {
-                    IconButton(onClick = {
-                        targetState = true
-                    }) {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = "Search"
-                        )
-                    }
-
-                    IconButton(onClick = {
-                        onTab()
-                    }) {
-                        if (!viewModel.showTabOneOrTo.value) {
-                            Icon(
-                                painter = painterResource(R.drawable.litle_cards),
-                                contentDescription = "List"
-                            )
-                        } else {
-                            Icon(
-                                painter = painterResource(R.drawable.big_cards),
-                                contentDescription = "List"
-                            )
-                        }
-                    }
-                    IconButton(onClick = {
-                        onFilter()
-                    }) {
-                        Icon(
-                            painter = painterResource(R.drawable.filter_alt),
-                            contentDescription = "Filter"
-                        )
-                    }
-
-                },
-
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = PurpleGrey80,
-                    titleContentColor = DarkBlue,
-                    actionIconContentColor = DarkBlue
-                )
-            )
+            }
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Main top bar")
 @Composable
 fun ShowMainTopBar() {
+    GuideTheme {
+        MainTopBar(
+            category = BookCategories.OTHER,
+            isListLayout = false,
+            onSearch = {},
+            onTab = {},
+            onFilter = {},
+            onMenu = {},
+            isSavedSelected = false
+        )
+    }
+}
 
+@Preview(showBackground = true, name = "Collapsed top bar")
+@Composable
+fun ShowCollapsedMainTopBar() {
+    GuideTheme {
+        MainTopBar(
+            category = BookCategories.OTHER,
+            isCollapsed = true,
+            onSearch = {},
+            onTab = {},
+            onFilter = {},
+            onMenu = {}
+        )
+    }
 }

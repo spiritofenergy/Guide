@@ -2,11 +2,14 @@ package com.kodex.guide.presentation.home
 
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,7 +38,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
@@ -51,6 +59,7 @@ import com.kodex.bookmarketcompose.R
 import com.kodex.guide.presentation.navigation.NavRoutes
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.UserRole
+import com.kodex.guide.presentation.home.CategoryCarousel
 import com.kodex.guide.ui.theme.Orange
 import kotlinx.coroutines.launch
 
@@ -87,6 +96,7 @@ fun HomeScreen(
     val savedViewModel: SavedPostsViewModel = hiltViewModel()
     val savedPosts by savedViewModel.savedPosts.collectAsStateWithLifecycle()
     val savedKeys by savedViewModel.savedKeys.collectAsStateWithLifecycle()
+    val ratingsByBook by viewModel.ratingsByBook.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     val categoryList = stringArrayResource(id = R.array.category_drawer)
@@ -99,6 +109,30 @@ fun HomeScreen(
     var lastDisplayedBooks by remember { mutableStateOf(emptyList<Book>()) }
     var refreshStarted by remember { mutableStateOf(false) }
     var hasCompletedBooksRequest by remember { mutableStateOf(false) }
+    var isTopBarCollapsed by remember { mutableStateOf(false) }
+    val topBarScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                val scrollDelta = consumed.y + available.y
+                if (scrollDelta < -2f) {
+                    isTopBarCollapsed = true
+                } else if (scrollDelta > 2f) {
+                    isTopBarCollapsed = false
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
+    LaunchedEffect(books.itemSnapshotList, savedPosts, lastDisplayedBooks) {
+        viewModel.loadRatingsForBooks(
+            (books.itemSnapshotList.items + savedPosts + lastDisplayedBooks).distinctBy(Book::key)
+        )
+    }
 
     LaunchedEffect(
         savedPosts,
@@ -111,6 +145,11 @@ fun HomeScreen(
         ) {
             lastDisplayedBooks = savedPosts
         }
+    }
+
+    LaunchedEffect(viewModel.categoryState.value) {
+        lastDisplayedBooks = emptyList()
+        hasCompletedBooksRequest = false
     }
 
     LaunchedEffect(books.loadState.refresh, books.itemSnapshotList) {
@@ -192,7 +231,12 @@ fun HomeScreen(
         drawerState = drawerState,
         modifier = Modifier.fillMaxWidth(),
         drawerContent = {
-            Column(modifier = Modifier.fillMaxWidth(if (!isLandscape) 0.7f else 0.3f)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(if (!isLandscape) 0.77f else 0.3f)
+                    .clip(RoundedCornerShape(bottomEnd = 24.dp))
+                    .background(Color.White)
+            ) {
                 if (!isLandscape) {
                     DrawerHeader(user = headerUser)   // ✅ передаём весь User?
 
@@ -255,7 +299,10 @@ fun HomeScreen(
             topBar = {
                 if (!isLandscape)
                     MainTopBar(
-                        viewModel.categoryState.value,
+                        category = viewModel.categoryState.value,
+                        isListLayout = viewModel.showTabOneOrTo.value,
+                        isCollapsed = isTopBarCollapsed,
+                        isSavedSelected = viewModel.selectedBottomItemState.intValue == BottomMenuItem.Saved.titleId,
                         onSearch = { searchText ->
                             viewModel.searchBook(searchText)
                         },
@@ -270,13 +317,15 @@ fun HomeScreen(
                         }
                     )
             },
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(topBarScrollConnection),
             bottomBar = {
                 if (!isLandscape)
                     BottomMenu(
                         viewModel.selectedBottomItemState.intValue,
                         onCategoryClick = {
-                            viewModel.getAllBooksFromCategory(category = BookCategories.OTHER)
+                            viewModel.getAllBooksFromCategory(category = BookCategories.ALL)
                             viewModel.selectedBottomItemState.intValue =
                                 BottomMenuItem.Saved.titleId
 
@@ -285,7 +334,7 @@ fun HomeScreen(
                         onHomeClick = {
                             // получаем список с иыентификатором и
                             viewModel.selectedBottomItemState.intValue = BottomMenuItem.Home.titleId
-                            viewModel.getAllBooksFromCategory(category = BookCategories.OTHER)
+                            viewModel.getAllBooksFromCategory(category = BookCategories.ALL)
                         },
                         onSettingsClick = {
                             onSettingsClick()
@@ -305,6 +354,12 @@ fun HomeScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
+                CategoryCarousel(
+                    selectedCategory = viewModel.categoryState.value,
+                    onCategoryClick = { category ->
+                        viewModel.onCategorySelected(category)
+                    }
+                )
                 if (bookToDelete != null) {
                     DeleteBookDialog(
                         onDismiss = { viewModel.onDeleteDialogDismissed() },
@@ -361,6 +416,7 @@ fun HomeScreen(
                                         titleIndex = viewModel.categoryState.value.id,
                                         showEditButton = viewModel.isAdminState.collectAsState().value,
                                         book = book,
+                                        ratings = ratingsByBook[book.key] ?: book.ratingsList,
                                         isSaved = true, // На этой вкладке все книги гарантированно сохранены
                                         onBookClick = { bk ->
                                             onBookClick(bk)
@@ -397,6 +453,7 @@ fun HomeScreen(
                                             titleIndex = viewModel.categoryState.value.id,
                                             showEditButton = viewModel.isAdminState.collectAsState().value,
                                             book = book,
+                                            ratings = ratingsByBook[book.key] ?: book.ratingsList,
                                             isSaved = isSaved,
                                             onBookClick = { onBookClick(it) },
                                             onEditClick = { onBookEditClick(it) },
@@ -420,6 +477,7 @@ fun HomeScreen(
                                             titleIndex = viewModel.categoryState.value.id,
                                             showEditButton = viewModel.isAdminState.collectAsState().value,
                                             book = book,
+                                            ratings = ratingsByBook[book.key] ?: book.ratingsList,
                                             isSaved = isSaved,
                                             onBookClick = { bk ->
                                                 onBookClick(bk)
@@ -454,6 +512,7 @@ fun HomeScreen(
                                             titleIndex = viewModel.categoryState.value.id,
                                             showEditButton = viewModel.isAdminState.collectAsState().value,
                                             book = book,
+                                            ratings = ratingsByBook[book.key] ?: book.ratingsList,
                                             isSaved = isSaved,
                                             onBookClick = { bk ->
                                                 onBookClick(bk)
@@ -641,7 +700,8 @@ fun HomeScreen(
                             showPremiumButton = nextRole != null && nextRole != UserRole.PREMIUM,
                             showGuestButton = currentRole == UserRole.USER ||
                                     currentRole == UserRole.BUSINESS ||
-                                    currentRole == UserRole.PREMIUM,
+                                    currentRole == UserRole.PREMIUM ||
+                                    currentRole == UserRole.ADMIN,
                             onDismiss = { viewModel.dismissAuthDialog() },
                             onNextTariffClick = {
                                 viewModel.dismissAuthDialog()
@@ -662,12 +722,7 @@ fun HomeScreen(
                     if (showPaymentSheet.value) {
                         PaymentBottomSheet(
                             viewModel = viewModel,
-                            onDismiss = { showPaymentSheet.value = false },
-                            onPaymentSuccess = {
-                                // Можно показать Toast или обновить UI
-                                Toast.makeText(context, "Роль обновлена!", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
+                            onDismiss = { showPaymentSheet.value = false }
                         )
                     }
                 }

@@ -54,17 +54,6 @@ class UpgradeManager @Inject constructor(
         )
     }
 
-    // ✅ Оплата и повышение до платного тарифа (из desiredRole)
-    suspend fun applyPaidUpgrade(uid: String): Result<UserRole> {
-        val role = _desiredRole.value?.takeIf { tariffPolicy.requiresPayment(it) }
-            ?: UserRole.BUSINESS
-
-        return userRoleRepo.updateUserRole(uid, role).map {
-            _desiredRole.value = null
-            role
-        }
-    }
-
     // ✅ Бесплатное повышение на следующий тариф
     suspend fun applyNextFreePlan(
         uid: String,
