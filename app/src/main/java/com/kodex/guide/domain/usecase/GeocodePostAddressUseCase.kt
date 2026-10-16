@@ -9,8 +9,8 @@ import java.util.Locale
 import javax.inject.Inject
 
 data class PostCoordinates(
-    val latitude: Double,
-    val longitude: Double
+    val latitude: String,
+    val longitude: String
 )
 
 class GeocodePostAddressUseCase @Inject constructor(
@@ -25,6 +25,6 @@ class GeocodePostAddressUseCase @Inject constructor(
             Geocoder(context, Locale("ru", "RU"))
                 .getFromLocationName(address, 1)
                 ?.firstOrNull()
-                ?.let { PostCoordinates(it.latitude, it.longitude) }
+                ?.let { PostCoordinates(it.latitude.toString(), it.longitude.toString()) }
         }
 }

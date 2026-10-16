@@ -41,10 +41,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.kodex.guide.domain.model.Book
+import com.kodex.guide.domain.model.UserRole
 import com.kodex.bookmarketcompose.R
+import com.kodex.guide.ui.theme.BoxFilter
 import com.kodex.guide.ui.theme.GreenSea
 import com.kodex.guide.ui.theme.Orange
 import com.kodex.guide.ui.theme.Red
+import com.kodex.guide.ui.theme.TextGray
+import com.kodex.guide.ui.theme.AccentPurple
+import com.kodex.guide.ui.theme.Premium
 
 
 @SuppressLint("DefaultLocale")
@@ -61,6 +66,11 @@ fun BookListItemUi(
     onSavedRoomClick: () -> Unit = {},
     onBookClick: (Book) -> Unit = {},
 ) {
+    val categoryBackgroundColor = when (book.authorRole) {
+        UserRole.BUSINESS.level -> GreenSea.copy(alpha = 0.5f)
+        UserRole.PREMIUM.level -> Premium.copy(alpha = 0.5f)
+        else -> TextGray.copy(alpha = 0.7f)
+    }
 
     var bitmap: Bitmap? = null
     try {
@@ -100,34 +110,15 @@ fun BookListItemUi(
             // 2. Категория в левом верхнем углу
             Text(
                 " " + stringArrayResource(id = R.array.category_drawer)[book.categoryIndex.id]+ " ",
-               // " " + stringArrayResource(R.array.category_array)[book.categoryIndex] + " ",
                 fontSize = 18.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(start = 10.dp, top = 10.dp)
-                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(10.dp))
+                    .background(categoryBackgroundColor, RoundedCornerShape(10.dp))
             )
 
-            // 3. MoreVert в правом верхнем углу
-            /*IconButton(
-                onClick = { },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(10.dp)
-            ) {
-                Icon(
-                    Icons.Default.MoreVert,
-                    contentDescription = "",
-                    modifier = Modifier
-                        .background(Color.Gray.copy(alpha = 0.5f), RoundedCornerShape(15.dp))
-                        .padding(8.dp),
-                    tint = Color.White
-                )
-            }*/
-
-            // 4. Bookmark в правом нижнем углу
             IconButton(
                 onClick = { onSavedRoomClick() },
                 modifier = Modifier

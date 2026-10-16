@@ -14,7 +14,7 @@ interface AuthRepo {
     /** Поток текущего пользователя */
     fun observeUser(): Flow<User?>
 
-    /** Анонимный вход */
+    /** Гостевой вход */
     suspend fun signInAnonymously(): Result<User>
 
     /** ✅ Создание профиля в Firestore */

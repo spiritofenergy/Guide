@@ -67,7 +67,8 @@ class NavRoutes {
         val isFaves: Boolean = false,
         val ratingsList: List<Int> = emptyList(),
         val hasDelivery: Boolean = true,
-        val acceptsCard: Boolean = true )
+        val acceptsCard: Boolean = true,
+        val publishPeriod: Int = 1 )
                 @Serializable
                 data class ParallaxNavObject1(
                     val bookId: String = "",

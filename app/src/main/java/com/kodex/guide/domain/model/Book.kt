@@ -20,7 +20,7 @@ data class Book(
     val imageUrl: String = "",
     val isFavorite: Boolean = false,
     val isAuthor: Boolean = false,
-    val authorId: Int = 0,
+    val authorRole: Int = 0,  // ✅ Роль автора (UserRole.level)
     val publishPeriod: Int = 1,
     val timeStamp: Long = System.currentTimeMillis(),
     val deleteDate: Int = 0,

@@ -69,6 +69,16 @@ class UpgradeManager @Inject constructor(
         return userRoleRepo.updateUserRole(uid, nextRole).map { nextRole }
     }
 
+    // ✅ Повышение после оплаты (BUSINESS или PREMIUM)
+    suspend fun applyPaidUpgrade(uid: String): Result<UserRole> {
+        // Если desiredRole установлен — используем его, иначе следующий по цепочке
+        val targetRole = _desiredRole.value
+            ?: tariffPolicy.nextRole(UserRole.ANONYMOUS)
+            ?: return Result.failure(IllegalStateException("Уже максимальный тариф"))
+
+        return userRoleRepo.updateUserRole(uid, targetRole).map { targetRole }
+    }
+
     private fun decideForTarget(target: UserRole): UpgradeDecision {
         val currentUser = authStateProvider.currentUser()
 

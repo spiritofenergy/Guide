@@ -18,6 +18,7 @@ data class PostEditorState(
     val delivery: Boolean = false,
     val payment: Boolean = false,
     val location: Boolean = false,
+    val publishPeriod: Int = 1,       // Период публикации в днях
     val imageUri: Uri? = null,       // Выбранное фото (из галереи или камеры)
     val existingImageUrl: String = "" // URL/Base64 существующего фото при редактировании
 ) {
@@ -36,6 +37,7 @@ data class PostEditorState(
             delivery = delivery,
             payment = payment,
             location = location,
+            publishPeriod = publishPeriod,
             imageUrl = if (imageUri != null) "" else existingImageUrl
 
         )
@@ -58,6 +60,7 @@ data class PostEditorState(
             delivery = book.delivery,
             payment = book.payment,
             location = book.location,
+            publishPeriod = book.publishPeriod,
             existingImageUrl = book.imageUrl ?: ""
         )
     }

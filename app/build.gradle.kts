@@ -55,8 +55,18 @@ kotlin {
         jvmTarget.set(JvmTarget.JVM_11) // или JVM_17, в зависимости от вашего проекта
     }
 }
+
+configurations.all {
+    exclude(group = "com.intellij", module = "annotations")
+    resolutionStrategy {
+        force("org.jetbrains:annotations:23.0.0")
+    }
+}
+
 dependencies {
-// ✅ ТЕСТЫ
+implementation(libs.room.compiler)
+    implementation(libs.firebase.ai)
+    // ✅ ТЕСТЫ
   /*  testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)*/

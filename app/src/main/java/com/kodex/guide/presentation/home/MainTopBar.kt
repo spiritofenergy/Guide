@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Microwave
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -31,12 +30,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
@@ -70,6 +72,7 @@ fun MainTopBar(
     val categoryList = stringArrayResource(id = R.array.category_top)
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
     
     // Читаем showDrawer из preferences
     val pref: HomeViewModel = hiltViewModel()
@@ -149,21 +152,31 @@ fun MainTopBar(
                                 )
                             },
                             trailingIcon = {
-                                IconButton(
-                                    onClick = {
-                                        queryText = ""
-                                        onSearch("")
-                                        if (!isCollapsed) {
-                                            searchMode = false
-                                            keyboardController?.hide()
+                                Row {
+                                    // Кнопка очистки
+                                    if (queryText.isNotEmpty()) {
+                                        IconButton(
+                                            onClick = {
+                                                queryText = ""
+                                                onSearch("")
+                                                if (!isCollapsed) {
+                                                    searchMode = false
+                                                    keyboardController?.hide()
+                                                }
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = "Очистить поиск",
+                                                tint = DarkBlue
+                                            )
                                         }
                                     }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Mic,
-                                        contentDescription = "Очистить поиск",
-                                        tint = DarkBlue
-                                    )
+                                    // Кнопка голосового ввода
+                                    VoiceInputButton { text ->
+                                        queryText = text
+                                        onSearch(text)
+                                    }
                                 }
                             },
                             singleLine = true,
@@ -239,6 +252,41 @@ fun MainTopBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun VoiceInputButton(
+    onResult: (String) -> Unit
+) {
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val matches = result.data?.getStringArrayListExtra(
+                android.speech.RecognizerIntent.EXTRA_RESULTS
+            )
+            matches?.firstOrNull()?.let { text ->
+                onResult(text)
+            }
+        }
+    }
+
+    IconButton(
+        onClick = {
+            val intent = android.content.Intent(android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL, android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(android.speech.RecognizerIntent.EXTRA_LANGUAGE, "ru-RU")
+                putExtra(android.speech.RecognizerIntent.EXTRA_PROMPT, "Говорите...")
+            }
+            launcher.launch(intent)
+        }
+    ) {
+        Icon(
+            imageVector = Icons.Default.Mic,
+            contentDescription = "Голосовой ввод",
+            tint = Orange
+        )
     }
 }
 

@@ -51,7 +51,21 @@
         <item>Food</item>
     </string-array>
 
-    <string-array name="publish_period">
+    <string-array name="publish_period_user">
+        <item>1</item>
+        <item>3</item>
+        <item>7</item>
+        <item>14</item>
+        <item>30</item>
+    </string-array>
+<string-array name="publish_period_business">
+        <item>1</item>
+        <item>3</item>
+        <item>7</item>
+        <item>14</item>
+        <item>30</item>
+        </string-array>
+<string-array name="publish_period_premium">
         <item>1</item>
         <item>3</item>
         <item>7</item>
@@ -61,10 +75,6 @@
         <item>180</item>
         <item>365</item>
     </string-array>
-
-
-
-
     <string-array name="category_admin">
         <item>Admin panel</item>
         <item>Add</item>

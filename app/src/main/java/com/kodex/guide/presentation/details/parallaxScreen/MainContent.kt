@@ -57,8 +57,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
-import java.text.SimpleDateFormat
-import java.util.Locale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -85,6 +83,8 @@ import com.kodex.guide.ui.theme.Orange
 import com.kodex.guide.ui.theme.TextDark
 import com.kodex.guide.ui.theme.TextGray
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -612,6 +612,19 @@ fun MainContent(
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(vertical = 4.dp)
                 )
+
+                // Период публикации
+                val publishPeriodNames = stringArrayResource(id = R.array.publish_period_user)
+                val periodText = publishPeriodNames.getOrNull(navObject.publishPeriod - 1) ?: ""
+                if (periodText.isNotEmpty()) {
+                    Text(
+                        text = "Период публикации: $periodText",
+                        fontSize = 14.sp,
+                        color = TextGray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
+                }
             }
 
             // ===== Секция: Отзывы =====

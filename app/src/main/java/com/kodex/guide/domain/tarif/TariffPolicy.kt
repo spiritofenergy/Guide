@@ -26,7 +26,7 @@ class DefaultTariffPolicy @Inject constructor() : TariffPolicy {
 
     override fun displayName(role: UserRole): String {
         return when (role) {
-            UserRole.ANONYMOUS -> "Анонимный"
+            UserRole.ANONYMOUS -> "Гостевой"
             UserRole.USER -> "Пользователь"
             UserRole.BUSINESS -> "Бизнес"
             UserRole.PREMIUM -> "Премиум"

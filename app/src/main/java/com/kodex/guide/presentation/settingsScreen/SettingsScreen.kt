@@ -1,5 +1,6 @@
 package com.kodex.guide.presentation.settingsScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,8 +33,8 @@ import com.kodex.guide.domain.model.User
 import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.presentation.home.HomeViewModel
 import com.kodex.guide.presentation.home.PaymentBottomSheet
-import com.kodex.guide.presentation.home.TariffDialog
- import com.kodex.guide.ui.dialods.AccountDialog
+import com.kodex.guide.presentation.home.ShowTariffDialog
+import com.kodex.guide.ui.dialods.AccountDialog
 import com.kodex.guide.ui.dialods.SettingsRestartDialog
 import com.kodex.guide.ui.theme.ButtonColorBlue
 import com.kodex.guide.ui.theme.Red
@@ -77,9 +78,12 @@ fun SettingsScreen(
     LaunchedEffect(Unit) {
         viewModel.getSettings()
         viewModel.settingsBundleState.collect { settingsData ->
-            dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_FORMAT] = settingsData.userSettingsData.imageFormat
-            dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_QUALITY] = settingsData.userSettingsData.quality
-            dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_SIZE] = settingsData.userSettingsData.size
+            dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_FORMAT] =
+                settingsData.userSettingsData.imageFormat
+            dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_QUALITY] =
+                settingsData.userSettingsData.quality
+            dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_SIZE] =
+                settingsData.userSettingsData.size
         }
     }
 
@@ -119,6 +123,7 @@ fun SettingsScreen(
                         phone = fieldValuesList[1]
                     )
                 }
+
                 DialogType.ADDRESS -> {
                     viewModel.newAddressData = AddressData(
                         city = fieldValuesList[0],
@@ -127,9 +132,11 @@ fun SettingsScreen(
                         postCode = fieldValuesList[3]
                     )
                 }
+
                 DialogType.PASSWORD -> {
                     viewModel.resetPassword(fieldValuesList[0])
                 }
+
                 DialogType.DELETE_ACCOUNT -> {
                     if (fieldValuesList[0].isEmpty() || fieldValuesList[1].isEmpty()) {
                         android.widget.Toast.makeText(
@@ -142,6 +149,7 @@ fun SettingsScreen(
                         showConfirmDeleteDialog = true
                     }
                 }
+
                 else -> {}
             }
         },
@@ -157,8 +165,8 @@ fun SettingsScreen(
         Surface(
             modifier = Modifier
                 .fillMaxWidth(),
-                color = ButtonColorBlue.copy(alpha = 0.7f),
-                shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
+            color = ButtonColorBlue.copy(alpha = 0.7f),
+            shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -264,7 +272,8 @@ fun SettingsScreen(
                             title = settings_address,
                             dialogType = DialogType.ADDRESS,
                             showDialog = true,
-                            fieldLabel = context.resources.getStringArray(R.array.address_array).toList(),
+                            fieldLabel = context.resources.getStringArray(R.array.address_array)
+                                .toList(),
                             fieldValues = listOf(
                                 viewModel.oldAddressData.city,
                                 viewModel.oldAddressData.street,
@@ -315,8 +324,8 @@ fun SettingsScreen(
             item {
                 SettingsMenuItem(
                     icon = if (isAuthorized) Icons.Default.Logout else Icons.Default.Login,
-                    title = if(isAuthorized) categoryAdmin[3] else categoryAdmin[2],
-                     onClick = {
+                    title = if (isAuthorized) categoryAdmin[3] else categoryAdmin[2],
+                    onClick = {
                         if (isAuthorized) {
                             viewModelHome.showLogoutTariffDialog()
                         } else {
@@ -361,7 +370,8 @@ fun SettingsScreen(
                             title = delete_account,
                             dialogType = DialogType.DELETE_ACCOUNT,
                             showDialog = true,
-                            fieldLabel = context.resources.getStringArray(R.array.delete_account_array).toList(),
+                            fieldLabel = context.resources.getStringArray(R.array.delete_account_array)
+                                .toList(),
                             fieldValues = listOf("", "")
                         )
                     },
@@ -371,61 +381,36 @@ fun SettingsScreen(
         }
 
         // === SAVE BUTTON ===
-       /* Button(
-            onClick = {
-                viewModel.newUserSettingsData = UserSettingsData(
-                    imageFormat = dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_FORMAT] ?: 0,
-                    quality = dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_QUALITY] ?: 0,
-                    size = dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_SIZE] ?: 0
-                )
-                viewModel.saveSettings()
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = ButtonColorBlue),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text("Сохранить")
-        }*/
+        /* Button(
+             onClick = {
+                 viewModel.newUserSettingsData = UserSettingsData(
+                     imageFormat = dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_FORMAT] ?: 0,
+                     quality = dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_QUALITY] ?: 0,
+                     size = dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_SIZE] ?: 0
+                 )
+                 viewModel.saveSettings()
+             },
+             modifier = Modifier
+                 .fillMaxWidth()
+                 .padding(horizontal = 16.dp, vertical = 16.dp),
+             colors = ButtonDefaults.buttonColors(containerColor = ButtonColorBlue),
+             shape = RoundedCornerShape(12.dp)
+         ) {
+             Text("Сохранить")
+         }*/
 
         // Показываем TariffDialog
-        if (showAuthDialog) {
-            val nextRole = viewModelHome.getNextRole(userRole)
-
-            TariffDialog(
-                currentRoleName = viewModelHome.getRoleDisplayName(userRole),
-                nextRoleName = nextRole?.let { viewModelHome.getRoleDisplayName(it) },
-                nextRequiresPayment = nextRole?.let { viewModelHome.requiresPayment(it) } ?: false,
-                showNextButton = nextRole != null,
-                showPremiumButton = nextRole != null && nextRole != UserRole.PREMIUM,
-                showGuestButton = userRole == UserRole.ANONYMOUS ||
-                        userRole == UserRole.USER ||
-                        userRole == UserRole.BUSINESS ||
-                        userRole == UserRole.PREMIUM ||
-                        userRole == UserRole.ADMIN,
-                onDismiss = {
-                    viewModelHome.dismissAuthDialog()
-                },
-                onNextTariffClick = {
-                    viewModelHome.dismissAuthDialog()
-                    viewModelHome.requestUpgrade(userRole)
-                },
-                onPremiumClick = {
-                    viewModelHome.dismissAuthDialog()
-                    viewModelHome.requestPremiumUpgrade()
-                },
-                onLogoutClick = {
-                    viewModelHome.dismissAuthDialog()
-                    viewModelHome.logout()
-                }
-            )
-        }
+        ShowTariffDialog(viewModelHome, userRole)
 
         if (viewModelHome.showPaymentSheet.value) {
             PaymentBottomSheet(
                 viewModel = viewModelHome,
-                onDismiss = { viewModelHome.showPaymentSheet.value = false }
+                onDismiss = { viewModelHome.showPaymentSheet.value = false },
+                onPaymentSuccess = {
+                    // Можно показать Toast или обновить UI
+                    Toast.makeText(context, "Роль обновлена!", Toast.LENGTH_SHORT)
+                        .show()
+                }
             )
         }
     }
@@ -434,18 +419,19 @@ fun SettingsScreen(
 
 fun getRoleDisplayName(role: UserRole): String {
     return when (role) {
-        UserRole.ANONYMOUS -> "Анонимный"
+        UserRole.ANONYMOUS -> "Гостевой"
         UserRole.USER -> "Пользователь"
         UserRole.BUSINESS -> "Бизнес"
         UserRole.PREMIUM -> "Премиум"
         UserRole.ADMIN -> "Администратор"
     }
 }
+
 @Composable
 fun SettingsMenuItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
-    onClick:() -> Unit,
+    onClick: () -> Unit,
     titleColor: Color = Color.DarkGray
 ) {
     Row(
@@ -532,5 +518,5 @@ fun ShowSettingsScreen() {
         userName = "Иван Иванов",
         role = UserRole.USER
     )
-        // SettingsScreen(user = mockUser)
+    // SettingsScreen(user = mockUser)
 }

@@ -15,11 +15,11 @@ data class BookDTO(
     val description: String = "",
     val price: Int = 0,
     val telephone: String = "",
-    val categoryIndex: Int = BookCategories.OTHER.id,
+    val categoryIndex: Any = BookCategories.OTHER.id,
     val imageUrl: String = "",
     val isFavorite: Boolean = false,
     val isAuthor: Boolean = false,
-    val authorId: Int = 0,
+    val authorRole: Int = 0,  // ✅ Роль автора (UserRole.level)
     val publishPeriod: Int = 1,
     val timeStamp: Long = System.currentTimeMillis(),
     val deleteDate: Int = 0,
@@ -31,9 +31,9 @@ data class BookDTO(
     val delivery: Boolean = false,
     val payment: Boolean = false,
     val ratingsList: List<Int> = emptyList(),
-    val latitude: String? = null,
-    val longitude: String? = null,
+    val latitude: Any? = null,
+    val longitude: Any? = null,
     val authorUid: String = "",        // ✅ владелец (uid из Firebase Auth)
     val isUploaded: Boolean = false,   // ✅ опубликован ли в Firebase
-
+    val categoryName: String? = null,  // ✅ для обратной совместимости с Firebase
 )

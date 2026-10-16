@@ -36,7 +36,9 @@ fun Book.toParallaxNavObject(): NavRoutes.ParallaxNavObject {
         delivery = delivery,
         ratingsList = ratingsList,
         latitude = latitude.orEmpty(),
-        longitude = longitude.orEmpty()
+        longitude = longitude.orEmpty(),
+        timestamp = timeStamp,
+        publishPeriod = publishPeriod
 
         // все остальные поля возьмутся из дефолтных значений
     )

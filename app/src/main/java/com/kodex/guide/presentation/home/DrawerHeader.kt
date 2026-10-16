@@ -85,7 +85,7 @@ fun DrawerHeader(
 
 private fun getRoleDisplayName(role: UserRole): String {
     return when (role) {
-        UserRole.ANONYMOUS -> "Анонимный"
+        UserRole.ANONYMOUS -> "Гостевой"
         UserRole.USER -> "Пользователь"
         UserRole.BUSINESS -> "Бизнес"
         UserRole.PREMIUM -> "Премиум"

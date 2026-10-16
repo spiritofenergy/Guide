@@ -53,13 +53,14 @@ import androidx.paging.LoadState
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.kodex.guide.domain.model.Book
-import com.kodex.guide.ui.dialods.FilterDialog
 import com.kodex.bookmarketcompose.R
-import com.kodex.guide.presentation.navigation.NavRoutes
+import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.presentation.home.CategoryCarousel
+import com.kodex.guide.presentation.home.ShowTariffDialog
+import com.kodex.guide.presentation.navigation.NavRoutes
+import com.kodex.guide.ui.dialods.FilterDialog
 import com.kodex.guide.ui.theme.Orange
 import kotlinx.coroutines.launch
 
@@ -687,42 +688,18 @@ fun HomeScreen(
                             showFilterDialog = false
                         }
                     )
-                    if (showAuthDialog) {
-                        val currentRole = userRole
-                        val nextRole = viewModel.getNextRole(currentRole)
-
-                        TariffDialog(
-                            currentRoleName = viewModel.getRoleDisplayName(currentRole),
-                            nextRoleName = nextRole?.let { viewModel.getRoleDisplayName(it) },
-                            nextRequiresPayment = nextRole?.let { viewModel.requiresPayment(it) }
-                                ?: false,
-                            showNextButton = nextRole != null,
-                            showPremiumButton = nextRole != null && nextRole != UserRole.PREMIUM,
-                            showGuestButton = currentRole == UserRole.USER ||
-                                    currentRole == UserRole.BUSINESS ||
-                                    currentRole == UserRole.PREMIUM ||
-                                    currentRole == UserRole.ADMIN,
-                            onDismiss = { viewModel.dismissAuthDialog() },
-                            onNextTariffClick = {
-                                viewModel.dismissAuthDialog()
-                                viewModel.requestUpgrade(currentRole)
-                            },
-                            onPremiumClick = {
-                                viewModel.dismissAuthDialog()
-                                viewModel.requestPremiumUpgrade()
-                            },
-                            onLogoutClick = {
-                                viewModel.dismissAuthDialog()
-                                viewModel.logout()
-                            }
-                        )
-                    }
+                    ShowTariffDialog(viewModel, userRole)
 
                     // Обёртка для отображения bottom sheet
                     if (showPaymentSheet.value) {
                         PaymentBottomSheet(
                             viewModel = viewModel,
-                            onDismiss = { showPaymentSheet.value = false }
+                            onDismiss = { showPaymentSheet.value = false },
+                            onPaymentSuccess = {
+                                // Можно показать Toast или обновить UI
+                                Toast.makeText(context, "Роль обновлена!", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
                         )
                     }
                 }

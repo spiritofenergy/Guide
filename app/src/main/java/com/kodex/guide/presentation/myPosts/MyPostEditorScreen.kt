@@ -1,6 +1,7 @@
 package com.kodex.guide.presentation.myPosts
 
 import android.widget.Toast
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
@@ -92,6 +93,8 @@ fun MyPostEditorScreen(
     var delivery by remember { mutableStateOf(false) }
     var payment by remember { mutableStateOf(false) }
     var location by remember { mutableStateOf(false) }
+    var publishPeriod by remember { mutableStateOf(1) }
+    var publishPeriodExpanded by remember { mutableStateOf(false) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var existingImageUrl by remember { mutableStateOf("") }
 
@@ -134,6 +137,7 @@ fun MyPostEditorScreen(
                 telephone = d.telephone; village = d.village; street = d.street
                 house = d.house; flat = d.flat; category = d.category
                 delivery = d.delivery; payment = d.payment; location = d.location
+                publishPeriod = d.publishPeriod
                 existingImageUrl = d.existingImageUrl
             }
         }
@@ -145,6 +149,7 @@ fun MyPostEditorScreen(
             telephone = b.telephone; village = b.village; street = b.street
             house = b.house; flat = b.flat; category = b.categoryIndex
             delivery = b.delivery; payment = b.payment; location = b.location
+            publishPeriod = b.publishPeriod
             existingImageUrl = b.imageUrl
         }
     }
@@ -163,19 +168,22 @@ fun MyPostEditorScreen(
         delivery,
         payment,
         location,
+        publishPeriod,
         existingImageUrl
     ) {
         if (bookKey.isEmpty()) {
             viewModel.autoSaveDraft(
                 PostEditorState(
                     title, description, price, telephone, village, street, house, flat,
-                    category, delivery, payment, location, imageUri, existingImageUrl
+                    category, delivery, payment, location, publishPeriod, imageUri, existingImageUrl
                 )
             )
         }
     }
 
     LaunchedEffect(bookKey) { viewModel.loadForEdit(bookKey) }
+
+    val publishPeriodNames = stringArrayResource(id = R.array.publish_period_user)
 
     Scaffold(
         topBar = {
@@ -261,6 +269,7 @@ fun MyPostEditorScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
+
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it.capitalizeFirst() },
@@ -309,6 +318,14 @@ fun MyPostEditorScreen(
 
             OptionsSection(delivery, { delivery = it }, payment, { payment = it })
 
+            // Период публикации
+            PublishPeriodDropdown(
+                publishPeriod,
+                publishPeriodExpanded,
+                publishPeriodNames,
+                onPeriodChange = { publishPeriod = it; publishPeriodExpanded = false },
+                onExpandedChange = { publishPeriodExpanded = it })
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -333,6 +350,7 @@ fun MyPostEditorScreen(
                         delivery = delivery,
                         payment = payment,
                         location = location,
+                        publishPeriod = publishPeriod,
                         imageUri = imageUri,
                         existingImageUrl = existingImageUrl
                     )
@@ -416,4 +434,33 @@ fun decodeBase64ToBitmap(base64String: String): android.graphics.Bitmap? {
 
 fun String.capitalizeFirst(): String {
     return if (isEmpty()) this else this[0].uppercase() + this.substring(1)
+}
+
+// Выпадающий список периода публикации
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PublishPeriodDropdown(
+    period: Int,
+    expanded: Boolean,
+    names: Array<String>,
+    onPeriodChange: (Int) -> Unit,
+    onExpandedChange: (Boolean) -> Unit
+) {
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = onExpandedChange) {
+        OutlinedTextField(
+            value = names.getOrNull(period - 1) ?: names.first(),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Период публикации") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }) {
+            names.forEachIndexed { index, name ->
+                DropdownMenuItem(text = { Text(name) }, onClick = { onPeriodChange(index + 1) })
+            }
+        }
+    }
 }

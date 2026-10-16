@@ -38,3 +38,4 @@ val IconBgLight = Color(0xFFF0EDFF)
 
 // Статусы
 val StatusOpen = Color(0x7511A423)
+val Premium = Color(0xFF9C27B0)
