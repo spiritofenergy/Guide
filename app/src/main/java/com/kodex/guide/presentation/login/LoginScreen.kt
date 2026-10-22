@@ -19,9 +19,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.kodex.bookmarketcompose.R
 import com.kodex.guide.ui.dialods.SettingsRestartDialog
 import com.kodex.guide.presentation.navigation.NavRoutes
+import com.kodex.guide.R
 
 @Composable
 fun LoginScreen(
@@ -106,7 +106,8 @@ fun LoginScreen(
 
             if (!viewModel.resetPasswordState.value) {
                 LoginButton(
-                    text = stringResource(R.string.enter)
+                    text = stringResource(R.string.enter),
+                    showLoadIndicator = viewModel.isLoading.value
                 ) {
                       viewModel.signIn(
                           onSignInSuccess = { navData ->
@@ -120,7 +121,9 @@ fun LoginScreen(
                     stringResource(R.string.recover_the_password)
                 } else {
                     stringResource(R.string.authorization)
-                }
+                },
+                showLoadIndicator = viewModel.resetPasswordState.value && viewModel.isLoading.value,
+                enabled = !viewModel.isLoading.value
             ) {
                 if (viewModel.resetPasswordState.value) {
                     viewModel.resetPassword()

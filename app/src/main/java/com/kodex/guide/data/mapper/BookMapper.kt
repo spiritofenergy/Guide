@@ -50,6 +50,7 @@ fun BookDTO.toBook(): Book {
         latitude = latitude?.toString(),
         longitude = longitude?.toString(),
         authorUid = authorUid,
+        authorEmail = authorEmail.ifEmpty { "" }, // TODO: для старых постов без authorEmail — загрузить из Firestore
         isUploaded = isUploaded,
     )
 }
@@ -83,6 +84,7 @@ fun Book.toBookDTO(): BookDTO {
         latitude = latitude,
         longitude = longitude,
         authorUid = authorUid,
+        authorEmail = authorEmail,
         isUploaded = isUploaded,
     )
 }

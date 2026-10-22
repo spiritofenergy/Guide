@@ -3,7 +3,6 @@ package com.kodex.guide.presentation.settingsScreen
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,18 +25,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.domain.model.AddressData
 import com.kodex.guide.domain.model.PersonalData
 import com.kodex.guide.domain.model.User
 import com.kodex.guide.domain.model.UserRole
+import com.kodex.guide.presentation.home.AuthEvent
 import com.kodex.guide.presentation.home.HomeViewModel
 import com.kodex.guide.presentation.home.PaymentBottomSheet
 import com.kodex.guide.presentation.home.ShowTariffDialog
 import com.kodex.guide.ui.dialods.AccountDialog
 import com.kodex.guide.ui.dialods.SettingsRestartDialog
 import com.kodex.guide.ui.theme.ButtonColorBlue
-import com.kodex.guide.ui.theme.Red
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SettingsScreen(
@@ -47,6 +47,7 @@ fun SettingsScreen(
     onBackClick: () -> Unit = {},
     onMyPostsClick: () -> Unit = {},
     onAddPostClick: () -> Unit = {},
+    onAddBannerClick: () -> Unit = {},
     onCloseAccountClick: () -> Unit = {}
 ) {
     val isAuthorized by viewModelHome.isAuthorized.collectAsStateWithLifecycle()
@@ -73,7 +74,40 @@ fun SettingsScreen(
     val password = stringResource(R.string.password)
     val delete_account = stringResource(R.string.settings_delete_account)
     // Отслеживаем showAuthDialog
-    val showAuthDialog by viewModelHome.showAuthDialog
+    val showAuthDialog by remember {
+        derivedStateOf { viewModelHome.showAuthDialog.value }
+    }
+    val isLogoutDialog by remember {
+        derivedStateOf { viewModelHome.isLogoutDialog.value }
+    }
+
+    // Обработка событий авторизации
+    LaunchedEffect(Unit) {
+        viewModelHome.authEvents.collectLatest { event ->
+            when (event) {
+                is AuthEvent.ShowLogInDialog -> {
+                    viewModelHome.showAuthDialog.value = true
+                    viewModelHome.isLogoutDialog.value = false
+                }
+                is AuthEvent.ShowLogOutDialog -> {
+                    viewModelHome.showAuthDialog.value = true
+                    viewModelHome.isLogoutDialog.value = true
+                }
+                is AuthEvent.NavigateToRegistration -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    viewModelHome.isRegisterState.value = true
+                    viewModelHome.showAuthDialog.value = true
+                    viewModelHome.isLogoutDialog.value = false
+                }
+                is AuthEvent.NavigateToSignIn -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    viewModelHome.isRegisterState.value = false
+                    viewModelHome.showAuthDialog.value = true
+                    viewModelHome.isLogoutDialog.value = false
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.getSettings()
@@ -86,6 +120,8 @@ fun SettingsScreen(
                 settingsData.userSettingsData.size
         }
     }
+    
+
 
     SettingsRestartDialog(
         showDialog = showConfirmDeleteDialog,
@@ -321,6 +357,17 @@ fun SettingsScreen(
                 )
             }
 
+            // Разместить баннер
+            item {
+                SettingsMenuItem(
+                    icon = Icons.Default.Star,
+                    title = "Разместить баннер",
+                    onClick = {
+                        onAddBannerClick()
+                    }
+                )
+            }
+
             item {
                 SettingsMenuItem(
                     icon = if (isAuthorized) Icons.Default.Logout else Icons.Default.Login,
@@ -329,7 +376,9 @@ fun SettingsScreen(
                         if (isAuthorized) {
                             viewModelHome.showLogoutTariffDialog()
                         } else {
-                            viewModelHome.onAuthButtonClick()
+                            // Для гостя — сразу предлагаем регистрацию
+                            viewModelHome.isRegisterState.value = true
+                            viewModelHome.showAuthDialog.value = true
                         }
                     }
                 )
@@ -399,9 +448,6 @@ fun SettingsScreen(
              Text("Сохранить")
          }*/
 
-        // Показываем TariffDialog
-        ShowTariffDialog(viewModelHome, userRole)
-
         if (viewModelHome.showPaymentSheet.value) {
             PaymentBottomSheet(
                 viewModel = viewModelHome,
@@ -412,6 +458,11 @@ fun SettingsScreen(
                         .show()
                 }
             )
+        }
+
+        // Показываем TariffDialog
+        if (showAuthDialog) {
+            ShowTariffDialog(viewModelHome, userRole)
         }
     }
 }

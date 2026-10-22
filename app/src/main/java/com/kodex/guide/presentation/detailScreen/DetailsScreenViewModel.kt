@@ -6,10 +6,10 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kodex.guide.data.repository.BooksRepo_Impl
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.RatingData
+import com.kodex.guide.domain.repository.BooksRepo
 import com.kodex.guide.domain.usecase.GetRelatedBooksUseCase
 import com.kodex.guide.presentation.navigation.NavRoutes
 import com.kodex.guide.presentation.detailScreen.states.DetailsUiState
@@ -26,8 +26,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DetailsScreenViewModel @Inject constructor(
-    val booksRepo: BooksRepo_Impl,
-    private val getRelatedBooksUseCase: GetRelatedBooksUseCase   // ✅ НОВОЕ
+    val booksRepo: BooksRepo,
+    private val getRelatedBooksUseCase: GetRelatedBooksUseCase
 
 ) : ViewModel() {
     // ✅ НОВОЕ: похожие посты

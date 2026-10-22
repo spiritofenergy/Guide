@@ -40,6 +40,9 @@ class NavRoutes {
     object SettingsNavObject
 
     @Serializable
+    object AddBannerNavObject
+
+    @Serializable
     data class ParallaxNavObject(
         val bookId: String = "",
         val title: String = "",
@@ -63,6 +66,7 @@ class NavRoutes {
         val categoryIndex: BookCategories = BookCategories.OTHER,
         val imageUrl: String = "",
         val author: String = "",
+        val authorEmail: String = "",
         val timestamp: Long = System.currentTimeMillis(),
         val isFaves: Boolean = false,
         val ratingsList: List<Int> = emptyList(),

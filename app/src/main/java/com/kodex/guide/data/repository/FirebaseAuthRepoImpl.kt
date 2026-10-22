@@ -73,12 +73,8 @@ class FirebaseAuthRepoImpl @Inject constructor(
             .collection("users")
             .document(user.uid)
             .set(user.copy(role = UserRole.USER).toDTO())
-            .addOnSuccessListener {
-                Log.d("MyLog", "Профиль создан для ${user.uid}")
-            }
-            .addOnFailureListener { e ->
-                Log.e("MyLog", "Ошибка создания профиля: ${e.message}")
-            }
+            .await()
+        Log.d("MyLog", "Профиль создан для ${user.uid}")
     }
 
     override suspend fun getUserRole(uid: String): UserRole {

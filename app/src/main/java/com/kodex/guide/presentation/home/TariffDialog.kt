@@ -2,6 +2,7 @@ package com.kodex.guide.presentation.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +47,96 @@ fun TariffDialog(
     onPremiumClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
+    var showBusinessDetails by remember { mutableStateOf(false) }
+    var showPremiumDetails by remember { mutableStateOf(false) }
+    
+    if (showBusinessDetails) {
+        AlertDialog(
+            onDismissRequest = { showBusinessDetails = false },
+            title = {
+                Text(
+                    text = "Тариф «Бизнес»",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        text = "350 ₽ за 3 месяца",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Включает:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("• Публикация объявлений в основных категориях", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("• Повышение видимости объявлений", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("• Возможность указать контактные данные", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("• Поддержка пользователей", style = MaterialTheme.typography.bodyMedium)
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showBusinessDetails = false
+                    onBusinessClick()
+                }) {
+                    Text("Оплатить")
+                }
+            }
+        )
+    }
+    
+    if (showPremiumDetails) {
+        AlertDialog(
+            onDismissRequest = { showPremiumDetails = false },
+            title = {
+                Text(
+                    text = "Тариф «Премиум»",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        text = "2500 ₽ в год",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Включает всё из «Бизнес», а также:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("• Публикация во всех категориях (включая дорогие)", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("• Приоритетное размещение в выдаче", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("• Расширенная статистика просмотров", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("• Эксклюзивный значок профиля", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text("• Приоритетная поддержка 24/7", style = MaterialTheme.typography.bodyMedium)
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showPremiumDetails = false
+                    onPremiumClick()
+                }) {
+                    Text("Оплатить")
+                }
+            }
+        )
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -99,31 +194,31 @@ fun TariffDialog(
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = TextGray.copy(alpha = 0.4f))
                     ) {
-                        Text("Перейти на «$nextRoleName»")
+                        Text("«$nextRoleName»")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                // BUSINESS — зелёная кнопка
+                // BUSINESS — зелёная кнопка (сверху)
                 if (showBusinessButton) {
                     Button(
-                        onClick = onBusinessClick,
+                        onClick = { showBusinessDetails = true },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = GreenSea)
                     ) {
-                        Text("Перейти на «Бизнес»")
+                        Text("«Бизнес» 350 р за 3мес")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                // PREMIUM — фиолетовая кнопка
+                // PREMIUM — фиолетовая кнопка (внизу)
                 if (showPremiumButton) {
                     Button(
-                        onClick = onPremiumClick,
+                        onClick = { showPremiumDetails = true },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(containerColor = Premium)
                     ) {
-                        Text("Перейти на «$premiumRoleName»")
+                        Text("«$premiumRoleName» 2500 р в год")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }

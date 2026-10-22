@@ -1,6 +1,7 @@
 package com.kodex.guide.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.kodex.guide.data.mapper.toBookDTO
 import com.kodex.guide.data.source.remote.FirebaseBooksDataSource
 import com.kodex.guide.domain.model.Book
@@ -33,11 +34,13 @@ class MyPostsRepositoryImpl @Inject constructor(
     override suspend fun saveDraft(book: Book): Result<Book> = runCatching {
         withContext(Dispatchers.IO) {
             val uid = auth.uid ?: throw IllegalStateException("Нужен вход в аккаунт")
+            val email = auth.currentUser?.email ?: ""
             val key = book.key.ifEmpty { UUID.randomUUID().toString() }
             val currentRole = userRoleRepo.observeUserRole(uid).first()
             val saved = book.copy(
                 key = key,
                 authorUid = uid,
+                authorEmail = email,
                 isAuthor = true,
                 authorRole = currentRole.level,
                 isUploaded = false,
@@ -52,10 +55,12 @@ class MyPostsRepositoryImpl @Inject constructor(
     override suspend fun upload(book: Book): Result<Unit> = runCatching {
         withContext(Dispatchers.IO) {
             val uid = auth.uid ?: throw IllegalStateException("Нужен вход в аккаунт")
+            val email = auth.currentUser?.email ?: ""
             val currentRole = userRoleRepo.observeUserRole(uid).first()
             val published = book.copy(
                 key = book.key.ifEmpty { UUID.randomUUID().toString() },
                 authorUid = uid,
+                authorEmail = email,
                 isAuthor = true,
                 authorRole = currentRole.level,
                 isUploaded = true,

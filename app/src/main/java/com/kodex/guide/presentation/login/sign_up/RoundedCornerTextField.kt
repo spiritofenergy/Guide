@@ -2,7 +2,6 @@ package com.kodex.guide.presentation.login.sign_up
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,10 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kodex.guide.ui.theme.ButtonColor
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 @Composable
 fun RoundedCornerTextField (
     maxLines: Int = 1,

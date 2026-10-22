@@ -1,4 +1,4 @@
-package com.kodex.guide.presentation.details.parallaxScreen
+package com.kodex.guide.presentation.parallaxScreen
 
 import android.Manifest
 import android.content.Context

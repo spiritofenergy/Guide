@@ -94,17 +94,14 @@ class PreferenceDataSource @Inject constructor(@ApplicationContext
         pref.edit { putString(key, value) } }
     fun savePhone(key: String, value: String){
         pref.edit { putString(key, value) } }
-    fun savePassword(key: String, value: String){
-        pref.edit { putString(key, value) } }
-
     fun getEmail(key: String, defValue: String): String{
         return pref.getString(key, defValue)?: defValue }
     fun getName(key: String, defValue: String): String{
         return pref.getString(key, defValue)?: defValue }
     fun getPhone(key: String, defValue: String): String{
         return pref.getString(key, defValue)?: defValue }
-    fun getPassword(key: String, defValue: String): String{
-        return pref.getString(key, defValue)?: defValue
+    fun clearSavedPassword() {
+        pref.edit { remove(PASSWORD_KEY) }
     }
     // ===== ✅ НОВОЕ: кеш текущего профиля для DrawerHeader =====
     fun saveUser(user: User) {

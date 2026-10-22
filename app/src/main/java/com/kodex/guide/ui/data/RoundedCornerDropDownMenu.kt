@@ -1,4 +1,4 @@
-package com.kodex.guide.ui.addscreen.data
+package com.kodex.guide.ui.data
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

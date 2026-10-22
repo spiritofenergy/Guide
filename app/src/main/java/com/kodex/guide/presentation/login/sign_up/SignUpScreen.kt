@@ -20,9 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.kodex.bookmarketcompose.R
 import com.kodex.guide.presentation.navigation.NavRoutes
 import com.kodex.guide.presentation.login.LoginButton
+import com.kodex.guide.R
 
 @Composable
 fun SignUpScreen(
@@ -33,7 +33,6 @@ fun SignUpScreen(
     LaunchedEffect(key1 = Unit) {
         viewModel.getAccountState()
         viewModel.getName()
-        viewModel.getPassword()
         viewModel.getPhone()
         viewModel.getEmail()
     }
@@ -42,7 +41,6 @@ fun SignUpScreen(
             viewModel.saveLastEmail()
             viewModel.saveLastName()
             viewModel.saveLastPhone()
-            viewModel.saveLastPassword()
             viewModel.passwordState.value = ""
         }
     }
@@ -58,7 +56,7 @@ fun SignUpScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(46.dp),
+            .padding(40.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -118,7 +116,8 @@ fun SignUpScreen(
                 )
             }
             LoginButton(
-                text = stringResource(R.string.enter)
+                text = stringResource(R.string.create_account),
+                showLoadIndicator = viewModel.isLoading.value
             ) {
                 viewModel.signUp(
                     onSignUpSuccess = { navData ->

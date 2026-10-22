@@ -1,4 +1,4 @@
-package com.kodex.guide.presentation.details.parallaxScreen
+package com.kodex.guide.presentation.parallaxScreen
 
 
 import android.content.Intent
@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.presentation.components.ActionButton
 import com.kodex.guide.presentation.components.ArrowCircleButton
 import com.kodex.guide.presentation.components.DeliveryChip
@@ -225,10 +225,12 @@ fun MainContent(
                         icon = Icons.Default.Email,
                         label = "Email",
                         onClick = {
-                            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                data = Uri.parse("mailto:ooozeeya@yandex.ru")
+                            navObject.authorEmail.takeIf { it.isNotBlank() }?.let { email ->
+                                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                    data = Uri.parse("mailto:$email")
+                                }
+                                context.startActivity(intent)
                             }
-                            context.startActivity(intent)
                         }
                     )
                     ActionButton(

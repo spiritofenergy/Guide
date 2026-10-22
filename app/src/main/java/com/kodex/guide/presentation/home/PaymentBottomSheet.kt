@@ -53,7 +53,7 @@ fun PaymentBottomSheet(
     // ✅ Определяем, за что платим (desiredRole ставится в requestUpgrade / requestPremiumUpgrade)
     val targetRole = viewModel.desiredRole.value ?: UserRole.BUSINESS
     val targetRoleName = viewModel.getRoleDisplayName(targetRole)
-    val price = if (targetRole == UserRole.PREMIUM) "450 ₽ / месяц" else "150 ₽ / месяц"
+    val price = if (targetRole == UserRole.PREMIUM) "2500 ₽ в год" else "350 ₽ за 3 мес"
 
     val coroutineScope = rememberCoroutineScope()
     var cardNumber by remember { mutableStateOf("") }

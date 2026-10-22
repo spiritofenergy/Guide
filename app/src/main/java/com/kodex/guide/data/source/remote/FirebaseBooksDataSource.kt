@@ -3,10 +3,12 @@ package com.kodex.guide.data.source.remote
  import com.google.firebase.auth.FirebaseAuth
  import com.google.firebase.firestore.FirebaseFirestore
  import com.google.firebase.firestore.Query
+ import com.kodex.guide.data.mapper.toBook
  import com.kodex.guide.data.mapper.toFirebaseFields
  import com.kodex.guide.data.model.BookDTO
  import com.kodex.guide.data.model.BooksPageDTO
  import com.kodex.guide.data.model.RatingDataDTO
+ import com.kodex.guide.domain.model.Book
  import com.kodex.guide.domain.model.BookCategories
  import com.kodex.guide.data.source.remote.FirebaseConst.CATEGORY_INDEX
  import com.kodex.guide.data.source.remote.FirebaseConst.KEY
@@ -16,6 +18,10 @@ package com.kodex.guide.data.source.remote
  import com.kodex.guide.data.source.remote.FirebaseConst.RATING_DATA
  import com.kodex.guide.data.source.remote.FirebaseConst.SEARCH_TITLE
  import com.kodex.guide.domain.model.BookFilterState
+ import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.channels.Channel
+ import kotlinx.coroutines.flow.flow
  import kotlinx.coroutines.tasks.await
  import javax.inject.Singleton
 
@@ -146,6 +152,30 @@ class FirebaseBooksDataSource(
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    fun getMyPosts(uid: String): Flow<List<Book>> = flow {
+        try {
+            android.util.Log.d("FirebaseBooksDataSource", "=== GET MY POSTS ===")
+            android.util.Log.d("FirebaseBooksDataSource", "UID: $uid")
+            
+            val querySnapshot = fireStore.collection(POSTS)
+                .limit(100)
+                .get()
+                .await()
+            
+            android.util.Log.d("FirebaseBooksDataSource", "Всего документов: ${querySnapshot.size()}")
+            
+            val books = querySnapshot.toObjects(BookDTO::class.java)
+                .filter { it.authorUid == uid }
+                .map { it.toBook() }
+            
+            android.util.Log.d("FirebaseBooksDataSource", "Найдено моих: ${books.size} шт")
+            emit(books)
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseBooksDataSource", "Ошибка загрузки", e)
+            emit(emptyList())
         }
     }
 }

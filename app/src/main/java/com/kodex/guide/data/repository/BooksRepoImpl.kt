@@ -10,33 +10,40 @@ import com.kodex.guide.data.mapper.toDTO
 import com.kodex.guide.data.mapper.toRatingData
 import com.kodex.guide.data.source.remote.FirebaseBooksDataSource
 import com.kodex.guide.domain.model.Book
+import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.BookFilterState
 import com.kodex.guide.domain.model.RatingData
 import com.kodex.guide.domain.repository.BooksRepo
 import com.kodex.guide.presentation.home.BookFactoryPaging
-import kotlinx.coroutines.flow.Flow
+import com.kodex.guide.ui.db.MainDb
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 const val BASE_64 = true
-class BooksRepo_Impl @Inject constructor(
+class BooksRepoImpl @Inject constructor(
     private val dataSource: FirebaseBooksDataSource,
-    //private val storageDataSource: FireBaseStorageDataSource,
     private val bitmapEncoder: BitmapEncoder,
-    ): BooksRepo{
+    private val mainDb: MainDb
+): BooksRepo{
     override fun getBooks(favsKeysList: List<String>, bookFilter: BookFilterState): Flow<PagingData<Book>> {
         return Pager(
             config = PagingConfig(
-                pageSize = 16,
-                prefetchDistance = 3,
-                initialLoadSize = 26,
-            ),  
-            pagingSourceFactory = { BookFactoryPaging(
-                dataSource,
-                favsKeysList,
-                bookFilter,
+                pageSize = 26,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                BookFactoryPaging(
+                    dataSource = dataSource,
+                    keysFavsList = favsKeysList,
+                    bookFilter = bookFilter,
+                    mainDb = mainDb
                 )
             }
         ).flow
+    }
+
+    override fun getMyPostsLocal(uid: String): Flow<List<Book>> {
+        return mainDb.trackDao().observeMyPosts(uid)
     }
 
     override suspend fun deleteBook(book: Book): Result<Unit> {

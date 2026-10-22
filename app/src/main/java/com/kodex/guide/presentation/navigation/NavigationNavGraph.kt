@@ -18,19 +18,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.data.mapper.ParallaxImageCache
 import com.kodex.guide.data.mapper.toParallaxNavObject
 import com.kodex.guide.presentation.admin_panel.AdminPanelScreen
 import com.kodex.guide.presentation.admin_panel.ModerationScreen
+import com.kodex.guide.presentation.banners.BannerEditorScreen
 import com.kodex.guide.presentation.comments.CommentsScreen
-import com.kodex.guide.presentation.details.parallaxScreen.ParallaxScreen
 import com.kodex.guide.presentation.home.HomeScreen
 import com.kodex.guide.presentation.home.HomeViewModel
 import com.kodex.guide.presentation.login.LoginScreen
 import com.kodex.guide.presentation.login.sign_up.SignUpScreen
 import com.kodex.guide.presentation.myPosts.MyPostEditorScreen
 import com.kodex.guide.presentation.myPosts.MyPostsScreen
+import com.kodex.guide.presentation.parallaxScreen.ParallaxScreen
 import com.kodex.guide.presentation.settingsScreen.SettingsScreen
 
  @RequiresApi(Build.VERSION_CODES.O)
@@ -70,7 +71,10 @@ fun NavigationNavGraph(
         }
         composable<NavRoutes.SingUpNavObject> {
             SignUpScreen() { navData ->
-                navController.navigate(navData)
+                navController.navigate(navData) {
+                    popUpTo<NavRoutes.SingUpNavObject> { inclusive = true }
+                    launchSingleTop = true
+                }
             }
         }
 
@@ -85,6 +89,14 @@ fun NavigationNavGraph(
                     navController.navigate(
                         place.toParallaxNavObject()
                     )
+                },
+
+                onBannerClick = { postKey ->
+                    if (postKey.isNotEmpty()) {
+                        navController.navigate(
+                            NavRoutes.ParallaxNavObject(bookId = postKey)
+                        )
+                    }
                 },
 
                 onBookEditClick = { book ->
@@ -108,7 +120,14 @@ fun NavigationNavGraph(
                        uid = "", email = ""))
                },
                 onAddClick = {
-                    navController.navigate(NavRoutes.MyPostEditorNavObject())
+                    // Проверка авторизации — если гость, предлагаем регистрацию
+                    if (homeViewModel.isAuthorized.value) {
+                        navController.navigate(NavRoutes.MyPostEditorNavObject())
+                    } else {
+                        // Показываем диалог тарифа с кнопкой регистрации
+                        homeViewModel.isRegisterState.value = true
+                        homeViewModel.showAuthDialog.value = true
+                    }
                 },
                 onRegistrationNeeded = {
                     // ✅ Запуск регистрации
@@ -185,12 +204,20 @@ fun NavigationNavGraph(
                 onAddPostClick = {
                     navController.navigate(NavRoutes.MyPostEditorNavObject(bookKey = ""))
                 },
+                onAddBannerClick = {
+                    navController.navigate(NavRoutes.AddBannerNavObject)
+                },
                 onCloseAccountClick = {
                     navController.popBackStack(
                         NavRoutes.LoginNavObject,
                         inclusive = false
                     )
                 }
+            )
+        }
+        composable<NavRoutes.AddBannerNavObject> {
+            BannerEditorScreen(
+                onBack = { navController.popBackStack() }
             )
         }
         composable<NavRoutes.ParallaxNavObject> { navEntry ->

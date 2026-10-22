@@ -15,11 +15,11 @@ plugins {
 }
 
 android {
-    namespace = "com.kodex.bookmarketcompose"
+    namespace = "com.kodex.guide"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.kodex.bookmarketcompose"
+        applicationId = "com.kodex.guide"
         minSdk = 24
         targetSdk = 36
         versionCode = 5
@@ -64,7 +64,7 @@ configurations.all {
 }
 
 dependencies {
-implementation(libs.room.compiler)
+
     implementation(libs.firebase.ai)
     // ✅ ТЕСТЫ
   /*  testImplementation(libs.junit)
@@ -85,7 +85,6 @@ implementation(libs.room.compiler)
     implementation(libs.androidx.paging)
 
     implementation(libs.hilt.navigation.compose)
-    implementation(libs.androidx.espresso.core)
    // implementation(libs.androidx.room.common.jvm)
     //implementation(libs.androidx.room3.runtime)
 
@@ -93,8 +92,6 @@ implementation(libs.room.compiler)
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.androidx.compose.foundation)
-    ksp(libs.hilt.navigation.compose.compiler)
-
 
     implementation(libs.android.hilt)
     ksp(libs.android.hilt.compiler)
@@ -118,13 +115,11 @@ implementation(libs.room.compiler)
     implementation(libs.firebase.database)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
-    implementation(libs.firebase.storage)
 
   //  testImplementation(libs.junit)
     implementation(libs.coil.compose)
 
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)

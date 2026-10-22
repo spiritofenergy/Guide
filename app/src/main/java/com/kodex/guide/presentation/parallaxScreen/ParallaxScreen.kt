@@ -1,4 +1,4 @@
-package com.kodex.guide.presentation.details.parallaxScreen
+package com.kodex.guide.presentation.parallaxScreen
 
 
 import android.content.Intent
@@ -46,7 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.kodex.guide.presentation.navigation.NavRoutes
 import com.kodex.guide.presentation.detailScreen.DetailsScreenViewModel
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.data.service.WorkingHoursServiceImpl

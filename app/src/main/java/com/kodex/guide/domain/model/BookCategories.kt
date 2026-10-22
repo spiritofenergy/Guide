@@ -11,8 +11,8 @@ enum class BookCategories(
     AUTO(5),          // "Авто"
     ELECTRONICS(6),   // "Электроника"
     ENTERTAINMENTS(7),// "Развлечения"
-    NEWS(8),
-    OTHER(9),
+    NEWS(8),            // "Новости"
+    OTHER(9),           // "Другое"
     CONSTRUCTION(10), // "Строительство"
     FOOD(11),         // "Продукты питания"
     ALL(12);

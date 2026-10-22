@@ -16,10 +16,12 @@ fun LoginButton(
     modifier: Modifier = Modifier,
     text: String,
     showLoadIndicator: Boolean = false,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
-    Button(onClick = {
-        onClick()},
+    Button(
+        onClick = onClick,
+        enabled = enabled && !showLoadIndicator,
         modifier = modifier.fillMaxWidth(0.5f),
         colors = ButtonDefaults.buttonColors(
             containerColor = ButtonColor

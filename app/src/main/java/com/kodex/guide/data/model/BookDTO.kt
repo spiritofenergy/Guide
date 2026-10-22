@@ -34,6 +34,7 @@ data class BookDTO(
     val latitude: Any? = null,
     val longitude: Any? = null,
     val authorUid: String = "",        // ✅ владелец (uid из Firebase Auth)
+    val authorEmail: String = "",      // ✅ email автора
     val isUploaded: Boolean = false,   // ✅ опубликован ли в Firebase
     val categoryName: String? = null,  // ✅ для обратной совместимости с Firebase
 )

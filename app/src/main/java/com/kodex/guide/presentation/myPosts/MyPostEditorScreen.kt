@@ -1,13 +1,11 @@
 package com.kodex.guide.presentation.myPosts
 
 import android.widget.Toast
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,7 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import coil.compose.AsyncImage
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.PostEditorState
 import com.kodex.guide.ui.theme.Orange
@@ -44,6 +43,7 @@ import java.io.File
 @Composable
 fun MyPostEditorScreen(
     viewModel: MyPostsViewModel = hiltViewModel(),
+    aiViewModel: AiDescriptionViewModel = hiltViewModel(),
     bookKey: String,
     onSaved: () -> Unit,
     onBack: () -> Unit
@@ -100,6 +100,12 @@ fun MyPostEditorScreen(
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    // AI генерация
+    val isGenerating by aiViewModel.isGenerating.collectAsStateWithLifecycle()
+    val aiDescription by aiViewModel.descriptionFlow.collectAsStateWithLifecycle()
+    val aiGenerationError by aiViewModel.errorMessage.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collectLatest { event ->
@@ -270,6 +276,52 @@ fun MyPostEditorScreen(
                 singleLine = true
             )
 
+            CategoryDropdown(
+                category,
+                categoryExpanded,
+                categoryNames,
+                onCategoryChange = { category = it; categoryExpanded = false },
+                onExpandedChange = { categoryExpanded = it })
+
+            // Кнопка AI-генерации описания
+            if (title.isNotBlank()) {
+                Button(
+                    onClick = {
+                        aiViewModel.generate(
+                            title = title,
+                            imageUri = imageUri,
+                            category = categoryNames.getOrNull(category.id) ?: ""
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isGenerating,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ButtonColorBlue
+                    )
+                ) {
+                    Icon(
+                        Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    if (isGenerating) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(if (isGenerating) "Генерация..." else "Сгенерировать описание с AI")
+                }
+            }
+
+            // Применяем сгенерированное описание
+            LaunchedEffect(aiDescription) {
+                aiDescription?.let { description = it }
+            }
+
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it.capitalizeFirst() },
@@ -277,7 +329,17 @@ fun MyPostEditorScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
-                maxLines = 5
+                maxLines = 5,
+                supportingText = {
+                    if (isGenerating) {
+                        Text("AI генерирует описание...", color = MaterialTheme.colorScheme.primary)
+                    } else if (aiGenerationError != null) {
+                        Text(
+                            aiGenerationError.orEmpty(),
+                            color = Orange
+                        )
+                    }
+                }
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -296,13 +358,6 @@ fun MyPostEditorScreen(
                     singleLine = true
                 )
             }
-
-            CategoryDropdown(
-                category,
-                categoryExpanded,
-                categoryNames,
-                onCategoryChange = { category = it; categoryExpanded = false },
-                onExpandedChange = { categoryExpanded = it })
 
             AddressSection(
                 village,

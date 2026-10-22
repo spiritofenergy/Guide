@@ -38,6 +38,7 @@ import com.kodex.guide.domain.tarif.TariffPolicy
 import com.kodex.guide.domain.tarif.UpgradeDecision
 import com.kodex.guide.domain.tarif.UpgradeManager
 import com.kodex.guide.domain.usecase.ObserveSavedKeysUseCase
+import com.kodex.guide.domain.repository.BannerRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -84,7 +85,16 @@ class HomeViewModel @Inject constructor(
     private val authStateProvider: AuthStateProvider,
     private val userAccessRepository: UserAccessRepoImpl,
     private val observeSavedKeysUseCase: ObserveSavedKeysUseCase,
-    ) : ViewModel() {
+    private val bannerRepo: BannerRepo
+) : ViewModel() {
+
+    val activeBanners = bannerRepo.observeActiveBanners()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+    
     val showPaymentSheet = mutableStateOf(false)
     val paymentInProgress = mutableStateOf(false)
     val minPriceValue = mutableFloatStateOf(0f)
@@ -276,7 +286,10 @@ class HomeViewModel @Inject constructor(
                 Log.d("MyLog", "Уже максимальный тариф")
             }
             is UpgradeDecision.AuthRequired -> navigateToAuth()
-            is UpgradeDecision.PaymentRequired -> showPaymentSheet.value = true
+            is UpgradeDecision.PaymentRequired -> {
+                desiredRole.value = UserRole.PREMIUM
+                showPaymentSheet.value = true
+            }
         }
     }
 
@@ -345,6 +358,11 @@ class HomeViewModel @Inject constructor(
 
     init {
         Log.d("ROLE_DEBUG", "=== init START ===")
+        // Загружаем баннеры сразу (будут из Room мгновенно)
+        viewModelScope.launch {
+            bannerRepo.loadBannersIfNeeded()
+        }
+        
         Log.d("ROLE_DEBUG", "Firebase.auth.currentUser?.uid = ${Firebase.auth.currentUser?.uid}")
         Log.d("ROLE_DEBUG", "authStateProvider.currentUser()?.uid = ${authStateProvider.currentUser()?.uid}")
         Log.d("ROLE_DEBUG", "cached user = ${preferenceDataSource.getUser()}")

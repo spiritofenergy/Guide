@@ -9,11 +9,11 @@ import kotlinx.coroutines.flow.Flow
 
 interface  BooksRepo {
     fun getBooks(favsKeysList: List<String>, bookFilter: BookFilterState): Flow<PagingData<Book>>
+    fun getMyPostsLocal(uid: String): Flow<List<Book>> // из Room/Paging (локально)
     suspend fun deleteBook(book: Book): Result<Unit>
     suspend fun saveBook(book: Book, uri: Uri?): Result<Unit>
     suspend fun submitUserRating(ratingData: RatingData, bookId: String): Result<Unit>
     suspend fun deleteComment(uid: String): Result<Unit>
     suspend fun getBookComments(bookId: String): Result<List<RatingData>>
     suspend fun getUserRating(bookId: String): Result<RatingData?>
-
-    }
+}

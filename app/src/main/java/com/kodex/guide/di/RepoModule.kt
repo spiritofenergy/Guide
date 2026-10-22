@@ -1,6 +1,6 @@
 package com.kodex.guide.di
 
-import com.kodex.guide.data.repository.BooksRepo_Impl
+import com.kodex.guide.data.repository.BooksRepoImpl
 import com.kodex.guide.data.repository.FavoritesFirebaseRepoImpl
 import com.kodex.guide.data.repository.FirebaseAuthRepoImpl
 import com.kodex.guide.data.repository.ModerationRepoImpl
@@ -94,7 +94,7 @@ abstract class RepoModule {
     @Binds
     @Singleton
     abstract fun bindBooksPepo(
-        booksRepoImpl: BooksRepo_Impl
+        booksRepoImpl: BooksRepoImpl
     ): BooksRepo
 
     @Binds

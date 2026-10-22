@@ -1,4 +1,4 @@
-package com.kodex.guide.presentation.details.parallaxScreen
+package com.kodex.guide.presentation.parallaxScreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

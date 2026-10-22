@@ -1,20 +1,23 @@
 package com.kodex.guide.presentation.home
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DrawerValue
@@ -32,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -53,17 +58,18 @@ import androidx.paging.LoadState
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
+import com.kodex.guide.domain.model.Banner
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
-import com.kodex.guide.domain.model.UserRole
-import com.kodex.guide.presentation.home.CategoryCarousel
-import com.kodex.guide.presentation.home.ShowTariffDialog
+import com.kodex.guide.presentation.banners.BannerEditorScreen
+import com.kodex.guide.presentation.home.BannerSlider
 import com.kodex.guide.presentation.navigation.NavRoutes
 import com.kodex.guide.ui.dialods.FilterDialog
 import com.kodex.guide.ui.theme.Orange
 import kotlinx.coroutines.launch
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -83,7 +89,8 @@ fun HomeScreen(
     onRegistrationNeeded: () -> Unit,
     onEnter: () -> Unit,
     showMyPosts: Boolean = true,
-    onMyPostsClick: () -> Unit = {}
+    onMyPostsClick: () -> Unit = {},
+    onBannerClick: (String) -> Unit = {}
 
     ) {
     // Подписываемся на роль пользователя
@@ -111,18 +118,30 @@ fun HomeScreen(
     var refreshStarted by remember { mutableStateOf(false) }
     var hasCompletedBooksRequest by remember { mutableStateOf(false) }
     var isTopBarCollapsed by remember { mutableStateOf(false) }
+    var bannerOffset by remember { mutableFloatStateOf(0f) }
     val topBarScrollConnection = remember {
         object : NestedScrollConnection {
+            override fun onPreScroll(
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                // При скролле вверх баннер уезжает наверх
+                if (available.y < 0) {
+                    bannerOffset += available.y
+                    bannerOffset = bannerOffset.coerceAtMost(0f)
+                }
+                return Offset.Zero
+            }
+
             override fun onPostScroll(
                 consumed: Offset,
                 available: Offset,
                 source: NestedScrollSource
             ): Offset {
-                val scrollDelta = consumed.y + available.y
-                if (scrollDelta < -2f) {
-                    isTopBarCollapsed = true
-                } else if (scrollDelta > 2f) {
-                    isTopBarCollapsed = false
+                // При скролле вниз баннер возвращается
+                if (available.y > 0) {
+                    bannerOffset += available.y
+                    bannerOffset = bannerOffset.coerceAtLeast(-150f) // высота баннера
                 }
                 return Offset.Zero
             }
@@ -354,13 +373,16 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .nestedScroll(topBarScrollConnection)
             ) {
-                CategoryCarousel(
+                /*CategoryCarousel(
                     selectedCategory = viewModel.categoryState.value,
                     onCategoryClick = { category ->
                         viewModel.onCategorySelected(category)
                     }
-                )
+                )*/
+
+                Spacer(modifier = Modifier.height(6.dp))
                 if (bookToDelete != null) {
                     DeleteBookDialog(
                         onDismiss = { viewModel.onDeleteDialogDismissed() },
@@ -368,6 +390,12 @@ fun HomeScreen(
                     )
                 }
 
+                CategoryCarousel(
+                                            selectedCategory = viewModel.categoryState.value,
+                                            onCategoryClick = { category ->
+                                                viewModel.onCategorySelected(category)
+                                            }
+                                        )
                 PullToRefreshBox(
                     isRefreshing = books.loadState.refresh is LoadState.Loading,
                     onRefresh = {
@@ -480,18 +508,10 @@ fun HomeScreen(
                                             book = book,
                                             ratings = ratingsByBook[book.key] ?: book.ratingsList,
                                             isSaved = isSaved,
-                                            onBookClick = { bk ->
-                                                onBookClick(bk)
-                                            },
-                                            onEditClick = {
-                                                onBookEditClick(it)
-                                            },
-                                            onDeleteClick = { bookToDelete ->
-                                                viewModel.onDeleteRequested(bookToDelete)
-                                            },
-                                            onSavedRoomClick = {
-                                                savedViewModel.toggle(book)
-                                            }
+                                            onBookClick = { bk -> onBookClick(bk) },
+                                            onEditClick = { onBookEditClick(it) },
+                                            onDeleteClick = { bookToDelete -> viewModel.onDeleteRequested(bookToDelete) },
+                                            onSavedRoomClick = { savedViewModel.toggle(book) }
                                         )
                                         Spacer(Modifier.padding(5.dp))
                                     }
@@ -504,6 +524,36 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .fillMaxSize()
                             ) {
+                                item(span = StaggeredGridItemSpan.FullLine) {
+                                    Column {
+                                       /* CategoryCarousel(
+                                            selectedCategory = viewModel.categoryState.value,
+                                            onCategoryClick = { category ->
+                                                viewModel.onCategorySelected(category)
+                                            }
+                                        )*/
+                                        // Слайдер баннеров
+                                        val banners by viewModel.activeBanners.collectAsStateWithLifecycle()
+                                        android.util.Log.d("HomeScreen", "Баннеров загружено: ${banners.size}")
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .heightIn(min = 0.dp, max = 200.dp)
+                                            /* .graphicsLayer {
+                                                 translationY = bannerOffset
+                                             }*/
+                                        ) {
+                                            BannerSlider(
+                                                banners = banners,
+                                                onBannerClick = { banner ->
+                                                    android.util.Log.d("HomeScreen", "Клик по баннеру: ${banner.postKey}")
+                                                    onBannerClick(banner.postKey)
+                                                }
+                                            )
+                                        }
+                                       // Spacer(modifier = Modifier.height(2.dp))
+                                    }
+                                }
                                 items(count = books.itemCount) { index ->
                                     val book = books[index]
                                     if (book != null) {

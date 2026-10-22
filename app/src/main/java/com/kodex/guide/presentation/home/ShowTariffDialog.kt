@@ -20,6 +20,8 @@ fun ShowTariffDialog(
     if (showAuthDialog) {
         val nextRole = viewModel.getNextRole(userRole)
         val nextRequiresPayment = nextRole?.let { viewModel.requiresPayment(it) } ?: false
+        val businessRequiresPayment = viewModel.requiresPayment(UserRole.BUSINESS)
+        val premiumRequiresPayment = viewModel.requiresPayment(UserRole.PREMIUM)
 
         TariffDialog(
             currentRoleName = viewModel.getRoleDisplayName(userRole),
@@ -27,8 +29,8 @@ fun ShowTariffDialog(
             premiumRoleName = viewModel.getRoleDisplayName(UserRole.PREMIUM),
             nextRequiresPayment = nextRequiresPayment,
             showNextButton = nextRole != null && !nextRequiresPayment,
-            showBusinessButton = nextRole == UserRole.BUSINESS && nextRequiresPayment,
-            showPremiumButton = nextRole == UserRole.PREMIUM && nextRequiresPayment,
+            showBusinessButton = (nextRole == UserRole.BUSINESS || userRole == UserRole.USER || userRole == UserRole.ANONYMOUS) && businessRequiresPayment,
+            showPremiumButton = userRole != UserRole.PREMIUM && userRole != UserRole.ADMIN && premiumRequiresPayment,
             showGuestButton = userRole == UserRole.USER ||
                     userRole == UserRole.BUSINESS ||
                     userRole == UserRole.PREMIUM ||
