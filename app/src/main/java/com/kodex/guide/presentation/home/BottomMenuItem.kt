@@ -1,6 +1,6 @@
 package com.kodex.guide.presentation.home
 
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 
 
 sealed class BottomMenuItem(

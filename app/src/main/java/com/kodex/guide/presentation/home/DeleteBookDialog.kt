@@ -2,7 +2,7 @@ package com.kodex.guide.presentation.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.ui.dialods.SettingsRestartDialog
 
 @Composable

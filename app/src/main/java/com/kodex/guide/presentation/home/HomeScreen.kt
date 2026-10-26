@@ -53,10 +53,11 @@ import androidx.paging.LoadState
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.UserRole
+import com.kodex.guide.presentation.banners.BannerSlider
 import com.kodex.guide.presentation.home.CategoryCarousel
 import com.kodex.guide.presentation.home.ShowTariffDialog
 import com.kodex.guide.presentation.navigation.NavRoutes
@@ -504,6 +505,19 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .fillMaxSize()
                             ) {
+                                // ✅ Баннер слайдер
+                                item(span = androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan.FullLine) {
+                                    val banners by viewModel.activeBanners.collectAsStateWithLifecycle()
+                                    if (banners.isNotEmpty()) {
+                                        BannerSlider(
+                                            banners = banners,
+                                            onBannerClick = { book ->
+                                                onBookClick(book)
+                                            }
+                                        )
+                                    }
+                                }
+                                
                                 items(count = books.itemCount) { index ->
                                     val book = books[index]
                                     if (book != null) {

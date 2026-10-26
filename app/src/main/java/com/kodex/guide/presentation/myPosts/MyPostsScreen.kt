@@ -58,7 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kodex.guide.domain.model.Book
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.ui.theme.ButtonColorBlue
 import com.kodex.guide.ui.theme.Orange
 import kotlinx.coroutines.flow.collectLatest

@@ -26,7 +26,6 @@ class FirebaseBooksDataSource(
 
     ) {
     suspend fun nextPage(
-        keysFavesList: List<String>,
         pageSize: Long,
         currentKey: String?,
         bookFilter: BookFilterState,
@@ -64,13 +63,9 @@ class FirebaseBooksDataSource(
         }
         val querySnapshot = query.get().await()
         val books = querySnapshot.toObjects(BookDTO::class.java)
-        val updatedBooks = books.map {
-            if (keysFavesList.contains(it.key)) {
-                it.copy(isFavorite = true)
-            } else {
-                it
-            }
-        }
+        val updatedBooks = books
+
+
         return BooksPageDTO(updatedBooks, books.lastOrNull()?.title)
     }
 

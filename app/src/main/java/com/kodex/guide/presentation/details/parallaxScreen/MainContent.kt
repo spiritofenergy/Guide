@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.presentation.components.ActionButton
 import com.kodex.guide.presentation.components.ArrowCircleButton
 import com.kodex.guide.presentation.components.DeliveryChip

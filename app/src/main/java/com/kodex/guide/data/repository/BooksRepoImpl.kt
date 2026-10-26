@@ -14,12 +14,15 @@ import com.kodex.guide.domain.model.BookFilterState
 import com.kodex.guide.domain.model.RatingData
 import com.kodex.guide.domain.repository.BooksRepo
 import com.kodex.guide.presentation.home.BookFactoryPaging
+import com.kodex.guide.ui.db.RoomDao
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 const val BASE_64 = true
 class BooksRepo_Impl @Inject constructor(
     private val dataSource: FirebaseBooksDataSource,
+    private val dao: RoomDao,
     //private val storageDataSource: FireBaseStorageDataSource,
     private val bitmapEncoder: BitmapEncoder,
     ): BooksRepo{
@@ -28,12 +31,12 @@ class BooksRepo_Impl @Inject constructor(
             config = PagingConfig(
                 pageSize = 16,
                 prefetchDistance = 3,
-                initialLoadSize = 26,
+                initialLoadSize = 48,
             ),  
             pagingSourceFactory = { BookFactoryPaging(
                 dataSource,
-                favsKeysList,
                 bookFilter,
+                dao  // ✅ Передаю DAO для сохранения
                 )
             }
         ).flow

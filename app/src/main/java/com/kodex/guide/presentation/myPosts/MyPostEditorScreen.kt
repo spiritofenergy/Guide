@@ -32,8 +32,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import coil.compose.AsyncImage
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.domain.model.BookCategories
+import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.PostEditorState
 import com.kodex.guide.ui.theme.Orange
 import com.kodex.guide.presentation.components.ActionSheetButton
@@ -95,6 +96,19 @@ fun MyPostEditorScreen(
     var location by remember { mutableStateOf(false) }
     var publishPeriod by remember { mutableStateOf(1) }
     var publishPeriodExpanded by remember { mutableStateOf(false) }
+    
+    // Баннер-поля
+    var isBanner by remember { mutableStateOf(false) }
+    var bannerTextTopLeft by remember { mutableStateOf("") }
+    var bannerTextTopRight by remember { mutableStateOf("") }
+    var bannerTextBottomLeft by remember { mutableStateOf("") }
+    var bannerTextBottomRight by remember { mutableStateOf("") }
+    var bannerPhone by remember { mutableStateOf("") }
+    var bannerPublishDate by remember { mutableStateOf(0L) }
+    var bannerExpireDate by remember { mutableStateOf(0L) }
+    var bannerCategoryIndex by remember { mutableStateOf(0) }
+    var bannerCategoryExpanded by remember { mutableStateOf(false) }
+    
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var existingImageUrl by remember { mutableStateOf("") }
 
@@ -151,6 +165,15 @@ fun MyPostEditorScreen(
             delivery = b.delivery; payment = b.payment; location = b.location
             publishPeriod = b.publishPeriod
             existingImageUrl = b.imageUrl
+            
+            // Баннер-поля
+            isBanner = b.isBanner
+            bannerTextTopLeft = b.bannerTextTopLeft
+            bannerTextTopRight = b.bannerTextTopRight
+            bannerTextBottomLeft = b.bannerTextBottomLeft
+            bannerTextBottomRight = b.bannerTextBottomRight
+            bannerPublishDate = b.bannerPublishDate
+            bannerExpireDate = b.bannerExpireDate
         }
     }
 
@@ -169,6 +192,15 @@ fun MyPostEditorScreen(
         payment,
         location,
         publishPeriod,
+        isBanner,
+        bannerTextTopLeft,
+        bannerTextTopRight,
+        bannerTextBottomLeft,
+        bannerTextBottomRight,
+        bannerPhone,
+        bannerPublishDate,
+        bannerExpireDate,
+        bannerCategoryIndex,
         existingImageUrl
     ) {
         if (bookKey.isEmpty()) {
@@ -325,6 +357,27 @@ fun MyPostEditorScreen(
                 publishPeriodNames,
                 onPeriodChange = { publishPeriod = it; publishPeriodExpanded = false },
                 onExpandedChange = { publishPeriodExpanded = it })
+            
+            // Секция баннера
+            BannerSection(
+                isBanner = isBanner,
+                onIsBannerChange = { isBanner = it },
+                bannerTextTopLeft = bannerTextTopLeft,
+                onBannerTextTopLeftChange = { bannerTextTopLeft = it },
+                bannerTextTopRight = bannerTextTopRight,
+                onBannerTextTopRightChange = { bannerTextTopRight = it },
+                bannerTextBottomLeft = bannerTextBottomLeft,
+                onBannerTextBottomLeftChange = { bannerTextBottomLeft = it },
+                bannerTextBottomRight = bannerTextBottomRight,
+                onBannerTextBottomRightChange = { bannerTextBottomRight = it },
+                bannerPhone = bannerPhone,
+                onBannerPhoneChange = { bannerPhone = it },
+                bannerCategoryIndex = bannerCategoryIndex,
+                onBannerCategoryIndexChange = { bannerCategoryIndex = it; bannerCategoryExpanded = false },
+                bannerCategoryExpanded = bannerCategoryExpanded,
+                onBannerCategoryExpandedChange = { bannerCategoryExpanded = it },
+                bannerCategoryNames = stringArrayResource(id = R.array.category_add)
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -352,7 +405,17 @@ fun MyPostEditorScreen(
                         location = location,
                         publishPeriod = publishPeriod,
                         imageUri = imageUri,
-                        existingImageUrl = existingImageUrl
+                        existingImageUrl = existingImageUrl,
+                        // Баннер-поля
+                        isBanner = isBanner,
+                        bannerTextTopLeft = bannerTextTopLeft,
+                        bannerTextTopRight = bannerTextTopRight,
+                        bannerTextBottomLeft = bannerTextBottomLeft,
+                        bannerTextBottomRight = bannerTextBottomRight,
+                        bannerPhone = bannerPhone,
+                        bannerPublishDate = bannerPublishDate,
+                        bannerExpireDate = bannerExpireDate,
+                        bannerCategoryIndex = bannerCategoryIndex
                     )
                 }
 
@@ -390,8 +453,146 @@ fun MyPostEditorScreen(
     }
 }
 
+// Секция настройки баннера
+@Composable
+fun BannerSection(
+    isBanner: Boolean,
+    onIsBannerChange: (Boolean) -> Unit,
+    bannerTextTopLeft: String,
+    onBannerTextTopLeftChange: (String) -> Unit,
+    bannerTextTopRight: String,
+    onBannerTextTopRightChange: (String) -> Unit,
+    bannerTextBottomLeft: String,
+    onBannerTextBottomLeftChange: (String) -> Unit,
+    bannerTextBottomRight: String,
+    onBannerTextBottomRightChange: (String) -> Unit,
+    bannerPhone: String,
+    onBannerPhoneChange: (String) -> Unit,
+    bannerCategoryIndex: Int,
+    onBannerCategoryIndexChange: (Int) -> Unit,
+    bannerCategoryExpanded: Boolean,
+    onBannerCategoryExpandedChange: (Boolean) -> Unit,
+    bannerCategoryNames: Array<String>
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isBanner) ButtonColorBlue.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            // Переключатель баннера
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Режим баннера",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (isBanner) ButtonColorBlue else MaterialTheme.colorScheme.onSurface
+                )
+                Switch(
+                    checked = isBanner,
+                    onCheckedChange = onIsBannerChange,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = ButtonColorBlue,
+                        checkedTrackColor = ButtonColorBlue.copy(alpha = 0.3f)
+                    )
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Поля баннера (показываем только если включен)
+            if (isBanner) {
+                OutlinedTextField(
+                    value = bannerTextTopLeft,
+                    onValueChange = onBannerTextTopLeftChange,
+                    label = { Text("Слева сверху") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                OutlinedTextField(
+                    value = bannerTextTopRight,
+                    onValueChange = onBannerTextTopRightChange,
+                    label = { Text("Справа сверху") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                OutlinedTextField(
+                    value = bannerTextBottomLeft,
+                    onValueChange = onBannerTextBottomLeftChange,
+                    label = { Text("Слева снизу") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                OutlinedTextField(
+                    value = bannerTextBottomRight,
+                    onValueChange = onBannerTextBottomRightChange,
+                    label = { Text("Справа снизу") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                OutlinedTextField(
+                    value = bannerPhone,
+                    onValueChange = onBannerPhoneChange,
+                    label = { Text("Телефон") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                // Категория баннера
+                BannerCategoryDropdown(
+                    bannerCategoryIndex,
+                    bannerCategoryExpanded,
+                    bannerCategoryNames,
+                    onBannerCategoryIndexChange,
+                    onBannerCategoryExpandedChange
+                )
+            }
+        }
+    }
+}
 
-// Вспомогательный компонент для выпадающего списка
+// Выпадающий список категории баннера
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BannerCategoryDropdown(
+    categoryIndex: Int,
+    expanded: Boolean,
+    names: Array<String>,
+    onCategoryChange: (Int) -> Unit,
+    onExpandedChange: (Boolean) -> Unit
+) {
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = onExpandedChange) {
+        OutlinedTextField(
+            value = names.getOrNull(categoryIndex) ?: names.first(),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Категория баннера") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }) {
+            names.forEachIndexed { index, name ->
+                DropdownMenuItem(text = { Text(name) }, onClick = { onCategoryChange(index) })
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDropdown(

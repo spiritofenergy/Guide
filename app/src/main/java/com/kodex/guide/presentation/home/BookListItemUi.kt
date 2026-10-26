@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.UserRole
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.ui.theme.BoxFilter
 import com.kodex.guide.ui.theme.GreenSea
 import com.kodex.guide.ui.theme.Orange
