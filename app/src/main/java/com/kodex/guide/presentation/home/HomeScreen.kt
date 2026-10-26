@@ -2,6 +2,7 @@ package com.kodex.guide.presentation.home
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -45,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -59,11 +59,15 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.kodex.guide.R
-import com.kodex.guide.domain.model.Banner
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
-import com.kodex.guide.presentation.banners.BannerEditorScreen
-import com.kodex.guide.presentation.home.BannerSlider
+import com.kodex.guide.presentation.banners.BannerSlider
+import com.kodex.guide.presentation.navigation.BottomMenu
+import com.kodex.guide.presentation.navigation.BottomMenuItem
+import com.kodex.guide.presentation.navigation.CategoryCarousel
+import com.kodex.guide.presentation.navigation.DrawerBody
+import com.kodex.guide.presentation.navigation.DrawerHeader
+import com.kodex.guide.presentation.navigation.MainTopBar
 import com.kodex.guide.presentation.navigation.NavRoutes
 import com.kodex.guide.ui.dialods.FilterDialog
 import com.kodex.guide.ui.theme.Orange
@@ -71,7 +75,7 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable
+ @Composable
 fun HomeScreen(
     //savedViewModel: SavedPostsViewModel = hiltViewModel(),
     viewModel: HomeViewModel = hiltViewModel(),
@@ -90,6 +94,7 @@ fun HomeScreen(
     onEnter: () -> Unit,
     showMyPosts: Boolean = true,
     onMyPostsClick: () -> Unit = {},
+    onManageBannersClick: () -> Unit = {},
     onBannerClick: (String) -> Unit = {}
 
     ) {
@@ -265,6 +270,10 @@ fun HomeScreen(
                     showMyPosts = showMyPosts,
                     onAdminClick = onAdminClick,
                     onAddBookClick = onAddClick,
+                    onManageBannersClick = {
+                        onManageBannersClick()
+                        coroutineScope.launch { drawerState.close() }
+                    },
                     onCategoryClick = { category ->
                         viewModel.onCategorySelected(category) // Вся логика теперь в ViewModel
                         coroutineScope.launch { drawerState.close() }
@@ -357,10 +366,14 @@ fun HomeScreen(
                             viewModel.getAllBooksFromCategory(category = BookCategories.ALL)
                         },
                         onSettingsClick = {
-                            onSettingsClick()
-                            viewModel.selectedBottomItemState.intValue =
-                                BottomMenuItem.Settings.titleId
-
+                            if (viewModel.isAuthorized.value) {
+                                onSettingsClick()
+                                viewModel.selectedBottomItemState.intValue =
+                                    BottomMenuItem.Settings.titleId
+                            } else {
+                                viewModel.isRegisterState.value = true
+                                viewModel.showAuthDialog.value = true
+                            }
                         },
                         onSavedClick = {
                             viewModel.selectedBottomItemState.intValue = BottomMenuItem.Saved.titleId
@@ -526,12 +539,7 @@ fun HomeScreen(
                             ) {
                                 item(span = StaggeredGridItemSpan.FullLine) {
                                     Column {
-                                       /* CategoryCarousel(
-                                            selectedCategory = viewModel.categoryState.value,
-                                            onCategoryClick = { category ->
-                                                viewModel.onCategorySelected(category)
-                                            }
-                                        )*/
+
                                         // Слайдер баннеров
                                         val banners by viewModel.activeBanners.collectAsStateWithLifecycle()
                                         android.util.Log.d("HomeScreen", "Баннеров загружено: ${banners.size}")
@@ -539,19 +547,17 @@ fun HomeScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .heightIn(min = 0.dp, max = 200.dp)
-                                            /* .graphicsLayer {
-                                                 translationY = bannerOffset
-                                             }*/
+
                                         ) {
                                             BannerSlider(
                                                 banners = banners,
                                                 onBannerClick = { banner ->
-                                                    android.util.Log.d("HomeScreen", "Клик по баннеру: ${banner.postKey}")
+                                                    Log.d("HomeScreen", "Клик по баннеру: postKey = ${banner.postKey}")
+                                                    // Передаём postKey - навигация произойдёт через NavigationNavGraph
                                                     onBannerClick(banner.postKey)
                                                 }
                                             )
                                         }
-                                       // Spacer(modifier = Modifier.height(2.dp))
                                     }
                                 }
                                 items(count = books.itemCount) { index ->

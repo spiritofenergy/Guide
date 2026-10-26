@@ -40,6 +40,8 @@ mobileads = "7.14.0"
 remoteCreationCore = "1.0.0-alpha18"
 roomCompiler = "2.8.5"
 firebaseAi = "18.0.0"
+cameraCamera2Pipe = "1.6.2"
+media3CommonKtx = "1.11.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -83,6 +85,8 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
 firebase-ai = { group = "com.google.firebase", name = "firebase-ai", version.ref = "firebaseAi" }
+androidx-camera-camera2-pipe = { group = "androidx.camera", name = "camera-camera2-pipe", version.ref = "cameraCamera2Pipe" }
+androidx-media3-common-ktx = { group = "androidx.media3", name = "media3-common-ktx", version.ref = "media3CommonKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

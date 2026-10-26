@@ -6,7 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -14,17 +17,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.kodex.guide.domain.model.Book
+import com.kodex.guide.ui.theme.ButtonColorBlue
 import com.kodex.guide.ui.theme.Orange
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.math.log
 
 /**
- * Экран создания баннера - выбор поста из своих объявлений
+ * Экран создания баннера - выбор поста и заполнение информации
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +45,16 @@ fun BannerEditorScreen(
     val myPosts by viewModel.myPosts.collectAsStateWithLifecycle()
     var selectedPost by remember { mutableStateOf<Book?>(null) }
     var showPostPicker by remember { mutableStateOf(false) }
+    
+    // Новые поля
+    var publishDate by remember { mutableStateOf(System.currentTimeMillis()) }
+    var expireDate by remember { mutableStateOf(0L) }
+    var categoryIndex by remember { mutableStateOf(0) }
+    var phone by remember { mutableStateOf("") }
+    var textTopLeft by remember { mutableStateOf("") }
+    var textTopRight by remember { mutableStateOf("") }
+    var textBottomLeft by remember { mutableStateOf("") }
+    var textBottomRight by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -53,6 +72,7 @@ fun BannerEditorScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -76,9 +96,11 @@ fun BannerEditorScreen(
             Button(
                 onClick = { showPostPicker = true },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = ButtonColorBlue
+                )
             ) {
-                Icon(Icons.Default.AutoAwesome, null)
+                Icon(Icons.Default.Image, null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Выбрать из своих объявлений")
             }
@@ -126,6 +148,108 @@ fun BannerEditorScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
+            // Разделитель
+            Text(
+                text = "Информация о баннере",
+                style = MaterialTheme.typography.titleMedium
+            )
+            
+            // Дата публикации
+            OutlinedTextField(
+                value = formatDate(publishDate),
+                onValueChange = { },
+                label = { Text("Дата публикации") },
+                leadingIcon = {
+                    Icon(Icons.Default.CalendarToday, null)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true
+            )
+            
+            // Дата удаления
+            OutlinedTextField(
+                value = if (expireDate > 0) formatDate(expireDate) else "Без ограничения",
+                onValueChange = { },
+                label = { Text("Дата удаления") },
+                leadingIcon = {
+                    Icon(Icons.Default.Delete, null)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true
+            )
+            
+            // Категория (индекс)
+            OutlinedTextField(
+                value = categoryIndex.toString(),
+                onValueChange = { newValue ->
+                    categoryIndex = newValue.toIntOrNull() ?: 0
+                },
+                label = { Text("Категория (индекс)") },
+                leadingIcon = {
+                    Icon(Icons.Default.Category, null)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                ),
+                placeholder = { Text("Например: 0 - Животные, 1 - Недвижимость...") }
+            )
+            
+            // Телефон
+            OutlinedTextField(
+                value = phone,
+                onValueChange = { phone = it },
+                label = { Text("Телефон") },
+                leadingIcon = {
+                    Icon(Icons.Default.Phone, null)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                placeholder = { Text("+7 (___) ___-__-__") }
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Текстовые поля
+            Text(
+                text = "Текст на баннере",
+                style = MaterialTheme.typography.titleMedium
+            )
+            
+            OutlinedTextField(
+                value = textTopLeft,
+                onValueChange = { textTopLeft = it },
+                label = { Text("Слева сверху") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2
+            )
+            
+            OutlinedTextField(
+                value = textTopRight,
+                onValueChange = { textTopRight = it },
+                label = { Text("Справа сверху") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2
+            )
+            
+            OutlinedTextField(
+                value = textBottomLeft,
+                onValueChange = { textBottomLeft = it },
+                label = { Text("Слева внизу") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2
+            )
+            
+            OutlinedTextField(
+                value = textBottomRight,
+                onValueChange = { textBottomRight = it },
+                label = { Text("Справа внизу") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
             // Кнопка сохранения
             Button(
                 onClick = {
@@ -136,7 +260,15 @@ fun BannerEditorScreen(
                     
                     viewModel.saveBanner(
                         postKey = selectedPost!!.key,
-                        imageUrl = selectedPost!!.imageUrl
+                        imageUrl = selectedPost!!.imageUrl,
+                        publishDate = publishDate,
+                        expireDate = expireDate,
+                        categoryIndex = categoryIndex,
+                        phone = phone,
+                        textTopLeft = textTopLeft,
+                        textTopRight = textTopRight,
+                        textBottomLeft = textBottomLeft,
+                        textBottomRight = textBottomRight
                     )
                     Toast.makeText(context, "Баннер создан", Toast.LENGTH_SHORT).show()
                     onBack()
@@ -245,4 +377,13 @@ fun PostItem(post: Book, onClick: () -> Unit) {
             }
         }
     }
+}
+
+/**
+ * Форматирует timestamp в читаемую дату
+ */
+fun formatDate(timestamp: Long): String {
+    if (timestamp == 0L) return ""
+    val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale("ru", "RU"))
+    return dateFormat.format(Date(timestamp))
 }

@@ -7,10 +7,13 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -24,6 +27,7 @@ import com.kodex.guide.data.mapper.toParallaxNavObject
 import com.kodex.guide.presentation.admin_panel.AdminPanelScreen
 import com.kodex.guide.presentation.admin_panel.ModerationScreen
 import com.kodex.guide.presentation.banners.BannerEditorScreen
+import com.kodex.guide.presentation.banners.ManageBannersScreen
 import com.kodex.guide.presentation.comments.CommentsScreen
 import com.kodex.guide.presentation.home.HomeScreen
 import com.kodex.guide.presentation.home.HomeViewModel
@@ -90,14 +94,20 @@ fun NavigationNavGraph(
                         place.toParallaxNavObject()
                     )
                 },
-
                 onBannerClick = { postKey ->
-                    if (postKey.isNotEmpty()) {
                         navController.navigate(
-                            NavRoutes.ParallaxNavObject(bookId = postKey)
+                                NavRoutes.ParallaxNavObject(bookId = postKey)
                         )
-                    }
                 },
+
+              /*  onBannerClick = { postKey ->
+                    android.util.Log.d("NavigationNavGraph",
+                        "onBannerClick: postKey=$postKey")
+                    // Навигация только по bookId - данные загрузятся из Room в ParallaxScreen
+                    navController.navigate(
+                        NavRoutes.ParallaxNavObject(bookId = postKey)
+                    )
+                },*/
 
                 onBookEditClick = { book ->
                     navController.navigate(NavRoutes.MyPostEditorNavObject(bookKey = book.key))
@@ -114,6 +124,9 @@ fun NavigationNavGraph(
                 },
                 onSettingsClick = {
                     navController.navigate(NavRoutes.SettingsNavObject)
+                },
+                onManageBannersClick = {
+                    navController.navigate(NavRoutes.ManageBannersNavObject)
                 },
                onCategoryClick = {
                    navController.navigate(NavRoutes.HomeDataObject(
@@ -207,6 +220,9 @@ fun NavigationNavGraph(
                 onAddBannerClick = {
                     navController.navigate(NavRoutes.AddBannerNavObject)
                 },
+                onManageBannersClick = {
+                    navController.navigate(NavRoutes.ManageBannersNavObject)
+                },
                 onCloseAccountClick = {
                     navController.popBackStack(
                         NavRoutes.LoginNavObject,
@@ -220,13 +236,41 @@ fun NavigationNavGraph(
                 onBack = { navController.popBackStack() }
             )
         }
+
+        composable<NavRoutes.ManageBannersNavObject> {
+            ManageBannersScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
         composable<NavRoutes.ParallaxNavObject> { navEntry ->
             val navData = navEntry.toRoute<NavRoutes.ParallaxNavObject>()
-            val navObject = remember(navData.bookId) {
-                navData.copy(
-                    imageUrl = ParallaxImageCache.take(navData.bookId) ?: navData.imageUrl
+
+            // Загружаем книгу из Room по bookId
+            val bookViewModel: HomeViewModel = hiltViewModel()
+            var book by remember { mutableStateOf<com.kodex.guide.domain.model.Book?>(null) }
+            var isLoading by remember { mutableStateOf(true) }
+
+            LaunchedEffect(navData.bookId) {
+                isLoading = true
+                book = bookViewModel.getBookByKey(navData.bookId)
+                isLoading = false
+                // Кэшируем данные книги
+                book?.let {
+                    val navObj = it.toParallaxNavObject()
+                    ParallaxImageCache.putNavObject(it.key, navObj)
+                    android.util.Log.d("ParallaxNav", "Кэшировано: ${it.title}, imageUrl=${it.imageUrl.take(50)}...")
+                }
+            }
+
+            // Приоритет: кеш > Room > fallback
+            val navObject = ParallaxImageCache.getNavObject(navData.bookId) ?: run {
+                book?.let { it.toParallaxNavObject() } ?: NavRoutes.ParallaxNavObject(
+                    bookId = navData.bookId,
+                    imageUrl = ParallaxImageCache.takeImageUrl(navData.bookId).orEmpty()
                 )
             }
+
+            android.util.Log.d("ParallaxNav", "navObject: title=${navObject.title}, imageUrl=${navObject.imageUrl.take(50)}...")
 
             ParallaxScreen(
                 navObject = navObject,
@@ -236,14 +280,12 @@ fun NavigationNavGraph(
                     navController.navigate(
                         NavRoutes.CommentsNavData(
                             bookId = navData.bookId,
-                            title = navData.title,
-                            ratingsList = navData.ratingsList
+                            title = navObject.title,
+                            ratingsList = navObject.ratingsList
                         )
                     )
                 },
-                // ✅ категория ТЕКУЩЕГО поста — из navData, а не из book
-                bookCategory = navData.categoryIndex,
-                // ✅ клик по похожему посту — переход на НОВЫЙ ParallaxScreen
+                bookCategory = navObject.categoryIndex,
                 onRelatedBookClick = { relatedBook ->
                     navController.navigate(relatedBook.toParallaxNavObject())
                 },

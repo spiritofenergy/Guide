@@ -12,8 +12,17 @@ fun BannerDTO.toBanner(): Banner {
         postKey = postKey,
         imageUrl = imageUrl,
         authorUid = authorUid,
+        authorRole = authorRole,
         isActive = isActive,
-        createdAt = createdAt
+        createdAt = createdAt,
+        publishDate = publishDate,
+        expireDate = expireDate,
+        categoryIndex = categoryIndex,
+        phone = phone,
+        textTopLeft = textTopLeft,
+        textTopRight = textTopRight,
+        textBottomLeft = textBottomLeft,
+        textBottomRight = textBottomRight
     )
 }
 
@@ -26,7 +35,16 @@ fun Banner.toBannerDTO(): BannerDTO {
         postKey = postKey,
         imageUrl = imageUrl,
         authorUid = authorUid,
+        authorRole = authorRole,
         isActive = isActive,
-        createdAt = createdAt
+        createdAt = createdAt,
+        publishDate = publishDate,
+        expireDate = expireDate,
+        categoryIndex = categoryIndex,
+        phone = phone,
+        textTopLeft = textTopLeft,
+        textTopRight = textTopRight,
+        textBottomLeft = textBottomLeft,
+        textBottomRight = textBottomRight
     )
 }

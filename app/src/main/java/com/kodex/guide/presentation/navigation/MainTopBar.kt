@@ -1,4 +1,4 @@
-package com.kodex.guide.presentation.home
+package com.kodex.guide.presentation.navigation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.BookCategories
+import com.kodex.guide.presentation.home.HomeViewModel
 import com.kodex.guide.ui.theme.ButtonColorBlue
 import com.kodex.guide.ui.theme.DarkBlue
 import com.kodex.guide.ui.theme.GuideTheme

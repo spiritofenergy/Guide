@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import com.kodex.guide.data.source.local.DraftEntity
 import com.kodex.guide.domain.model.Book
 
-@Database(entities = [Book::class, DraftEntity::class, BannerDTO::class], version = 7, exportSchema = false)
+@Database(entities = [Book::class, DraftEntity::class, BannerDTO::class], version = 9, exportSchema = false)
 @TypeConverters(BookConverter::class)
 abstract class MainDb: RoomDatabase() {
 

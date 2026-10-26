@@ -224,35 +224,36 @@ fun BookListItemUi(
                 .padding(bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 4.dp),
-                text = "${book.price} p",
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                fontSize = 18.sp,
-
-
-            )
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    modifier = Modifier
+                        .padding(start = 4.dp),
+                    text = "${book.price} p",
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    fontSize = 18.sp,
+                )
+                
+                if(book.delivery) {
+                    Icon(
+                        Icons.Default.DeliveryDining,
+                        contentDescription = "Delivery",
+                        modifier = Modifier.size(18.dp),
+                        tint = GreenSea
+                    )
+                }
+            }
             
-            if(book.delivery) {
-                Icon(
-                    Icons.Default.DeliveryDining,
-                    contentDescription = "Delivery",
-                    modifier = Modifier.size(18.dp),
-                    tint = GreenSea
-                )
-            }
-            if (book.payment) {
-                Icon(
-                    Icons.Default.Payment,
-                    contentDescription = "Payment",
-                    modifier = Modifier.size(18.dp),
-                    tint = Red
-                )
-            }
+            Icon(
+                Icons.Default.Payment,
+                contentDescription = "Payment",
+                modifier = Modifier.size(18.dp),
+                tint = Red
+            )
             Icon(
                 Icons.Default.LocationOn,
                 contentDescription = "Location",
@@ -269,8 +270,8 @@ fun BookListItemUi(
                 fontWeight = FontWeight.Light,
                 fontSize = 18.sp,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-
+                overflow = TextOverflow.Ellipsis,
+                textAlign = androidx.compose.ui.text.style.TextAlign.End
             )
 
 

@@ -1,6 +1,7 @@
-package com.kodex.guide.presentation.home
+package com.kodex.guide.presentation.navigation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.ui.theme.Orange
+import com.kodex.guide.ui.theme.PurpleGrey80
 
 @Composable
 fun CategoryCarousel(
@@ -69,7 +71,12 @@ fun CategoryChip(
         modifier = Modifier
             .height(36.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(if (isSelected) Orange else Color.LightGray.copy(alpha = 0.5f))
+            .background(if (isSelected) Orange else PurpleGrey80.copy(alpha = 0.5f))
+            .border(
+                width = 1.dp,
+                color = Orange.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(18.dp)
+            )
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp)
     ) {

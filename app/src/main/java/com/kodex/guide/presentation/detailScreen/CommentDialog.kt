@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.kodex.guide.domain.model.RatingData
-import com.kodex.guide.ui.theme.ButtonColor
+import com.kodex.guide.ui.theme.DrawerColorBlue
 import com.kodex.guide.presentation.castom.toFormattedDate
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -37,7 +37,7 @@ fun CommentDialog(
                 Button(onClick = {
                     onDismiss()
                 }, colors = ButtonDefaults.buttonColors(
-                    containerColor = ButtonColor
+                    containerColor = DrawerColorBlue
                 )) {
                     Text(text = confirmButton)
                 }
@@ -45,7 +45,7 @@ fun CommentDialog(
                 Button(onClick = {
                    // onConfirm()
                 }, colors = ButtonDefaults.buttonColors(
-                    containerColor = ButtonColor
+                    containerColor = DrawerColorBlue
                 )) {
                     Text(text = confirmButtonText)
                 }

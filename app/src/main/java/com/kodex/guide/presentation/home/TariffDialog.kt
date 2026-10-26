@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kodex.guide.domain.model.UserRole
+import com.kodex.guide.ui.theme.DrawerColorBlue
 import com.kodex.guide.ui.theme.GreenSea
 import com.kodex.guide.ui.theme.Premium
 import com.kodex.guide.ui.theme.TextGray
@@ -83,10 +84,15 @@ fun TariffDialog(
                 }
             },
             confirmButton = {
-                Button(onClick = {
-                    showBusinessDetails = false
-                    onBusinessClick()
-                }) {
+                Button(
+                    onClick = {
+                        showBusinessDetails = false
+                        onBusinessClick()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = DrawerColorBlue
+                    )
+                ) {
                     Text("Оплатить")
                 }
             }
@@ -128,10 +134,15 @@ fun TariffDialog(
                 }
             },
             confirmButton = {
-                Button(onClick = {
-                    showPremiumDetails = false
-                    onPremiumClick()
-                }) {
+                Button(
+                    onClick = {
+                        showPremiumDetails = false
+                        onPremiumClick()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = DrawerColorBlue
+                    )
+                ) {
                     Text("Оплатить")
                 }
             }

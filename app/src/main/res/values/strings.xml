@@ -40,7 +40,7 @@
     <string name="mark_post">Mark a post</string>
     <string name="user_name">User name: </string>
     <string name="phone_number">Phone number: </string>
-    <string name="login">Login: </string>
+    <string name="login">Email: </string>
     <string name="password">Password: </string>
     <string name="taman">Taman</string>
     <string name="taman_peninsula">Taman Peninsula</string>

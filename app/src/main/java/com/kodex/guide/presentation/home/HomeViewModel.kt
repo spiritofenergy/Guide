@@ -39,6 +39,7 @@ import com.kodex.guide.domain.tarif.UpgradeDecision
 import com.kodex.guide.domain.tarif.UpgradeManager
 import com.kodex.guide.domain.usecase.ObserveSavedKeysUseCase
 import com.kodex.guide.domain.repository.BannerRepo
+import com.kodex.guide.presentation.navigation.BottomMenuItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -55,13 +56,11 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.text.Typography.registered
 
 // ✅ События для UI (диалоги, навигация)
 sealed class AuthEvent {
@@ -91,7 +90,7 @@ class HomeViewModel @Inject constructor(
     val activeBanners = bannerRepo.observeActiveBanners()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = emptyList()
         )
     
@@ -358,10 +357,8 @@ class HomeViewModel @Inject constructor(
 
     init {
         Log.d("ROLE_DEBUG", "=== init START ===")
-        // Загружаем баннеры сразу (будут из Room мгновенно)
-        viewModelScope.launch {
-            bannerRepo.loadBannersIfNeeded()
-        }
+        // Баннеры загружаются автоматически при инициализации BannerRepoImpl
+        // Здесь можно добавить ручную перезагрузку по необходимости
         
         Log.d("ROLE_DEBUG", "Firebase.auth.currentUser?.uid = ${Firebase.auth.currentUser?.uid}")
         Log.d("ROLE_DEBUG", "authStateProvider.currentUser()?.uid = ${authStateProvider.currentUser()?.uid}")
@@ -554,6 +551,18 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Асинхронно загружает книгу из Room по key
+     */
+    suspend fun getBookByKey(key: String): Book? {
+        return try {
+            mainDb.trackDao().getPostByKey(key)
+        } catch (e: Exception) {
+            android.util.Log.e("HomeViewModel", "Error getting book by key: $key", e)
+            null
         }
     }
 

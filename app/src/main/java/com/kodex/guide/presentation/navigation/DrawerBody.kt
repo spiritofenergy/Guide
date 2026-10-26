@@ -1,4 +1,4 @@
-package com.kodex.guide.presentation.home
+package com.kodex.guide.presentation.navigation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.LocalGroceryStore
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.UserRole
+import com.kodex.guide.presentation.home.HomeViewModel
 
 private data class DrawerCategoryItem(
     val icon: ImageVector,
@@ -58,6 +60,7 @@ fun DrawerBody(
     onSettingsClick: () -> Unit = {},
     onAdmin: (Boolean) -> Unit = {},
     onAdminClick: () -> Unit = {},
+    onManageBannersClick: () -> Unit = {},
     onCategoryClick: (BookCategories) -> Unit = {},
     showMyPosts: Boolean = true,
     onMyPostsClick: () -> Unit = {},
@@ -222,6 +225,40 @@ fun DrawerBody(
                         onAdminClick()
                         onCloseDrawer()
                     }
+                )
+                
+                DrawerMenuItem(
+                    iconDrawableId = Icons.Default.AutoAwesome,
+                    text = "Баннеры",
+                    onItemClick = {
+                        onManageBannersClick()
+                        onCloseDrawer()
+                    }
+                )
+            }
+
+            // Разместить баннер (только BUSINESS и PREMIUM)
+            val canCreateBanner = userRole == UserRole.BUSINESS || userRole == UserRole.PREMIUM
+            if (canCreateBanner) {
+                DrawerMenuItem(
+                    iconDrawableId = Icons.Default.Star,
+                    text = "Разместить баннер",
+                    onItemClick = {
+                        onAddBookClick()
+                        onCloseDrawer()
+                    }
+                )
+            } else if (isAuthorized && userRole == UserRole.USER) {
+                // Пользователь с ролью USER - предлагаем перейти на BUSINESS/PREMIUM
+                DrawerMenuItem(
+                    iconDrawableId = Icons.Default.Star,
+                    text = "Разместить баннер",
+                    onItemClick = {
+                        viewModelHome.isRegisterState.value = true
+                        viewModelHome.showAuthDialog.value = true
+                        onCloseDrawer()
+                    },
+                    suffixText = "BUSINESS/PREMIUM"
                 )
             }
 

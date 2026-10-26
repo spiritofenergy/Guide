@@ -43,6 +43,9 @@ class NavRoutes {
     object AddBannerNavObject
 
     @Serializable
+    object ManageBannersNavObject
+
+    @Serializable
     data class ParallaxNavObject(
         val bookId: String = "",
         val title: String = "",
@@ -73,6 +76,7 @@ class NavRoutes {
         val hasDelivery: Boolean = true,
         val acceptsCard: Boolean = true,
         val publishPeriod: Int = 1 )
+    /*
                 @Serializable
                 data class ParallaxNavObject1(
                     val bookId: String = "",
@@ -95,7 +99,7 @@ class NavRoutes {
                     val hasDelivery: Boolean = false,  // 🆕 Наличие доставки
                     val acceptsCard: Boolean = false   // 🆕 Оплата картой
         )
-
+*/
 
     @Serializable
     data class DetailNavObject(

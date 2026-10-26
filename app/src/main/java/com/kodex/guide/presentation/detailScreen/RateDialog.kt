@@ -30,7 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kodex.guide.domain.model.RatingData
-import com.kodex.guide.ui.theme.ButtonColor
+import com.kodex.guide.ui.theme.DrawerColorBlue
 import com.kodex.guide.ui.theme.Orange
 
 
@@ -112,7 +112,7 @@ fun RateDialog(
                             lastRating = ratingData.rating ?: 0
                             ))
                     },colors = ButtonDefaults.buttonColors(
-                        containerColor = ButtonColor
+                        containerColor = DrawerColorBlue
                     )
                 ) {
                     Text(text = "Submit")

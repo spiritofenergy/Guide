@@ -1,4 +1,4 @@
-package com.kodex.guide.presentation.home
+package com.kodex.guide.presentation.navigation
 
 import com.kodex.guide.R
 

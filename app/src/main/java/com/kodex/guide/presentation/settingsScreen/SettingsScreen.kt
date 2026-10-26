@@ -48,6 +48,7 @@ fun SettingsScreen(
     onMyPostsClick: () -> Unit = {},
     onAddPostClick: () -> Unit = {},
     onAddBannerClick: () -> Unit = {},
+    onManageBannersClick: () -> Unit = {},
     onCloseAccountClick: () -> Unit = {}
 ) {
     val isAuthorized by viewModelHome.isAuthorized.collectAsStateWithLifecycle()
@@ -357,15 +358,46 @@ fun SettingsScreen(
                 )
             }
 
-            // Разместить баннер
+            // Разместить баннер (только BUSINESS и PREMIUM)
             item {
-                SettingsMenuItem(
-                    icon = Icons.Default.Star,
-                    title = "Разместить баннер",
-                    onClick = {
-                        onAddBannerClick()
-                    }
-                )
+                val canCreateBanner = userRole == UserRole.BUSINESS || userRole == UserRole.PREMIUM
+                
+                if (canCreateBanner) {
+                    SettingsMenuItem(
+                        icon = Icons.Default.Star,
+                        title = "Разместить баннер",
+                        onClick = {
+                            onAddBannerClick()
+                        }
+                    )
+                } else if (isAuthorized && userRole == UserRole.USER) {
+                    // Пользователь с ролью USER - предлагаем перейти на BUSINESS/PREMIUM
+                    SettingsMenuItem(
+                        icon = Icons.Default.Star,
+                        title = "Разместить баннер",
+                        onClick = {
+                            // Показываем диалог тарифа с кнопкой регистрации
+                            viewModelHome.isRegisterState.value = true
+                            viewModelHome.showAuthDialog.value = true
+                        },
+                        titleColor = Color.Gray
+                    )
+                }
+                // Для ANONYMOUS и других ролей - не показываем
+            }
+
+            // Управление баннерами (только для админа)
+            item {
+                val isAdmin by viewModelHome.isAdminState.collectAsStateWithLifecycle()
+                if (isAdmin) {
+                    SettingsMenuItem(
+                        icon = Icons.Default.AutoAwesome,
+                        title = "Баннеры",
+                        onClick = {
+                            onManageBannersClick()
+                        }
+                    )
+                }
             }
 
             item {
@@ -426,6 +458,8 @@ fun SettingsScreen(
                     },
                     titleColor = Color.Red
                 )
+                Spacer(modifier = Modifier.height(55.dp))
+
             }
         }
 
@@ -491,7 +525,7 @@ fun SettingsMenuItem(
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
             .clickable(onClick = onClick)
-            .padding(16.dp),
+            .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

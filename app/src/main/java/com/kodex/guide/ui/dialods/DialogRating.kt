@@ -34,7 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.RatingData
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.DrawerColorBlue
 import com.kodex.guide.ui.theme.Orange
 
 
@@ -110,7 +110,7 @@ fun DialogRating(
                 Button(
                     modifier = Modifier,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ButtonColorBlue
+                        containerColor = DrawerColorBlue
                     ),
                     onClick = {
                         onDismiss()
@@ -122,7 +122,7 @@ fun DialogRating(
                 Button(
                     modifier = Modifier,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ButtonColorBlue
+                        containerColor = DrawerColorBlue
                     ),
                     onClick = {
                         onSubmit(

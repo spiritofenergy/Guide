@@ -7,7 +7,9 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.util.Base64
+import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -54,8 +56,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -105,12 +109,28 @@ fun MainContent(
     val telephone = navObject.telephone
     val scope = rememberCoroutineScope()
 
+
     val bitmap by remember(navObject.imageUrl) {
         mutableStateOf<Bitmap?>(runCatching {
             val base64Image = Base64.decode(navObject.imageUrl, Base64.DEFAULT)
             BitmapFactory.decodeByteArray(base64Image, 0, base64Image.size)
         }.getOrNull())
     }
+    Log.d("MainContent", "MainContent: $bitmap")
+ /*   val isBase64 = navObject.imageUrl.isNotEmpty() && !navObject.imageUrl.startsWith("http")
+
+    // 2. Декодируем только если это Base64
+    val bitmap = remember(navObject.imageUrl) {
+        if (isBase64) {
+            try {
+                val decodedBytes = Base64.decode(navObject.imageUrl, Base64.DEFAULT)
+                BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+            } catch (e: Exception) {
+                null
+            }
+        } else null
+    }*/
+
     DialogRating(
         ratingData = uiState.value.ratingData,
         onDismiss = { viewModel.onEvent(DetailUiEvents.DetailUiEvent.HideUserRatingDialog) },
@@ -139,8 +159,13 @@ fun MainContent(
                 .height(320.dp)
         ) {
 
+
+// 3. В блоке Box с фото (верхняя часть) замените AsyncImage на условный рендеринг:
             // Фото на весь фон
+            Log.d("MainContent", "MainContent: $bitmap")
+
             AsyncImage(
+
                 model = bitmap,
                 contentDescription = navObject.title,
                 modifier = Modifier
@@ -150,8 +175,29 @@ fun MainContent(
                         else Modifier
                     ),
                 contentScale = ContentScale.Crop,
-               // transition = androidx.compose.animation.core.tween(durationMillis = 300)
+                // transition = androidx.compose.animation.core.tween(durationMillis = 300)
             )
+          /*  if (bitmap != null) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = navObject.title,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(onClick = onShowImageClick),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                AsyncImage(
+                    model = navObject.imageUrl, // Передаем саму ссылку, если это не Base64
+                    contentDescription = navObject.title,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(if (navObject.imageUrl.isNotEmpty()) Modifier.clickable(onClick = onShowImageClick) else Modifier),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = R.drawable.placeholder_color),
+                    error = painterResource(id = R.drawable.placeholder_color)
+                )
+            }*/
 
             // Затемнение снизу для читаемости текста
             Box(
