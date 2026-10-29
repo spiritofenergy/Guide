@@ -1,10 +1,10 @@
 package com.kodex.guide.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.kodex.guide.data.mapper.toBannerEntity
 import com.kodex.guide.data.mapper.toBookDTO
 import com.kodex.guide.data.source.remote.FirebaseBooksDataSource
 import com.kodex.guide.domain.model.Book
-import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.domain.repository.MyPostsRepo
 import com.kodex.guide.domain.repository.UserRoleRepo
 import com.kodex.guide.ui.db.RoomDao
@@ -49,22 +49,39 @@ class MyPostsRepositoryImpl @Inject constructor(
         }
     }
 
+
     override suspend fun upload(book: Book): Result<Unit> = runCatching {
         withContext(Dispatchers.IO) {
             val uid = auth.uid ?: throw IllegalStateException("Нужен вход в аккаунт")
             val currentRole = userRoleRepo.observeUserRole(uid).first()
+
             val published = book.copy(
                 key = book.key.ifEmpty { UUID.randomUUID().toString() },
                 authorUid = uid,
                 isAuthor = true,
                 authorRole = currentRole.level,
                 isUploaded = true,
-                searchTitle = book.title.lowercase()
+                searchTitle = book.title.lowercase(),
+                timeStamp = System.currentTimeMillis()
             )
+
+            // 1. Сохраняем пост в Firebase
             remote.saveBook(published.toBookDTO()).getOrThrow()
+
+            // 2. Сохраняем пост в Room
             dao.insertPost(published)
+
+            // 3. СОЗДАЕМ И СОХРАНЯЕМ БАННЕР (теперь всего 2 строки вместо 15!)
+            val bannerEntity = published.toBannerEntity()
+            dao.insertBanners(listOf(bannerEntity))
+
+            // 4. Сохраняем баннер в Firebase
+            val bannerBookDto = published.copy(isBanner = true).toBookDTO()
+            remote.saveBannerToFirebase(bannerBookDto)
         }
     }
+
+
 
     override suspend fun delete(book: Book): Result<Unit> = runCatching {
         withContext(Dispatchers.IO) {

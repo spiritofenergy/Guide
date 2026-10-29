@@ -85,28 +85,6 @@ class HomeViewModel @Inject constructor(
     private val userAccessRepository: UserAccessRepoImpl,
     private val observeSavedKeysUseCase: ObserveSavedKeysUseCase,
     ) : ViewModel() {
-
-    // ✅ Баннеры - это те же Book с isBanner = true, загружаем из Room
-    val activeBanners: StateFlow<List<Book>> = mainDb.trackDao()
-        .getAllPosts()
-        .map { posts ->
-            val allBanners = posts.filter { it.isBanner }
-            Log.d("MyLog", "Всего постов в Room: ${posts.size}, баннеров: ${allBanners.size}")
-            allBanners.forEach { 
-                Log.d("MyLog", "Баннер: ${it.key}, isBanner=${it.isBanner}, bannerExpireDate=${it.bannerExpireDate}") 
-            }
-            
-            // Фильтруем только активные (bannerExpireDate == 0 - бесконечные)
-            val active = allBanners.filter { it.bannerExpireDate == 0L }
-                .sortedByDescending { it.timeStamp }
-            Log.d("MyLog", "Активных баннеров: ${active.size}")
-            active
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = emptyList()
-        )
     
     val showPaymentSheet = mutableStateOf(false)
     val paymentInProgress = mutableStateOf(false)
@@ -118,7 +96,13 @@ class HomeViewModel @Inject constructor(
 
     // ✅ профиль для DrawerHeader
     val headerUser = mutableStateOf<User?>(null)
-
+    // Превращаем Flow из репозитория в StateFlow для UI
+    val banners = booksRepo.getBannersFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList() // Пока данные грузятся, список пуст
+        )
 
     // Состояние для диалога
     val showAuthDialog = mutableStateOf(false)

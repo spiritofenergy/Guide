@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GigaCodeAgentSettings">
+    <option name="autoApprovedCommands">
+      <list>
+        <Execute>
+          <option name="pattern" value="powershell -Command &quot;Rename-Item -Path 'E:\24\Guide\app\src\main\java\com\kodex\guide\data\repository\BooksRepo_Impl.kt' -NewName 'BooksRepoImpl.kt'&quot;" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="powershell -Command &quot;Write-Host 'Проверьте коллекцию banners в Firestore:'; Write-Host '1. Откройте Firebase Console'; Write-Host '2. Firestore Database'; Write-Host '3. Коллекция banners'; Write-Host '4. Есть ли там документы?'&quot;" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="cmd /c &quot;cd /d E:\24\Guide &amp;&amp; gradlew.bat assembleDebug 2&gt;&amp;1 | findstr /C:&quot;BUILD&quot; /C:&quot;error&quot; /C:&quot;FAILED&quot;&quot;" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="$env:JAVA_HOME=C:UsersMarat.jdkstemurin-17.0.20.1" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Select-String -Path &quot;E:\24\Guide\app\src\main\java\com\kodex\guide\presentation\home\HomeViewModel.kt&quot; -Pattern &quot;getBookByKey&quot; -AllMatches" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="&quot;E:\24\Guide\gradlew.bat&quot; :app:compileDebugKotlin --no-daemon" />
+        </Execute>
+      </list>
+    </option>
+  </component>
+</project>

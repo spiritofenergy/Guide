@@ -2,6 +2,7 @@ package com.kodex.guide.data.mapper
 
 import android.util.Log
 import com.kodex.guide.data.model.BookDTO
+import com.kodex.guide.data.source.local.BannerEntity
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
 import kotlin.String
@@ -84,5 +85,26 @@ fun Book.toBookDTO(): BookDTO {
         longitude = longitude,
         authorUid = authorUid,
         isUploaded = isUploaded,
+    )
+}
+fun Book.toBannerEntity(): BannerEntity {
+    return BannerEntity(
+        key = this.key,
+        postKey = this.key, // Жесткая связь с постом
+        telephone = this.telephone,
+        categoryIndex = this.categoryIndex,
+        imageUrl = this.imageUrl,
+        authorRole = this.authorRole,
+        publishPeriod = this.publishPeriod,
+        timeStamp = this.timeStamp,
+        authorUid = this.authorUid,
+        isUploaded = this.isUploaded,
+        isBanner = true, // Баннер всегда true
+        bannerTextTopLeft = this.bannerTextTopLeft,
+        bannerTextTopRight = this.bannerTextTopRight,
+        bannerTextBottomLeft = this.bannerTextBottomLeft,
+        bannerTextBottomRight = this.bannerTextBottomRight,
+        bannerPublishDate = System.currentTimeMillis(),
+        bannerExpireDate = this.bannerExpireDate
     )
 }

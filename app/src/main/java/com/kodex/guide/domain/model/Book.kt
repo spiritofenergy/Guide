@@ -39,7 +39,8 @@ data class Book(
     val isUploaded: Boolean = false,   // ✅ опубликован ли в Firebase
 
     // ✅ Поля для баннера (если isBanner = true)
-    val isBanner: Boolean = false,      // 🆕 Флаг что это баннер
+    val isBanner: Boolean = false,
+    val active: Boolean = false,     // 🆕 Флаг что это баннер
     val bannerTextTopLeft: String = "", // 🆕 Текст слева сверху
     val bannerTextTopRight: String = "", // 🆕 Текст справа сверху
     val bannerTextBottomLeft: String = "", // 🆕 Текст слева снизу

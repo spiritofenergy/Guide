@@ -3,7 +3,6 @@ package com.kodex.guide.presentation.home
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -56,10 +55,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
-import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.presentation.banners.BannerSlider
-import com.kodex.guide.presentation.home.CategoryCarousel
-import com.kodex.guide.presentation.home.ShowTariffDialog
 import com.kodex.guide.presentation.navigation.NavRoutes
 import com.kodex.guide.ui.dialods.FilterDialog
 import com.kodex.guide.ui.theme.Orange
@@ -90,8 +86,8 @@ fun HomeScreen(
     // Подписываемся на роль пользователя
     val userRole by viewModel.userRole.collectAsState()      // ✅ Flow
     val isAdmin by viewModel.isAdminState.collectAsState()   // ✅ Flow
-    val showAuthDialog by viewModel.showAuthDialog
-    val isLogoutDialog by viewModel.isLogoutDialog
+  //  val showAuthDialog by viewModel.showAuthDialog
+  //  val isLogoutDialog by viewModel.isLogoutDialog
     val headerUser by viewModel.headerUser
     val showPaymentSheet = viewModel.showPaymentSheet
 
@@ -99,6 +95,7 @@ fun HomeScreen(
     val savedPosts by savedViewModel.savedPosts.collectAsStateWithLifecycle()
     val savedKeys by savedViewModel.savedKeys.collectAsStateWithLifecycle()
     val ratingsByBook by viewModel.ratingsByBook.collectAsStateWithLifecycle()
+    val banners by viewModel.banners.collectAsState()
 
     val context = LocalContext.current
     val categoryList = stringArrayResource(id = R.array.category_drawer)
@@ -132,7 +129,8 @@ fun HomeScreen(
 
     LaunchedEffect(books.itemSnapshotList, savedPosts, lastDisplayedBooks) {
         viewModel.loadRatingsForBooks(
-            (books.itemSnapshotList.items + savedPosts + lastDisplayedBooks).distinctBy(Book::key)
+            (books.itemSnapshotList.items + savedPosts + lastDisplayedBooks)
+                .distinctBy(Book::key)
         )
     }
 
@@ -416,7 +414,7 @@ fun HomeScreen(
                                     BookListItemUi(
                                         heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
                                         titleIndex = viewModel.categoryState.value.id,
-                                        showEditButton = viewModel.isAdminState.collectAsState().value,
+                                        showEditButton = isAdmin,
                                         book = book,
                                         ratings = ratingsByBook[book.key] ?: book.ratingsList,
                                         isSaved = true, // На этой вкладке все книги гарантированно сохранены
@@ -507,12 +505,16 @@ fun HomeScreen(
                             ) {
                                 // ✅ Баннер слайдер
                                 item(span = androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan.FullLine) {
-                                    val banners by viewModel.activeBanners.collectAsStateWithLifecycle()
+                                   // val banners by viewModel.activeBanners.collectAsStateWithLifecycle()
                                     if (banners.isNotEmpty()) {
                                         BannerSlider(
                                             banners = banners,
-                                            onBannerClick = { book ->
-                                                onBookClick(book)
+                                            onBannerClick = { banner  ->
+                                                // Берем postKey из баннера. Если его вдруг нет, берем просто key баннера.
+                                                val postKeyToOpen = if (banner.postKey.isNotEmpty()) banner.postKey else banner.key
+
+                                                // Передаем объект Book с нужным ключом в навигацию
+                                                onBookClick(Book(key = postKeyToOpen))
                                             }
                                         )
                                     }
