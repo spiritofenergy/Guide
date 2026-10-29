@@ -31,15 +31,14 @@ class FirebaseBooksDataSource(
 
     suspend fun getActiveBannersFromFirebase(): Result<List<BookDTO>> {
         return try {
-            val querySnapshot = fireStore.collection(BANNERS)
-                .get()
-                .await()
+            val querySnapshot = fireStore.collection(BANNERS).get().await()
             val banners = querySnapshot.toObjects(BookDTO::class.java)
             Result.success(banners)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
+
     // Новый метод для удаления просроченных баннеров из Firebase
     suspend fun deleteExpiredBanners() {
         try {

@@ -15,6 +15,7 @@ import com.kodex.guide.data.mapper.toRatingData
 import com.kodex.guide.data.model.toBannerEntity
 import com.kodex.guide.data.source.local.BannerEntity
 import com.kodex.guide.data.source.remote.FirebaseBooksDataSource
+import com.kodex.guide.di.MainModule
 import com.kodex.guide.domain.model.Banner
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookFilterState
@@ -22,19 +23,32 @@ import com.kodex.guide.domain.model.RatingData
 import com.kodex.guide.domain.repository.BooksRepo
 import com.kodex.guide.presentation.home.BookFactoryPaging
 import com.kodex.guide.ui.db.RoomDao
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 const val BASE_64 = true
+
 class BooksRepo_Impl @Inject constructor(
     private val dataSource: FirebaseBooksDataSource,
     private val dao: RoomDao,
     //private val storageDataSource: FireBaseStorageDataSource,
     private val bitmapEncoder: BitmapEncoder,
-    ): BooksRepo {
+    @MainModule.ApplicationScope private val externalScope: CoroutineScope // 👈 Добавили аннотацию
 
+) : BooksRepo {
+
+
+    init {
+        // ✅ Запускаем синхронизацию ОДИН РАЗ при создании репозитория.
+        // Она будет идти в фоне, пока UI спокойно читает Room.
+        externalScope.launch {
+            syncBannersFromFirebase()
+        }
+    }
     override fun getBooks(
         favsKeysList: List<String>,
         bookFilter: BookFilterState
@@ -80,7 +94,8 @@ class BooksRepo_Impl @Inject constructor(
             dao.insertBanner(bannerEntity)
 
             // 4. Сохраняем в Firebase (отдельная коллекция)
-            val bannerResult = dataSource.saveBannerToFirebase(preparedBook.copy(isBanner = true).toBookDTO())
+            val bannerResult =
+                dataSource.saveBannerToFirebase(preparedBook.copy(isBanner = true).toBookDTO())
             if (bannerResult.isFailure) {
                 // Логируем ошибку, но пост и локальный баннер уже сохранены
             }
@@ -128,57 +143,46 @@ class BooksRepo_Impl @Inject constructor(
     override fun getBannersFlow(): Flow<List<Banner>> {
         return dao.getAllActiveBannersFlow()
             .map { entities -> entities.map { it.toDomain() } }
-            .onStart {
-                // onStart срабатывает, когда UI только подписался на Flow
-                syncBannersFromFirebase()
-            }
     }
 
     private suspend fun syncBannersFromFirebase() {
-
-        // 1. Сначала удаляем просроченные баннеры прямо из Firebase
         dataSource.deleteExpiredBanners()
-
         val result = dataSource.getActiveBannersFromFirebase()
-        /*// 1. Проверяем на ошибку
-        if (result.isFailure) {
-            val errorMsg = result.exceptionOrNull()?.message ?: "Неизвестная ошибка"
-            Log.e("BannerSync", "❌ Ошибка загрузки из Firebase: $errorMsg")
-            return
-        }
-
-        val remoteBanners = result.getOrNull()
-        if (remoteBanners.isNullOrEmpty()) {
-            Log.w("BannerSync", "⚠️ В Firebase нет активных баннеров")
-            return
-        }*/
         if (result.isSuccess) {
-            val remoteBanners = result.getOrNull()
-            if (remoteBanners != null) {
-
-                Log.d("BannerSync", "✅ Получено ${remoteBanners.size} баннеров из Firebase")
-
-                // 1. Очищаем старые баннеры
-                dao.deleteAllBanners()
-
-                // 3. Конвертируем BookDTO в BannerEntity с помощью НОВОГО маппера
-                val entities: List<BannerEntity> = remoteBanners.map { dto ->
-                    dto.toBannerEntity()
-                }
-
-
-                // 3. Сохраняем ВЕСЬ СПИСОК ОДНИМ ВЫЗОВОМ
-                dao.insertBanners(entities)  // ← Просто entities, без listOf()
-                Log.d("BannerSync", "💾 Успешно сохранено ${entities.size} баннеров в Room")
-
+            val remoteBanners = result.getOrNull() ?: return
+            val entities: List<BannerEntity> = remoteBanners.map { dto ->
+                dto.toBannerEntity()
             }
+            // 3. Обновляем Room одной транзакцией (без моргания)
+            dao.replaceAllBanners(entities)
+            //  dao.insertBanners(entities)  // ← Просто entities, без listOf()
         }
     }
+    /*
+        private suspend fun syncBannersFromFirebase() {
+            // 1. Сначала удаляем просроченные баннеры прямо из Firebase
+            dataSource.deleteExpiredBanners()
+            val result = dataSource.getActiveBannersFromFirebase()
+            if (result.isSuccess) {
+                val remoteBanners = result.getOrNull()
+                if (remoteBanners != null) {
+                    Log.d("BannerSync", "✅ Получено ${remoteBanners.size} баннеров из Firebase")
+                    // 1. Очищаем старые баннеры
+                    dao.deleteAllBanners()
+                    // 3. Конвертируем BookDTO в BannerEntity с помощью НОВОГО маппера
+                    val entities: List<BannerEntity> = remoteBanners.map { dto ->
+                        dto.toBannerEntity() }
+                    // 3. Сохраняем ВЕСЬ СПИСОК ОДНИМ ВЫЗОВОМ
+                    dao.insertBanners(entities)  // ← Просто entities, без listOf()
+                    Log.d("BannerSync", "💾 Успешно сохранено ${entities.size} баннеров в Room")
+                }
+            }
+        }*/
 
     override suspend fun getBookComments(bookId: String): Result<List<RatingData>> {
-        return dataSource.getBookComments(bookId).map { list->
-            list.map {
-                rData -> rData.toRatingData()
+        return dataSource.getBookComments(bookId).map { list ->
+            list.map { rData ->
+                rData.toRatingData()
             }
         }
     }

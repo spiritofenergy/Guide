@@ -100,7 +100,7 @@ class HomeViewModel @Inject constructor(
     val banners = booksRepo.getBannersFlow()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(1000),
             initialValue = emptyList() // Пока данные грузятся, список пуст
         )
 

@@ -68,4 +68,9 @@ interface RoomDao {
         deleteByKey(key)
         deleteBannerByKey(key)
     }
+    @Transaction
+    suspend fun replaceAllBanners(banners: List<BannerEntity>) {
+        deleteAllBanners()
+        insertBanners(banners)
+    }
 }
