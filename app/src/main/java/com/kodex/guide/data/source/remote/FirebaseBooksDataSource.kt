@@ -1,5 +1,7 @@
 package com.kodex.guide.data.source.remote
 
+ import android.util.Log
+ import androidx.annotation.OptIn
  import com.google.firebase.auth.FirebaseAuth
  import com.google.firebase.firestore.FirebaseFirestore
  import com.google.firebase.firestore.Query
@@ -7,6 +9,7 @@ package com.kodex.guide.data.source.remote
  import com.kodex.guide.data.model.BookDTO
  import com.kodex.guide.data.model.BooksPageDTO
  import com.kodex.guide.data.model.RatingDataDTO
+ import com.kodex.guide.data.source.remote.FirebaseConst.BANNERS
  import com.kodex.guide.domain.model.BookCategories
  import com.kodex.guide.data.source.remote.FirebaseConst.CATEGORY_INDEX
  import com.kodex.guide.data.source.remote.FirebaseConst.KEY
@@ -25,8 +28,36 @@ class FirebaseBooksDataSource(
     private val auth: FirebaseAuth,
 
     ) {
+
+    suspend fun getActiveBannersFromFirebase(): Result<List<BookDTO>> {
+        return try {
+            val querySnapshot = fireStore.collection(BANNERS).get().await()
+            val banners = querySnapshot.toObjects(BookDTO::class.java)
+            Result.success(banners)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Новый метод для удаления просроченных баннеров из Firebase
+    suspend fun deleteExpiredBanners() {
+        try {
+            val now = System.currentTimeMillis()
+            // Ищем баннеры, у которых expireDate меньше текущего времени и он не равен 0
+            val querySnapshot = fireStore.collection("banners")
+                .whereLessThan("bannerExpireDate", now)
+                .get()
+                .await()
+
+            for (doc in querySnapshot.documents) {
+                // Удаляем просроченные документы
+                doc.reference.delete().await()
+            }
+        } catch (e: Exception) {
+            Log.e("FirebaseBooksDataSource", "Ошибка при удалении просроченных")
+        }
+    }
     suspend fun nextPage(
-        keysFavesList: List<String>,
         pageSize: Long,
         currentKey: String?,
         bookFilter: BookFilterState,
@@ -64,13 +95,9 @@ class FirebaseBooksDataSource(
         }
         val querySnapshot = query.get().await()
         val books = querySnapshot.toObjects(BookDTO::class.java)
-        val updatedBooks = books.map {
-            if (keysFavesList.contains(it.key)) {
-                it.copy(isFavorite = true)
-            } else {
-                it
-            }
-        }
+        val updatedBooks = books
+
+
         return BooksPageDTO(updatedBooks, books.lastOrNull()?.title)
     }
 
@@ -86,6 +113,16 @@ class FirebaseBooksDataSource(
            Result.failure(e)
        }
    }
+    suspend fun saveBannerToFirebase(banner: BookDTO): Result<Unit> {
+        return try {
+            val db = fireStore.collection(BANNERS) // Отдельная коллекция
+            val key = if (banner.key.isEmpty()) db.document().id else banner.key
+            db.document(key).set(banner.copy(key = key)).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
     suspend fun submitUserRating(ratingData: RatingDataDTO, bookId: String): Result<Unit> {
         if (auth.uid == null) return Result.failure(Throwable("User not authenticated"))
       return  try {

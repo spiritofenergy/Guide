@@ -2,6 +2,7 @@ package com.kodex.guide.data.source.remote
 
 object FirebaseConst {
     const val POSTS = "posts"
+    const val BANNERS = "banners"
     const val USERS = "users"
     const val FAVORITES = "favorites"
     const val TITLE = "title"

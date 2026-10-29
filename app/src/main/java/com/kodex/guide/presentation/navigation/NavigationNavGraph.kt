@@ -18,7 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.data.mapper.ParallaxImageCache
 import com.kodex.guide.data.mapper.toParallaxNavObject
 import com.kodex.guide.presentation.admin_panel.AdminPanelScreen
@@ -86,7 +86,6 @@ fun NavigationNavGraph(
                         place.toParallaxNavObject()
                     )
                 },
-
                 onBookEditClick = { book ->
                     navController.navigate(NavRoutes.MyPostEditorNavObject(bookKey = book.key))
                 },

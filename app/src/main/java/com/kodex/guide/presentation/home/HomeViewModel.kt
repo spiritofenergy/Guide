@@ -85,6 +85,7 @@ class HomeViewModel @Inject constructor(
     private val userAccessRepository: UserAccessRepoImpl,
     private val observeSavedKeysUseCase: ObserveSavedKeysUseCase,
     ) : ViewModel() {
+    
     val showPaymentSheet = mutableStateOf(false)
     val paymentInProgress = mutableStateOf(false)
     val minPriceValue = mutableFloatStateOf(0f)
@@ -95,7 +96,13 @@ class HomeViewModel @Inject constructor(
 
     // ✅ профиль для DrawerHeader
     val headerUser = mutableStateOf<User?>(null)
-
+    // Превращаем Flow из репозитория в StateFlow для UI
+    val banners = booksRepo.getBannersFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(1000),
+            initialValue = emptyList() // Пока данные грузятся, список пуст
+        )
 
     // Состояние для диалога
     val showAuthDialog = mutableStateOf(false)

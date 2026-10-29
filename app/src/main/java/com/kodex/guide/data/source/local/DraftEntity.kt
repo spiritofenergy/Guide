@@ -22,6 +22,17 @@ data class DraftEntity(
     val payment: Boolean,
     val location: Boolean,
     val imageUrl: String?, // Base64 или URL
+    
+    // Баннер-поля
+    val isBanner: Boolean = false,
+    val bannerTextTopLeft: String? = null,
+    val bannerTextTopRight: String? = null,
+    val bannerTextBottomLeft: String? = null,
+    val bannerTextBottomRight: String? = null,
+    val bannerPhone: String? = null,
+    val bannerPublishDate: Long = 0L,
+    val bannerExpireDate: Long = 0L,
+    val bannerCategoryId: Int? = null,
 
     // Метаданные
     val createdAt: Long = System.currentTimeMillis()
