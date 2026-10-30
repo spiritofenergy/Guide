@@ -4,28 +4,20 @@ import com.kodex.guide.domain.model.BookCategories
 import kotlinx.serialization.Serializable
 
 @Serializable
-class NavRoutes {
+open class NavRoutes {
 
 
     @Serializable
-    data class MyPostsNavObject(
-        val uid: String = ""
-    )
+    data class MyPostsNavObject(val uid: String = "")
 
     @Serializable
-    data class MyPostEditorNavObject(
-        val bookKey: String = ""
-    )
+    data class MyPostEditorNavObject(val bookKey: String = "")
 
     @Serializable
-    data class HomeDataObject(
-        val uid: String = "",
-        val email: String?
-    )
+    data class HomeDataObject(val uid: String = "", val email: String?)
 
     @Serializable
-    object AdminPanelNavObject {
-    }
+    object AdminPanelNavObject {}
 
     @Serializable
     object ModerationNavObject
@@ -39,8 +31,11 @@ class NavRoutes {
     @Serializable
     object SettingsNavObject
 
+ /*   @Serializable
+    data class DetailsNavObject(val bookKey: String) : NavRoutes()
+*/
     @Serializable
-    data class ParallaxNavObject(
+    data class DetailNavObject(
         val bookId: String = "",
         val title: String = "",
         val description: String = "",
@@ -58,8 +53,8 @@ class NavRoutes {
         val location:  Boolean = false,
         val delivery: Boolean = false,
         val payment: Boolean = false,
-        val latitude: String = "",
-        val longitude: String = "",
+        val latitude: String? = null,
+        val longitude: String? = null,
         val categoryIndex: BookCategories = BookCategories.OTHER,
         val imageUrl: String = "",
         val author: String = "",
@@ -68,8 +63,9 @@ class NavRoutes {
         val ratingsList: List<Int> = emptyList(),
         val hasDelivery: Boolean = true,
         val acceptsCard: Boolean = true,
-        val publishPeriod: Int = 1 )
-                @Serializable
+        val publishPeriod: Int = 1
+    )
+      /*          @Serializable
                 data class ParallaxNavObject1(
                     val bookId: String = "",
                     val title: String = "",
@@ -91,9 +87,9 @@ class NavRoutes {
                     val hasDelivery: Boolean = false,  // 🆕 Наличие доставки
                     val acceptsCard: Boolean = false   // 🆕 Оплата картой
         )
+*/
 
-
-    @Serializable
+    /*@Serializable
     data class DetailNavObject(
         val bookId: String = "",
         val title: String = "",
@@ -106,8 +102,8 @@ class NavRoutes {
         val timestamp: Long = System.currentTimeMillis(),
         val isFaves: Boolean = false,
         val ratingsList: List<Int> = emptyList()
-    )
-
+    )*/
+/*
     @Serializable
     data class PlaceNavObject(
         val bookId: String = "",
@@ -127,7 +123,7 @@ class NavRoutes {
         val isFaves: Boolean = false,
         val ratingsList: List<Int> = emptyList()
 
-    )
+    )*/
 
     fun DetailNavObject.toCommentsNavData(): CommentsNavData {
         return CommentsNavData(

@@ -49,6 +49,20 @@ class BooksRepo_Impl @Inject constructor(
             syncBannersFromFirebase()
         }
     }
+
+    // Поиск в локальной базе (Room)
+     suspend fun getBookFromLocal(key: String): Book? {
+        return dao.getPostByKey(key)
+    }
+    // Поиск в Firebase
+     suspend fun getBookFromRemote(key: String): Result<Book?> {
+        return try {
+            val bookDto = dataSource.getBookByKey(key) // Нужно добавить этот метод в FirebaseBooksDataSource
+            Result.success(bookDto?.toDomain()) // Конвертация DTO в доменную модель
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
     override fun getBooks(
         favsKeysList: List<String>,
         bookFilter: BookFilterState

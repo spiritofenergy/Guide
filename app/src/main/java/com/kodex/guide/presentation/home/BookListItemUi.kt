@@ -43,12 +43,10 @@ import coil.compose.AsyncImage
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.R
-import com.kodex.guide.ui.theme.BoxFilter
 import com.kodex.guide.ui.theme.GreenSea
 import com.kodex.guide.ui.theme.Orange
 import com.kodex.guide.ui.theme.Red
 import com.kodex.guide.ui.theme.TextGray
-import com.kodex.guide.ui.theme.AccentPurple
 import com.kodex.guide.ui.theme.Premium
 
 

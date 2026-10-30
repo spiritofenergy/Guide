@@ -18,9 +18,9 @@ object ParallaxImageCache {
     }
 }
 
-fun Book.toParallaxNavObject(): NavRoutes.ParallaxNavObject {
+fun Book.toParallaxNavObject(): NavRoutes.DetailNavObject {
     ParallaxImageCache.put(key, imageUrl)
-    return NavRoutes.ParallaxNavObject(
+    return NavRoutes.DetailNavObject(
         bookId = key,
         title = title,
         description = description,
@@ -35,8 +35,8 @@ fun Book.toParallaxNavObject(): NavRoutes.ParallaxNavObject {
         payment = payment,
         delivery = delivery,
         ratingsList = ratingsList,
-        latitude = latitude.orEmpty(),
-        longitude = longitude.orEmpty(),
+        latitude = latitude?.toString() ?: "",
+        longitude = longitude?.toString() ?: "",
         timestamp = timeStamp,
         publishPeriod = publishPeriod
 

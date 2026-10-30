@@ -57,6 +57,14 @@ class FirebaseBooksDataSource(
             Log.e("FirebaseBooksDataSource", "Ошибка при удалении просроченных")
         }
     }
+    suspend fun getBookByKey(key: String): BookDTO? {
+        return try {
+            val doc = fireStore.collection(POSTS).document(key).get().await()
+            doc.toObject(BookDTO::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
     suspend fun nextPage(
         pageSize: Long,
         currentKey: String?,

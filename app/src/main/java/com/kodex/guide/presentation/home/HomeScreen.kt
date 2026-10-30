@@ -3,6 +3,7 @@ package com.kodex.guide.presentation.home
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -49,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,6 +59,12 @@ import com.kodex.guide.R
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.presentation.banners.BannerSlider
+import com.kodex.guide.presentation.navigation.BottomMenu
+import com.kodex.guide.presentation.navigation.BottomMenuItem
+import com.kodex.guide.presentation.navigation.CategoryCarousel
+import com.kodex.guide.presentation.navigation.DrawerBody
+import com.kodex.guide.presentation.navigation.DrawerHeader
+import com.kodex.guide.presentation.navigation.MainTopBar
 import com.kodex.guide.presentation.navigation.NavRoutes
 import com.kodex.guide.ui.dialods.FilterDialog
 import com.kodex.guide.ui.theme.Orange
@@ -67,6 +75,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     //savedViewModel: SavedPostsViewModel = hiltViewModel(),
     viewModel: HomeViewModel = hiltViewModel(),
+    navController: NavController,
     navData: NavRoutes.HomeDataObject,
     onBookEditClick: (Book) -> Unit,
     onBookClick: (Book) -> Unit,
@@ -295,7 +304,11 @@ fun HomeScreen(
                     onClick = { onAddClick() },
                     containerColor = Orange.copy(alpha = 0.6F),
                     contentColor = Color.White,
-
+                    modifier = Modifier.border(
+                        width = 1.dp,
+                        color = Orange,
+                        shape = RoundedCornerShape(24.dp)
+                    )
                     ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -458,7 +471,7 @@ fun HomeScreen(
                                             banners = banners,
                                             onBannerClick = { banner ->
                                                 val postKeyToOpen = if (banner.postKey.isNotEmpty()) banner.postKey else banner.key
-                                                onBookClick(Book(key = postKeyToOpen))
+                                                navController.navigate(NavRoutes.DetailNavObject(bookId = postKeyToOpen))
                                             }
                                         )
                                     }

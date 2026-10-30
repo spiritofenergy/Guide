@@ -1,4 +1,4 @@
-package com.kodex.guide.presentation.home
+package com.kodex.guide.presentation.navigation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

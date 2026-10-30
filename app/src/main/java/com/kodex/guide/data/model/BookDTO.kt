@@ -1,22 +1,18 @@
 package com.kodex.guide.data.model
 
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.kodex.guide.data.source.local.BannerEntity
 import com.kodex.guide.domain.model.BookCategories
 
-@Entity(tableName = "books")
 data class BookDTO(
-    @PrimaryKey(autoGenerate = true)
-    //val id: Int = 0,
     val key: String = "",
     val title: String = "",
     val searchTitle: String = title.lowercase(),
     val description: String = "",
     val price: Int = 0,
     val telephone: String = "",
-    val categoryIndex: Any = BookCategories.OTHER.id,
+    val categoryIndex: Double = BookCategories.OTHER.id.toDouble(),
     val imageUrl: String = "",
     val isFavorite: Boolean = false,
     val isAuthor: Boolean = false,
@@ -43,17 +39,15 @@ data class BookDTO(
 
 fun BookDTO.toBannerEntity(): BannerEntity {
     return BannerEntity(
-        key = this.key ?: "",
-        postKey = this.key ?: "", // Связываем баннер с ключом поста
-        telephone = this.telephone ?: "",
-       // categoryIndex = this.categoryIndex ?: 0,
-        imageUrl = this.imageUrl ?: "",
-        authorRole = this.authorRole ?: 0,
-        publishPeriod = this.publishPeriod ?: 0,
-        timeStamp = this.timeStamp ?: System.currentTimeMillis(),
-        authorUid = this.authorUid ?: "",
-        isUploaded = this.isUploaded ?: true,
+        key = this.key,
+        postKey = this.key, // Связываем баннер с ключом поста
+        telephone = this.telephone,
+        imageUrl = this.imageUrl,
+        authorRole = this.authorRole,
+        publishPeriod = this.publishPeriod,
+        timeStamp = this.timeStamp,
+        authorUid = this.authorUid,
+        isUploaded = this.isUploaded,
         isBanner = true, // Принудительно ставим true
-
     )
 }

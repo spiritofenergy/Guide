@@ -38,6 +38,7 @@ import com.kodex.guide.domain.tarif.TariffPolicy
 import com.kodex.guide.domain.tarif.UpgradeDecision
 import com.kodex.guide.domain.tarif.UpgradeManager
 import com.kodex.guide.domain.usecase.ObserveSavedKeysUseCase
+import com.kodex.guide.presentation.navigation.BottomMenuItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -54,13 +55,11 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.text.Typography.registered
 
 // ✅ События для UI (диалоги, навигация)
 sealed class AuthEvent {
@@ -175,7 +174,7 @@ class HomeViewModel @Inject constructor(
                 val book = changedBookList.find { it.key == pData.key }
                 if (book != null) {
                     pData.copy(
-                        isFavorite = book.isFavorite
+                      //  isFavorite = book.isFavorite
                     )
                 } else {
                     pData
@@ -528,14 +527,14 @@ class HomeViewModel @Inject constructor(
             if (changedBook == null) {
                 list + ChangedTempBook(
                     key = book.key,
-                    isFavorite = book.isFavorite,
+                   // isFavorite = book.isFavorite,
                     isDeleted = isDeleted
                 )
             } else {
                 list.map { tempBook ->
                     if (tempBook.key == book.key) {
                         tempBook.copy(
-                            isFavorite = book.isFavorite,
+                           // isFavorite = book.isFavorite,
                             isDeleted = isDeleted
                         )
                     } else {
@@ -631,11 +630,11 @@ class HomeViewModel @Inject constructor(
         }
 
         // Обновляем состояние isFavorite
-        val updatedBook = book.copy(isFavorite = true)
-        mainDb.trackDao().insertPost(updatedBook)
+      //  val updatedBook = book.copy(isFavorite = true)
+       // mainDb.trackDao().insertPost(updatedBook)
 
         // Обновляем UI через bookListUpdate
-        updateChangedBook(updatedBook, isDeleted = false)
+       // updateChangedBook(updatedBook, isDeleted = false)
 
         withContext(Dispatchers.Main) {
             _uiState.emit(MainUiState.Success)

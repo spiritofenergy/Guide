@@ -20,9 +20,6 @@ interface RoomDao {
     @Query("SELECT * FROM books")
     fun getAllPosts(): Flow<List<Book>>
 
-    @Query("SELECT * FROM books WHERE isFavorite = 1")
-    fun getFavoriteBooks(): Flow<List<Book>>
-
     @Query("SELECT * FROM books WHERE authorUid = :uid ORDER BY timeStamp DESC")
     fun observeMyPosts(uid: String): Flow<List<Book>>
 
