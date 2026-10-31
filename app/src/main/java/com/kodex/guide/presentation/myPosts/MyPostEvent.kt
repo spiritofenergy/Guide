@@ -10,6 +10,6 @@ sealed interface MyPostsEvent {
 
     data class Toast(val message: String) : MyPostsEvent
 
-    data class RestoreDraft(val state: PostEditorState) : MyPostsEvent
+    data class RestoreSample(val state: PostEditorState) : MyPostsEvent
     object NavigateBack : MyPostsEvent
 }

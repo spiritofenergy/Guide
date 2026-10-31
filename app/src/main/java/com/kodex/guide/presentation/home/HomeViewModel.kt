@@ -143,24 +143,18 @@ class HomeViewModel @Inject constructor(
             initialValue = emptySet()
         )
     val books: Flow<PagingData<Book>> = combine(
-        savedKeysFlow,
+      //  savedKeysFlow,
         bookFilterStateFlow,
         debounceSearchFlow,
         booksRefreshFlow
-    ) { savedKeys, filter, searchText, _ ->
+    ) {filter, searchText, _ ->
 
-        Triple(
-            savedKeys.toList(),   // ← важно: Set<String> -> List<String>
-            filter,
-            searchText
-        )
-    }.flatMapLatest { (keysList, filter, searchText) ->
-
+        Pair(filter, searchText)
+    }.flatMapLatest { (filter, searchText) ->
         booksRepo.getBooks(
-            keysList,
+            emptyList(), // Передаем пустой список вместо keysList
             filter.copy(searchText = searchText)
         )
-
     }.cachedIn(viewModelScope)
         .combine(bookListUpdate) { pagingData, changedBookList ->
             pagingData.filter { pData ->

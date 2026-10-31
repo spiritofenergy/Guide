@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.util.Base64
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -60,7 +61,7 @@ import kotlinx.coroutines.delay
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ParallaxScreen(
+fun DetailScreen(
     key: String,
     viewModel: DetailsScreenViewModel = hiltViewModel(),
     onBackPressed: () -> Unit,
@@ -94,9 +95,11 @@ fun ParallaxScreen(
 
     // 2. СНАЧАЛА ПРОВЕРКА: Если книга еще грузится, показываем лоадер и ВЫХОДИМ из функции
     if (book == null) {
+        Log.d("MyLog", "Book is null")
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = Orange)
         }
+
         return // <-- ВАЖНО: Код ниже не выполнится, пока book == null
     }
 

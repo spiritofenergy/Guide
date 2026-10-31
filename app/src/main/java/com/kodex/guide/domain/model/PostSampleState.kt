@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * Соответствует SRP: хранит только данные, необходимые для восстановления формы.
  */
 @Serializable
-data class PostDraftState(
+data class PostSampleState(
     val title: String = "",
     val description: String = "",
     val price: Int = 0,
@@ -16,7 +16,7 @@ data class PostDraftState(
     val street: String = "",
     val house: String = "",
     val flat: String = "",
-    val categoryId: Int = 0, // Храним ID категории вместо объекта BookCategories
+    val categoryIndex: BookCategories, // Храним ID категории вместо объекта BookCategories
     val delivery: Boolean = false,
     val payment: Boolean = false,
     val location: Boolean = false,

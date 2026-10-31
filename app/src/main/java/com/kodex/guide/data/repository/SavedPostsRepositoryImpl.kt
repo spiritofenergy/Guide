@@ -30,28 +30,21 @@ class SavedPostsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun save(book: Book) {
-        TODO("Not yet implemented")
+        localSource.insert(book)
     }
-
-    /* override suspend fun save(book: Book) {
-         localSource.insert(book.copy(isFavorite = true))
-     }*/
 
     override suspend fun remove(key: String) {
         localSource.deleteByKey(key)
     }
 
     override suspend fun toggle(book: Book): Boolean {
-        TODO("Not yet implemented")
-    }
+        return if (localSource.exists(book.key)) {
+            localSource.deleteByKey(book.key)
+            false // Вернули false, так как удалили
+        } else {
+            localSource.insert(book)
+            true // Вернули true, так как добавили
+        }
 
-    /*  override suspend fun toggle(book: Book): Boolean {
-          return if (localSource.exists(book.key)) {
-              localSource.deleteByKey(book.key)
-              false
-          } else {
-              localSource.insert(book.copy(isFavorite = true))
-              true
-          }
-      }*/
+    }
 }

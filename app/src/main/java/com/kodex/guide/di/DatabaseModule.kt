@@ -2,7 +2,7 @@ package com.kodex.guide.di
 
 import android.content.Context
 import androidx.room.Room
-import com.kodex.guide.ui.db.DraftDao
+import com.kodex.guide.ui.db.SavedDao
 import com.kodex.guide.ui.db.MainDb
 import com.kodex.guide.ui.db.RoomDao
 import dagger.Module
@@ -10,7 +10,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import org.intellij.lang.annotations.MagicConstant
 import javax.inject.Singleton
 
 @Module
@@ -28,7 +27,7 @@ object DatabaseModule {
     }
     @Provides
     @Singleton
-    fun provideDraftDao(database: MainDb): DraftDao {
+    fun provideDraftDao(database: MainDb): SavedDao {
         return database.draftDao()
     }
 

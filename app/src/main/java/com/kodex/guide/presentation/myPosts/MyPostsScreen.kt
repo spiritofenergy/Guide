@@ -79,11 +79,8 @@ fun MyPostsScreen(
                 is MyPostsEvent.Toast ->
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
 
-                is MyPostsEvent.RestoreDraft -> {
-                    // Здесь должна быть логика восстановления,
-                    // но так как это экран СПИСКА постов, а не редактор,
-                    // это событие сюда приходить не должно.
-                    // Можно просто игнорировать или залогировать.
+                is MyPostsEvent.RestoreSample -> {
+
                 }
                 is MyPostsEvent.NavigateBack -> {
                     onBack() // Если нужно обрабатывать навигацию и здесь
@@ -288,7 +285,7 @@ fun MyPostCard(
 fun StatusBadge(isUploaded: Boolean) {
     val bg = if (isUploaded) Color(0xFF10B981).copy(alpha = 0.15f)
     else Color(0xFFF59E0B).copy(alpha = 0.15f)
-    val text = if (isUploaded) "Опубликован" else "Черновик"
+    val text = if (isUploaded) "Опубликован" else "Образец"
     val color = if (isUploaded) Color(0xFF10B981) else Color(0xFFF59E0B)
     Surface(shape = MaterialTheme.shapes.small, color = bg) {
         Text(

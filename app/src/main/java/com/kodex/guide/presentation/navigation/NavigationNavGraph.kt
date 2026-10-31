@@ -1,6 +1,7 @@
 package com.kodex.guide.presentation.navigation
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.activity.compose.BackHandler
 import androidx.compose.material3.AlertDialog
@@ -20,11 +21,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
 import com.kodex.guide.R
 import com.kodex.guide.data.mapper.toParallaxNavObject
-import com.kodex.guide.domain.model.Book
 import com.kodex.guide.presentation.admin_panel.AdminPanelScreen
 import com.kodex.guide.presentation.admin_panel.ModerationScreen
 import com.kodex.guide.presentation.comments.CommentsScreen
-import com.kodex.guide.presentation.detailScreen.ParallaxScreen
+import com.kodex.guide.presentation.detailScreen.DetailScreen
 import com.kodex.guide.presentation.home.HomeScreen
 import com.kodex.guide.presentation.home.HomeViewModel
 import com.kodex.guide.presentation.login.LoginScreen
@@ -168,8 +168,9 @@ fun NavigationNavGraph(
          // В NavigationNavGraph.kt
          composable<NavRoutes.DetailNavObject> { navEntry ->
              val navData = navEntry.toRoute<NavRoutes.DetailNavObject>()
+             Log.d("MyLog", "2. Навигация открыла DetailScreen. Получен bookId = '${navData.bookId}'")
 
-             ParallaxScreen(
+             DetailScreen(
                  key = navData.bookId, // <-- ПЕРЕДАЕМ ТОЛЬКО КЛЮЧ
                  onBackPressed = { navController.popBackStack() },
                  onNavigateToReviews = { /* TODO */ },

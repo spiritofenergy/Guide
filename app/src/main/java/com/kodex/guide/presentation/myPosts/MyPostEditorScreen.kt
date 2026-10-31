@@ -1,13 +1,11 @@
 package com.kodex.guide.presentation.myPosts
 
 import android.widget.Toast
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -34,7 +32,6 @@ import kotlinx.coroutines.flow.collectLatest
 import coil.compose.AsyncImage
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.BookCategories
-import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.PostEditorState
 import com.kodex.guide.ui.theme.Orange
 import com.kodex.guide.presentation.components.ActionSheetButton
@@ -76,7 +73,7 @@ fun MyPostEditorScreen(
         )
     }
 
-    val draft by viewModel.latestDraft.collectAsStateWithLifecycle()
+   // val draft by viewModel.latestDraft.collectAsStateWithLifecycle()
     val editPost by viewModel.editPost.collectAsState()
     val categoryNames = stringArrayResource(id = R.array.category_add)
 
@@ -122,7 +119,7 @@ fun MyPostEditorScreen(
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
 
                 is MyPostsEvent.NavigateBack -> onSaved()
-                is MyPostsEvent.RestoreDraft -> Unit
+                is MyPostsEvent.RestoreSample -> Unit
             }
         }
     }
@@ -143,19 +140,7 @@ fun MyPostEditorScreen(
             imageUri = uri
         }
 
-    // Загрузка данных
-    LaunchedEffect(draft, bookKey) {
-        if (bookKey.isEmpty() && draft != null && title.isBlank()) {
-            draft?.let { d ->
-                title = d.title; description = d.description; price = d.price
-                telephone = d.telephone; village = d.village; street = d.street
-                house = d.house; flat = d.flat; category = d.category
-                delivery = d.delivery; payment = d.payment; location = d.location
-                publishPeriod = d.publishPeriod
-                existingImageUrl = d.existingImageUrl
-            }
-        }
-    }
+
 
     LaunchedEffect(editPost) {
         editPost?.let { b ->
@@ -177,41 +162,6 @@ fun MyPostEditorScreen(
         }
     }
 
-    // Автосохранение
-    LaunchedEffect(
-        title,
-        description,
-        price,
-        telephone,
-        village,
-        street,
-        house,
-        flat,
-        category,
-        delivery,
-        payment,
-        location,
-        publishPeriod,
-        isBanner,
-        bannerTextTopLeft,
-        bannerTextTopRight,
-        bannerTextBottomLeft,
-        bannerTextBottomRight,
-        bannerPhone,
-        bannerPublishDate,
-        bannerExpireDate,
-        bannerCategoryIndex,
-        existingImageUrl
-    ) {
-        if (bookKey.isEmpty()) {
-            viewModel.autoSaveDraft(
-                PostEditorState(
-                    title, description, price, telephone, village, street, house, flat,
-                    category, delivery, payment, location, publishPeriod, imageUri, existingImageUrl
-                )
-            )
-        }
-    }
 
     LaunchedEffect(bookKey) { viewModel.loadForEdit(bookKey) }
 
@@ -442,7 +392,7 @@ fun MyPostEditorScreen(
                     isLoading = isSavingOrUploading && isPublishing,
                     loadingText = "Отправка…",
                     onClick = {
-                        viewModel.savePost(state = getCurrentState(), publish = true)
+                      //  viewModel.savePost(state = getCurrentState(), publish = true)
                     },
                     modifier = Modifier.weight(1f)
                 )

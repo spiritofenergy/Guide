@@ -1,6 +1,7 @@
 package com.kodex.guide.presentation.home
 
 import android.content.res.Configuration
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
@@ -103,7 +105,7 @@ fun HomeScreen(
 
     val savedViewModel: SavedPostsViewModel = hiltViewModel()
     val savedPosts by savedViewModel.savedPosts.collectAsStateWithLifecycle()
-    val savedKeys by savedViewModel.savedKeys.collectAsStateWithLifecycle()
+    //val savedKeys by savedViewModel.savedKeys.collectAsStateWithLifecycle()
     val ratingsByBook by viewModel.ratingsByBook.collectAsStateWithLifecycle()
     val banners by viewModel.banners.collectAsStateWithLifecycle()
     var isUserRefreshing by remember { mutableStateOf(false) }
@@ -311,7 +313,7 @@ fun HomeScreen(
                     )
                     ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                       imageVector = Icons.Default.Add,
                         contentDescription = "Добавить объявление"
                     )
                 }
@@ -433,7 +435,7 @@ fun HomeScreen(
                                         titleIndex = viewModel.categoryState.value.id,
                                         showEditButton = isAdmin, // ✅ Используем готовую переменную
                                         book = book,
-                                        ratings = ratingsByBook[book.key] ?: book.ratingsList,
+                                       // ratings = ratingsByBook[book.key] ?: book.ratingsList,
                                         isSaved = true,
                                         onBookClick = { bk -> onBookClick(bk) },
                                         onEditClick = { onBookEditClick(it) },
@@ -471,6 +473,8 @@ fun HomeScreen(
                                             banners = banners,
                                             onBannerClick = { banner ->
                                                 val postKeyToOpen = if (banner.postKey.isNotEmpty()) banner.postKey else banner.key
+                                                Log.d("BannerTrace", "1. Клик по баннеру. banner.key=${banner.key}," +
+                                                        " banner.postKey=${banner.postKey} -> Отправляем в Nav: $postKeyToOpen")
                                                 navController.navigate(NavRoutes.DetailNavObject(bookId = postKeyToOpen))
                                             }
                                         )
@@ -480,36 +484,39 @@ fun HomeScreen(
                                 // 2. Посты
                                 if (books.itemCount > 0) {
                                     // Если Paging уже загрузил данные — берем их
-                                    items(count = books.itemCount) { index ->
-                                        val book = books[index]
-                                        if (book != null) {
-                                            val isSaved = savedKeys.contains(book.key)
-                                            BookListItemUi(
-                                                heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
-                                                titleIndex = viewModel.categoryState.value.id,
-                                                showEditButton = isAdmin,
-                                                book = book,
-                                                ratings = ratingsByBook[book.key] ?: book.ratingsList,
-                                                isSaved = isSaved,
-                                                onBookClick = { bk -> onBookClick(bk) },
-                                                onEditClick = { onBookEditClick(it) },
-                                                onDeleteClick = { bookToDelete -> viewModel.onDeleteRequested(bookToDelete) },
-                                                onSavedRoomClick = { savedViewModel.toggle(book) }
-                                            )
-                                        }
+                                    items(
+                                        items = books.itemSnapshotList.items,
+                                        key = { it.key }
+                                    ) { book ->
+                                       // val isSaved = savedKeys.contains(book.key)
+                                        BookListItemUi(
+                                            heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
+                                            titleIndex = viewModel.categoryState.value.id,
+                                            showEditButton = isAdmin,
+                                            book = book,
+                                          //  ratings = ratingsByBook[book.key] ?: book.ratingsList,
+                                           // isSaved = isSaved,
+                                            onBookClick = { bk -> onBookClick(bk) },
+                                            onEditClick = { onBookEditClick(it) },
+                                            onDeleteClick = { bookToDelete -> viewModel.onDeleteRequested(bookToDelete) },
+                                            onSavedRoomClick = { savedViewModel.toggle(book) }
+                                        )
+
                                     }
                                 } else {
                                     // Если Paging пуст (идет фоновая загрузка) — берем кэш из Room
-                                    items(count = lastDisplayedBooks.size) { index ->
-                                        val book = lastDisplayedBooks[index]
-                                        val isSaved = savedKeys.contains(book.key)
+                                    items(
+                                        items = lastDisplayedBooks,
+                                        key = { it.key }
+                                    ) { book ->
+                                       // val isSaved = savedKeys.contains(book.key)
                                         BookListItemUi(
                                             heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
                                             titleIndex = viewModel.categoryState.value.id,
                                             showEditButton = isAdmin,
                                             book = book,
                                             ratings = ratingsByBook[book.key] ?: book.ratingsList,
-                                            isSaved = isSaved,
+                                           // isSaved = isSaved,
                                             onBookClick = { bk -> onBookClick(bk) },
                                             onEditClick = { onBookEditClick(it) },
                                             onDeleteClick = { bookToDelete -> viewModel.onDeleteRequested(bookToDelete) },

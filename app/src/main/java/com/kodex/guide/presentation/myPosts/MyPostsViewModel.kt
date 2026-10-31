@@ -3,7 +3,9 @@ package com.kodex.guide.presentation.myPosts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kodex.guide.data.images.BitmapEncoder
+import com.kodex.guide.data.source.local.PreferenceDataSource
 import com.kodex.guide.domain.model.Book
+import com.kodex.guide.domain.model.PostSampleState
 import com.kodex.guide.domain.model.PostEditorState
 import com.kodex.guide.domain.tarif.AuthStateProvider
 import com.kodex.guide.domain.usecase.*
@@ -19,12 +21,12 @@ class MyPostsViewModel @Inject constructor(
     private val geocodePostAddress: GeocodePostAddressUseCase,
     private val observeMyPosts: ObserveMyPostsUseCase,
     private val getMyPost: GetMyPostUseCase,
-    private val saveDraft: SaveDraftUseCase,
     private val uploadMyPost: UploadMyPostUseCase,
     private val deleteMyPost: DeleteMyPostUseCase,
     private val bitmapEncoder: BitmapEncoder,
     private val authStateProvider: AuthStateProvider,
-    private val observeLatestDraft: ObserveLatestDraftUseCase
+   // private val observeLatestDraft: ObserveLatestDraftUseCase
+        val preferenceDataSource : PreferenceDataSource
 ) : ViewModel() {
 
     // Ошибки валидации
@@ -43,10 +45,6 @@ class MyPostsViewModel @Inject constructor(
     // Пост, который мы редактируем (если key не пустой)
     private val _editPost = MutableStateFlow<Book?>(null)
     val editPost: StateFlow<Book?> = _editPost.asStateFlow()
-
-    // Последний черновик (для автозаполнения нового поста)
-    val latestDraft: StateFlow<PostEditorState?> = observeLatestDraft()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     // Поток событий UI (тосты, навигация)
     private val _uiEvents = MutableSharedFlow<MyPostsEvent>()
@@ -122,13 +120,30 @@ class MyPostsViewModel @Inject constructor(
                 }
 
                 if (!publish) {
-                    saveDraft(book)
-                        .onSuccess {
-                            emitToast("Черновик сохранен")
-                            _uiEvents.emit(MyPostsEvent.NavigateBack)
-                        }
-                        .onFailure { emitToast("Ошибка сохранения: ${it.message}") }
-                } else {
+                    // ✅ Сохраняем образец без фото
+                    try {
+                        val sampleAd = PostSampleState(
+                            title = book.title,
+                            description = book.description,
+                            price = book.price,
+                            telephone = book.telephone,
+                            village = book.village,
+                            street = book.street,
+                            house = book.house,
+                            flat = book.flat,
+                            categoryIndex = book.categoryIndex,
+                            delivery = book.delivery,
+                            payment = book.payment,
+                            location = book.location,
+                        )
+                        preferenceDataSource.saveSampleAd(sampleAd)
+                        emitToast("Объявление сохранено")
+                        _uiEvents.emit(MyPostsEvent.NavigateBack)
+                    } catch (e: Exception) {
+                        emitToast("Ошибка сохранения: ${e.message}")
+                    }
+                }
+                else {
                     uploadMyPost(book)
                         .onSuccess {
                             emitToast("Объявление опубликовано!")
@@ -168,7 +183,7 @@ class MyPostsViewModel @Inject constructor(
                 existingImageUrl = book.imageUrl
             )
             _editPost.value = book
-            savePost(state = state, publish = true)
+           // savePost(state = state, publish = true)
         }
     }
 
@@ -177,11 +192,6 @@ class MyPostsViewModel @Inject constructor(
             deleteMyPost(book)
                 .onSuccess { emitToast("Объявление удалено") }
                 .onFailure { emitToast("Ошибка удаления: ${it.message}") }
-        }
-    }
-    fun autoSaveDraft(state: PostEditorState) {
-        viewModelScope.launch {
-            saveDraft(state)
         }
     }
 

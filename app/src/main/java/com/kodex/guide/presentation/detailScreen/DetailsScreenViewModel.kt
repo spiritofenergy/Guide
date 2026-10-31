@@ -42,14 +42,18 @@ class DetailsScreenViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     init {
-        Log.d("DetailsDebug", "VM создана. bookId = '$bookId'")
+        Log.d("MyLog", "VM создана. bookId = '$bookId'")
         if (bookId.isNotEmpty()) {
             loadBookDetails()
+        }else {
+            Log.e("MyLog", "3. ОШИБКА: bookId пустой! ViewModel не знает, что искать.")
         }
-    }
+        }
 
     private fun loadBookDetails() {
         viewModelScope.launch {
+            Log.d("MyLog", "4. Начинаем загрузку. Ищем книгу с ID = $bookId")
+
             // 1. Локально
             val localBook = booksRepo.getBookFromLocal(bookId)
             if (localBook != null) {
@@ -57,13 +61,17 @@ class DetailsScreenViewModel @Inject constructor(
             }
 
             // 2. Из сети
+            Log.d("MyLog", "4b. Идем в Remote (Firebase)...")
             val remoteBookResult = booksRepo.getBookFromRemote(bookId)
             remoteBookResult.onSuccess { remoteBook ->
                 if (remoteBook != null) {
+                    Log.d("MyLog", "4c. УСПЕХ из Firebase: ${remoteBook.title}")
                     _uiState.value = _uiState.value.copy(book = remoteBook)
+                }else{
+                    Log.e("MyLog", "4c. ОШИБКА: Firebase вернул null (книга с таким ID не существует в коллекции books!)")
                 }
             }.onFailure {
-                Log.e("DetailsDebug", "Ошибка загрузки книги: ${it.message}")
+                Log.e("MyLog", "Ошибка загрузки книги: ${it.message}")
             }
         }
     }
@@ -92,7 +100,7 @@ class DetailsScreenViewModel @Inject constructor(
                     )
                 },
                 onFailure = { error ->
-                    Log.e("DetailsDebug", "Ошибка при отправке рейтинга: ${error.message}")
+                    Log.e("MyLog", "Ошибка при отправке рейтинга: ${error.message}")
                 }
             )
         }
@@ -107,7 +115,7 @@ class DetailsScreenViewModel @Inject constructor(
                 )
             },
             onFailure = { error ->
-                Log.e("DetailsDebug", "Ошибка загрузки комментов: ${error.message}")
+                Log.e("MyLog", "Ошибка загрузки комментов: ${error.message}")
             }
         )
     }
@@ -122,7 +130,7 @@ class DetailsScreenViewModel @Inject constructor(
                 )
             },
             onFailure = { error ->
-                Log.e("DetailsDebug", "Ошибка загрузки рейтинга: ${error.message}")
+                Log.e("MyLog", "Ошибка загрузки рейтинга: ${error.message}")
             }
         )
     }
