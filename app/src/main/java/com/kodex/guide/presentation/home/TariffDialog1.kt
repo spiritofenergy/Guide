@@ -1,6 +1,5 @@
 package com.kodex.guide.presentation.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -20,8 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.ui.theme.GreenSea
 import com.kodex.guide.ui.theme.Premium
 import com.kodex.guide.ui.theme.TextGray
@@ -148,4 +146,49 @@ fun TariffDialog(
         },
         dismissButton = {}
     )
+}
+// ==========================================
+// ПРЕДПРОСМОТРЫ (PREVIEW)
+// ==========================================
+
+@Preview(showBackground = true, name = "Аноним (Гостевой)")
+@Composable
+fun TariffDialogAnonymousPreview() {
+    MaterialTheme {
+        TariffDialog(
+            currentRoleName = "Гостевой",
+            nextRoleName = "Пользователь",
+            nextRequiresPayment = false, // Регистрация бесплатна
+            showNextButton = true,
+            showBusinessButton = false,
+            showPremiumButton = false,
+            showGuestButton = false,
+            onDismiss = {},
+            onNextTariffClick = {},
+            onBusinessClick = {},
+            onPremiumClick = {},
+            onLogoutClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Пользователь (Все кнопки)")
+@Composable
+fun TariffDialogUserPreview() {
+    MaterialTheme {
+        TariffDialog(
+            currentRoleName = "Пользователь",
+            nextRoleName = "Бизнес",
+            nextRequiresPayment = true, // Нужна оплата
+            showNextButton = true,
+            showBusinessButton = true,
+            showPremiumButton = true,
+            showGuestButton = true, // Кнопка "Гостевой" для выхода
+            onDismiss = {},
+            onNextTariffClick = {},
+            onBusinessClick = {},
+            onPremiumClick = {},
+            onLogoutClick = {}
+        )
+    }
 }

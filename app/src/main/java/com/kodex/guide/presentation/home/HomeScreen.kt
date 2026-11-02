@@ -60,6 +60,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
+import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.presentation.banners.BannerSlider
 import com.kodex.guide.presentation.navigation.BottomMenu
 import com.kodex.guide.presentation.navigation.BottomMenuItem
@@ -189,6 +190,7 @@ fun HomeScreen(
 
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    var showAllTariffsDialog by remember { mutableStateOf(false) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -303,7 +305,19 @@ fun HomeScreen(
             // FAB добавляется здесь
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { onAddClick() },
+                    onClick = {
+                        if (userRole == UserRole.ANONYMOUS) {
+                            // ✅ 1. Устанавливаем желаемую роль
+                            viewModel.desiredRole.value = UserRole.USER
+
+                            // ✅ 2. Показываем диалог
+                            viewModel.showAuthDialog.value = true
+                            viewModel.isLogoutDialog.value = false
+
+                        } else {
+                            onAddClick()
+                        }
+                              },
                     containerColor = Orange.copy(alpha = 0.6F),
                     contentColor = Color.White,
                     modifier = Modifier.border(
@@ -548,214 +562,6 @@ fun HomeScreen(
                         )
                     }
                 }
-                /*PullToRefreshBox(
-                    isRefreshing = isUserRefreshing,
-                    onRefresh = {
-                        isUserRefreshing = true
-                        viewModel.refreshBooks()
-                    },
-                    state = state,
-                    modifier = Modifier.fillMaxSize(),
-                    indicator = {
-                        Indicator(
-                            modifier = Modifier
-                                .align(Alignment.TopCenter)
-                                .padding(top = 12.dp),
-                            isRefreshing = books.loadState.refresh is LoadState.Loading,
-                            containerColor = Color.LightGray,
-                            color = Orange,
-                            state = state
-
-                        )
-                    }
-                ) {
-
-                    // Проверяем, какая вкладка сейчас выбрана и каково состояние загрузки
-                    val isSavedTabSelected = viewModel.selectedBottomItemState.intValue == BottomMenuItem.Saved.titleId
-                    val isRefreshing = books.loadState.refresh is LoadState.Loading
-                    val isBooksEmpty = books.itemCount == 0
-
-                    if (isSavedTabSelected) {
-                        // Вкладка "Сохраненные" - всегда показываем список из Room
-                        LazyColumn(
-                            Modifier
-                                .fillMaxSize()
-                                .padding(2.dp)
-                        ) {
-                            if (savedPosts.isEmpty()) {
-                                item {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text("Нет сохраненных объявлений")
-                                    }
-                                }
-                            } else {
-                                items(savedPosts, key = { it.key }) { book ->
-                                    BookListItemUi(
-                                        heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
-                                        titleIndex = viewModel.categoryState.value.id,
-                                        showEditButton = isAdmin,
-                                        book = book,
-                                        ratings = ratingsByBook[book.key] ?: book.ratingsList,
-                                        isSaved = true, // На этой вкладке все книги гарантированно сохранены
-                                        onBookClick = { bk ->
-                                            onBookClick(bk)
-                                        },
-                                        onEditClick = {
-                                            onBookEditClick(it)
-                                        },
-                                        onDeleteClick = { bookToDelete ->
-                                            viewModel.onDeleteRequested(bookToDelete)
-                                        },
-                                        onSavedRoomClick = {
-                                            savedViewModel.toggle(book)
-                                        }
-                                    )
-                                    Spacer(Modifier.padding(5.dp))
-                                }
-                            }
-                        }
-                    } else {
-                        // Вкладка "Главная" (или другие)
-                        if (isRefreshing || isBooksEmpty) {
-                            if (lastDisplayedBooks.isNotEmpty()) {
-                                LazyVerticalStaggeredGrid(
-                                    columns = StaggeredGridCells.Fixed(
-                                        if (viewModel.showTabOneOrTo.value) 1 else 2
-                                    ),
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    items(count = lastDisplayedBooks.size) { index ->
-                                        val book = lastDisplayedBooks[index]
-                                        val isSaved = savedKeys.contains(book.key)
-                                        BookListItemUi(
-                                            heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
-                                            titleIndex = viewModel.categoryState.value.id,
-                                            showEditButton = viewModel.isAdminState.collectAsState().value,
-                                            book = book,
-                                            ratings = ratingsByBook[book.key] ?: book.ratingsList,
-                                            isSaved = isSaved,
-                                            onBookClick = { onBookClick(it) },
-                                            onEditClick = { onBookEditClick(it) },
-                                            onDeleteClick = { viewModel.onDeleteRequested(it) },
-                                            onSavedRoomClick = { savedViewModel.toggle(book) }
-                                        )
-                                    }
-                                }
-                            } else if (!viewModel.hasSelectedCategory.value &&
-                                !hasCompletedBooksRequest
-                            ) {
-                                LazyColumn(
-                                    Modifier
-                                        .fillMaxSize()
-                                        .padding(2.dp)
-                                ) {
-                                    items(savedPosts, key = { it.key }) { book ->
-                                        val isSaved = savedKeys.contains(book.key)
-                                        BookListItemUi(
-                                            heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
-                                            titleIndex = viewModel.categoryState.value.id,
-                                            showEditButton = viewModel.isAdminState.collectAsState().value,
-                                            book = book,
-                                            ratings = ratingsByBook[book.key] ?: book.ratingsList,
-                                            isSaved = isSaved,
-                                            onBookClick = { bk ->
-                                                onBookClick(bk)
-                                            },
-                                            onEditClick = {
-                                                onBookEditClick(it)
-                                            },
-                                            onDeleteClick = { bookToDelete ->
-                                                viewModel.onDeleteRequested(bookToDelete)
-                                            },
-                                            onSavedRoomClick = {
-                                                savedViewModel.toggle(book)
-                                            }
-                                        )
-                                        Spacer(Modifier.padding(5.dp))
-                                    }
-                                }
-                            }
-                        } else {
-                            // Основной список загрузился
-                            LazyVerticalStaggeredGrid(
-                                columns = StaggeredGridCells.Fixed(if (viewModel.showTabOneOrTo.value == true) 1 else 2),
-                                modifier = Modifier
-                                    .fillMaxSize()
-                            ) {
-                                // ✅ Баннер слайдер
-                                item(span = androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan.FullLine) {
-                                   // val banners by viewModel.activeBanners.collectAsStateWithLifecycle()
-                                    if (banners.isNotEmpty()) {
-                                        BannerSlider(
-                                            banners = banners,
-                                            onBannerClick = { banner  ->
-                                                // Берем postKey из баннера. Если его вдруг нет, берем просто key баннера.
-                                                val postKeyToOpen = if (banner.postKey.isNotEmpty()) banner.postKey else banner.key
-
-                                                // Передаем объект Book с нужным ключом в навигацию
-                                                onBookClick(Book(key = postKeyToOpen))
-                                            }
-                                        )
-                                    }
-                                }
-                                
-                                items(count = books.itemCount) { index ->
-                                    val book = books[index]
-                                    if (book != null) {
-                                        val isSaved = savedKeys.contains(book.key)
-                                        BookListItemUi(
-                                            heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
-                                            titleIndex = viewModel.categoryState.value.id,
-                                            showEditButton = viewModel.isAdminState.collectAsState().value,
-                                            book = book,
-                                            ratings = ratingsByBook[book.key] ?: book.ratingsList,
-                                            isSaved = isSaved,
-                                            onBookClick = { bk ->
-                                                onBookClick(bk)
-                                            },
-                                            onEditClick = {
-                                                onBookEditClick(it)
-                                            },
-                                            onDeleteClick = { bookToDelete ->
-                                                viewModel.onDeleteRequested(bookToDelete)
-                                            },
-                                            onSavedRoomClick = {
-                                                savedViewModel.toggle(book)
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    FilterDialog(
-                        showDialog = showFilterDialog,
-                        onConfirm = {
-                            showFilterDialog = false
-                        },
-                        onDismiss = {
-                            showFilterDialog = false
-                        }
-                    )
-                    ShowTariffDialog(viewModel, userRole)
-
-                    // Обёртка для отображения bottom sheet
-                    if (showPaymentSheet.value) {
-                        PaymentBottomSheet(
-                            viewModel = viewModel,
-                            onDismiss = { showPaymentSheet.value = false },
-                            onPaymentSuccess = {
-                                // Можно показать Toast или обновить UI
-                                Toast.makeText(context, "Роль обновлена!", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-                        )
-                    }
-                }*/
             }
         }
     }
