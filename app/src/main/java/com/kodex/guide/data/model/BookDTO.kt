@@ -12,7 +12,7 @@ data class BookDTO(
     val description: String = "",
     val price: Int = 0,
     val telephone: String = "",
-    val categoryIndex: Double = BookCategories.OTHER.id.toDouble(),
+    val categoryIndex: Int = BookCategories.OTHER.id,
     val imageUrl: String = "",
     val isFavorite: Boolean = false,
     val isAuthor: Boolean = false,

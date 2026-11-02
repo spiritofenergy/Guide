@@ -18,13 +18,13 @@ import kotlin.collections.map
 class RelatedBooksRepositoryImpl @Inject constructor() : RelatedBooksRepo {
 
     override suspend fun getRelatedBooks(
-        category: BookCategories,
+        categoryId: Int,
         excludeKey: String
     ): Result<List<Book>> = runCatching {
         withContext(Dispatchers.IO) {
             val snapshot = Firebase.firestore
                 .collection(POSTS)                            // ← как в вашем getBooks
-                .whereEqualTo(CATEGORY_INDEX, category.id)
+                .whereEqualTo(CATEGORY_INDEX, categoryId)
                 .limit(11)
                 .get()
                 .await()

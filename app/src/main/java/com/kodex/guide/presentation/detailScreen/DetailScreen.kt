@@ -67,7 +67,7 @@ fun DetailScreen(
     onBackPressed: () -> Unit,
     onNavigateToReviews: () -> Unit,
     onCommentClick: () -> Unit,
-    bookCategory: BookCategories = BookCategories.OTHER,
+   // bookCategory: BookCategories = BookCategories.OTHER,
     onRelatedBookClick: (Book) -> Unit = {},
     timeService: WorkingHoursService = WorkingHoursServiceImpl(),
 ) {
@@ -107,7 +107,8 @@ fun DetailScreen(
 
     // Запускаем загрузку сопутствующих данных (похожие посты, комменты)
     LaunchedEffect(book.key) {
-        viewModel.loadRelatedBooks(bookCategory, book.key)
+        viewModel.loadRelatedBooks(book.categoryIndex, book.key)
+        Log.d("MyLog", "Loading related books for key: ${book.categoryIndex}")
         viewModel.onEvent(DetailUiEvents.DetailUiEvent.GetCommentsEvent(book.key))
     }
 
@@ -193,7 +194,7 @@ fun DetailScreen(
                 items(relatedBooks) { relatedBook ->
                     BookListItemUi(
                         heightValue = 2,
-                        titleIndex = relatedBook.categoryIndex.id,
+                        titleIndex = relatedBook.categoryIndex,
                         showEditButton = false,
                         book = relatedBook,
                         isSaved = savedKeys.contains(relatedBook.key),

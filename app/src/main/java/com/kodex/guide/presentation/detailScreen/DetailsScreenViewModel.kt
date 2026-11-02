@@ -76,10 +76,10 @@ class DetailsScreenViewModel @Inject constructor(
         }
     }
 
-    fun loadRelatedBooks(category: BookCategories, excludeKey: String) {
+    fun loadRelatedBooks(categoryId: Int, excludeKey: String) {
         viewModelScope.launch {
-            Log.d("MyLog", "➡️ loadRelatedBooks: category=$category, exclude=$excludeKey")
-            getRelatedBooksUseCase(category, excludeKey)
+            Log.d("MyLog", "➡️ loadRelatedBooks: category=$categoryId, exclude=$excludeKey")
+            getRelatedBooksUseCase(categoryId, excludeKey)
                 .onSuccess { list ->
                     Log.d("MyLog", "✅ related loaded: ${list.size} шт")
                     _relatedBooks.value = list

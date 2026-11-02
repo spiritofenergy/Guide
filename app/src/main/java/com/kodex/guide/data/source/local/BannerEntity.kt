@@ -16,7 +16,6 @@ data class BannerEntity(
     val key: String = "",
     val telephone: String = "",
     val postKey: String = "",
-    val categoryIndex: BookCategories = BookCategories.OTHER,
     val imageUrl: String = "",
     val authorRole: Int = 0,  // ✅ Роль автора (UserRole.level)
     val publishPeriod: Int = 1,

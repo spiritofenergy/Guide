@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kodex.guide.data.images.BitmapEncoder
 import com.kodex.guide.data.source.local.PreferenceDataSource
 import com.kodex.guide.domain.model.Book
+import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.PostSampleState
 import com.kodex.guide.domain.model.PostEditorState
 import com.kodex.guide.domain.tarif.AuthStateProvider
@@ -175,7 +176,7 @@ class MyPostsViewModel @Inject constructor(
                 street = book.street,
                 house = book.house,
                 flat = book.flat,
-                category = book.categoryIndex,
+                category = BookCategories.fromId(book.categoryIndex),
                 delivery = book.delivery,
                 payment = book.payment,
                 location = book.location,

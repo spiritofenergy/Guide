@@ -51,7 +51,7 @@ open class NavRoutes {
         val payment: Boolean = false,
         val latitude: String? = null,
         val longitude: String? = null,
-        val categoryIndex: BookCategories = BookCategories.OTHER,
+        val categoryIndex: Int = BookCategories.OTHER.id,
         val imageUrl: String = "",
         val author: String = "",
         val timestamp: Long = System.currentTimeMillis(),

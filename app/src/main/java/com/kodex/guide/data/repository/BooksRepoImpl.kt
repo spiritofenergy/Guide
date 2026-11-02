@@ -77,7 +77,8 @@ class BooksRepo_Impl @Inject constructor(
                 BookFactoryPaging(
                     dataSource,
                     bookFilter,
-                    dao
+                    dao,
+                    externalScope = externalScope
                 )
             }
         ).flow

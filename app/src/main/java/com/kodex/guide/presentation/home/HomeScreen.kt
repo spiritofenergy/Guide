@@ -432,7 +432,7 @@ fun HomeScreen(
                                 items(savedPosts, key = { it.key }) { book ->
                                     BookListItemUi(
                                         heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
-                                        titleIndex = viewModel.categoryState.value.id,
+                                        titleIndex = book.categoryIndex,
                                         showEditButton = isAdmin, // ✅ Используем готовую переменную
                                         book = book,
                                        // ratings = ratingsByBook[book.key] ?: book.ratingsList,
@@ -491,11 +491,11 @@ fun HomeScreen(
                                        // val isSaved = savedKeys.contains(book.key)
                                         BookListItemUi(
                                             heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
-                                            titleIndex = viewModel.categoryState.value.id,
+                                            titleIndex = book.categoryIndex,
                                             showEditButton = isAdmin,
                                             book = book,
-                                          //  ratings = ratingsByBook[book.key] ?: book.ratingsList,
-                                           // isSaved = isSaved,
+                                            ratings = ratingsByBook[book.key] ?: book.ratingsList,
+                                            isSaved = true,
                                             onBookClick = { bk -> onBookClick(bk) },
                                             onEditClick = { onBookEditClick(it) },
                                             onDeleteClick = { bookToDelete -> viewModel.onDeleteRequested(bookToDelete) },
@@ -512,11 +512,11 @@ fun HomeScreen(
                                        // val isSaved = savedKeys.contains(book.key)
                                         BookListItemUi(
                                             heightValue = if (viewModel.showTabOneOrTo.value) 1 else 2,
-                                            titleIndex = viewModel.categoryState.value.id,
+                                            titleIndex = book.categoryIndex, // Получаем индекс категории из бд,
                                             showEditButton = isAdmin,
                                             book = book,
                                             ratings = ratingsByBook[book.key] ?: book.ratingsList,
-                                           // isSaved = isSaved,
+                                            //isSaved = isSaved,
                                             onBookClick = { bk -> onBookClick(bk) },
                                             onEditClick = { onBookEditClick(it) },
                                             onDeleteClick = { bookToDelete -> viewModel.onDeleteRequested(bookToDelete) },

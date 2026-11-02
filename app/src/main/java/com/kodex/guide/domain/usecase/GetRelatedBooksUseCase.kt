@@ -9,10 +9,10 @@ class GetRelatedBooksUseCase @Inject constructor(
     private val repository: RelatedBooksRepo
 ) {
     suspend operator fun invoke(
-        category: BookCategories,
+        categoryId: Int,
         excludeKey: String,
         limit: Int = 10
     ): Result<List<Book>> =
-        repository.getRelatedBooks(category, excludeKey)
+        repository.getRelatedBooks(categoryId, excludeKey)
             .map { list -> list.take(limit) }
 }

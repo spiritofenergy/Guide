@@ -50,6 +50,6 @@ fun Book.toSavedEntity(): SavedEntity {
         delivery = delivery,
         payment = payment,
         location = location,
-        categoryIndexId = categoryIndex.id // или как у вас достается ID категории
+        categoryIndexId = categoryIndex // или как у вас достается ID категории
     )
 }

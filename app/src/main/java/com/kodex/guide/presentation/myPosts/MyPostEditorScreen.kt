@@ -146,7 +146,7 @@ fun MyPostEditorScreen(
         editPost?.let { b ->
             title = b.title; description = b.description; price = b.price.toString()
             telephone = b.telephone; village = b.village; street = b.street
-            house = b.house; flat = b.flat; category = b.categoryIndex
+            house = b.house; flat = b.flat; category = BookCategories.fromId(b.categoryIndex)
             delivery = b.delivery; payment = b.payment; location = b.location
             publishPeriod = b.publishPeriod
             existingImageUrl = b.imageUrl

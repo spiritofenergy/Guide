@@ -16,7 +16,7 @@ data class PostSampleState(
     val street: String = "",
     val house: String = "",
     val flat: String = "",
-    val categoryIndex: BookCategories, // Храним ID категории вместо объекта BookCategories
+    val categoryIndex: Int = 0, // Преобразуем ID в объект Book), // Храним ID категории вместо объекта BookCategories
     val delivery: Boolean = false,
     val payment: Boolean = false,
     val location: Boolean = false,

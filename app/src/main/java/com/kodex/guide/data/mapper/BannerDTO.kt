@@ -10,8 +10,6 @@ fun BannerDTO.toEntity(): BannerEntity {
         id = this.id,
         key = this.key,
         postKey = this.postKey,
-        // Если в DTO categoryIndex это Int, а в Entity это BookCategories, нужно найти по id
-        categoryIndex = BookCategories.entries.find { it.id == this.categoryIndex } ?: BookCategories.OTHER,
         imageUrl = this.imageUrl,
         authorRole = this.authorRole,
         publishPeriod = this.publishPeriod,

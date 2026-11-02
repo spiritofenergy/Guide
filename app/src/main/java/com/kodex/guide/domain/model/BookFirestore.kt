@@ -28,7 +28,7 @@ data class BookFirestore(
         description = description,
         price = price,
         telephone = telephone,
-        categoryIndex = BookCategories.fromId(categoryIndex),
+        //categoryIndex = BookCategories.fromId(categoryIndex),
         imageUrl = imageUrl,
         isAuthor = isAuthor,
         authorRole = authorRole,  // ✅ authorRole → authorRole

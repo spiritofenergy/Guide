@@ -21,7 +21,7 @@ fun BookDTO.toBook(): Book {
         description = description,
         price = price,
         telephone = telephone,
-        categoryIndex = BookCategories.fromId(categoryId),
+        categoryIndex = categoryIndex,
         imageUrl = imageUrl,
         isAuthor = isAuthor,
         authorRole = authorRole,
@@ -52,8 +52,8 @@ fun Book.toBookDTO(): BookDTO {
         description = description,
         price = price,
         telephone = telephone,
-        categoryIndex = categoryIndex.id.toDouble(),
-        categoryName = categoryIndex.name,  // ✅ Имя для обратной совместимости
+        categoryIndex = categoryIndex,
+        //categoryName = categoryIndex.name,  // ✅ Имя для обратной совместимости
         imageUrl = imageUrl,
         isAuthor = isAuthor,
         authorRole = authorRole,  // ✅ authorRole → authorRole
@@ -79,7 +79,6 @@ fun Book.toBannerEntity(): BannerEntity {
         key = this.key,
         postKey = this.key, // Жесткая связь с постом
         telephone = this.telephone,
-        categoryIndex = this.categoryIndex,
         imageUrl = this.imageUrl,
         authorRole = this.authorRole,
         publishPeriod = this.publishPeriod,
@@ -108,7 +107,7 @@ fun BookDTO.toDomain(): Book {
         flat = this.flat,
         latitude = this.latitude?.toString(),
         longitude = this.longitude?.toString(),
-        categoryIndex = BookCategories.OTHER,
+        categoryIndex = this.categoryIndex,
         location = this.location,
         delivery = this.delivery,
         payment = this.payment,

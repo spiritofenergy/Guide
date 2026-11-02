@@ -65,6 +65,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.Book
+import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.RatingData
 import com.kodex.guide.presentation.components.ActionButton
 import com.kodex.guide.presentation.components.ArrowCircleButton
@@ -212,7 +213,7 @@ fun MainContent(
 
                 // Категория по центру
                 Text(
-                    text = stringArrayResource(id = R.array.category_drawer)[book.categoryIndex.id],
+                    text = stringArrayResource(id = R.array.category_drawer)[book.categoryIndex],
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.White,

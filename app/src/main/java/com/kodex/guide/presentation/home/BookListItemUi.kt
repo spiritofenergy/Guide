@@ -63,7 +63,7 @@ fun BookListItemUi(
     heightValue: (Int) = 0,
     titleIndex: Int,
     showEditButton: Boolean = true,
-    book: Book = Book(),
+    book: Book,
     ratings: List<Int> = book.ratingsList,
     isSaved: Boolean = false,
     onEditClick: (Book) -> Unit = {},
@@ -72,14 +72,14 @@ fun BookListItemUi(
     onBookClick: (Book) -> Unit = {},
 ) {
     // ✅ Собираем состояния ВНУТРИ карточки
-    val homeViewModel: HomeViewModel = hiltViewModel() // или передайте через параметры
+  //  val homeViewModel: HomeViewModel = hiltViewModel() // или передайте через параметры
     val savedViewModel: SavedPostsViewModel = hiltViewModel()
 
-    val ratingsMap by homeViewModel.ratingsByBook.collectAsStateWithLifecycle()
+   // val ratingsMap by homeViewModel.ratingsByBook.collectAsStateWithLifecycle()
     val savedKeys by savedViewModel.savedKeys.collectAsStateWithLifecycle()
 
     // Вычисляем локально
-    val ratings = ratingsMap[book.key] ?: book.ratingsList
+  //  val ratings = ratingsMap[book.key] ?: book.ratingsList
     val isSaved = savedKeys.contains(book.key)
 
     val categoryBackgroundColor = when (book.authorRole) {
@@ -133,7 +133,8 @@ fun BookListItemUi(
 
                     // 2. Категория в левом верхнем углу
                     Text(
-                        " " + stringArrayResource(id = R.array.category_drawer)[book.categoryIndex.id] + " ",
+                      " " + stringArrayResource(id = R.array.category_drawer)[book.categoryIndex] + " ",
+
                         fontSize = 18.sp,
                         color = Color.White,
                         fontWeight = FontWeight.Medium,
