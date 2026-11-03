@@ -1,5 +1,6 @@
 package com.kodex.guide.presentation.login.sign_up
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
@@ -59,6 +60,7 @@ fun SignUpScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(46.dp),
+
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -128,12 +130,75 @@ fun SignUpScreen(
             }
        }
   }
-@Preview(showBackground = true)
-@Composable
-fun ShowSingUpLoginScreen(){
-    SignUpScreen(
-        viewModel = viewModel(),
-        onNavigationToMainScreen = {}
 
+@Preview(showBackground = true, showSystemUi = true, widthDp = 360, heightDp = 640)
+@Preview(
+    showBackground = true,
+    showSystemUi = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    name = "Dark Mode"
+)
+@Composable
+fun SignUpScreenDesignPreview() {
+    // Упрощённая версия для дизайна
+    SignUpScreenDesignOnly()
+}
+
+@Composable
+private fun SignUpScreenDesignOnly() {
+    Image(
+        painter = painterResource(id = R.drawable.bereg),
+        contentDescription = "BG",
+        modifier = Modifier.fillMaxSize(),
+        contentScale = ContentScale.Crop,
     )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(46.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.create_account),
+            color = Color.White,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.Serif
+        )
+        Spacer(modifier = Modifier.height(40.dp))
+
+        // Заглушки полей
+        RoundedCornerTextField(
+            text = "Иван Иванов",
+            label = stringResource(R.string.user_name),
+            isPassword = false
+        ) {}
+        Spacer(modifier = Modifier.height(5.dp))
+
+        RoundedCornerTextField(
+            text = "+7 (999) 123-45-67",
+            label = stringResource(R.string.phone_number),
+            isPassword = false
+        ) {}
+        Spacer(modifier = Modifier.height(5.dp))
+
+        RoundedCornerTextField(
+            text = "ivan@example.com",
+            label = stringResource(R.string.login),
+            isPassword = false
+        ) {}
+        Spacer(modifier = Modifier.height(5.dp))
+
+        RoundedCornerTextField(
+            text = "••••••••",
+            label = stringResource(R.string.password),
+            isPassword = true
+        ) {}
+        Spacer(modifier = Modifier.height(5.dp))
+
+        LoginButton(
+            text = stringResource(R.string.enter)
+        ) {}
+    }
 }

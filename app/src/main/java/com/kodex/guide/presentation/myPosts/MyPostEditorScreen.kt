@@ -392,7 +392,7 @@ fun MyPostEditorScreen(
                     isLoading = isSavingOrUploading && isPublishing,
                     loadingText = "Отправка…",
                     onClick = {
-                      //  viewModel.savePost(state = getCurrentState(), publish = true)
+                        viewModel.savePost(state = getCurrentState(), publish = true)
                     },
                     modifier = Modifier.weight(1f)
                 )

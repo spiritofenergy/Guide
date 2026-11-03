@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.kodex.guide.data.source.local.BannerEntity
+import com.kodex.guide.data.source.local.MyPostEntity
 import com.kodex.guide.data.source.local.SavedEntity
 import com.kodex.guide.domain.model.Book
 
@@ -11,14 +12,16 @@ import com.kodex.guide.domain.model.Book
     entities = [
     Book::class,
     SavedEntity::class,
-    BannerEntity::class],
+    BannerEntity::class,
+    MyPostEntity::class],
     version = 7, exportSchema = false)
 @TypeConverters(BookConverter::class)
 abstract class MainDb: RoomDatabase() {
 
     abstract fun draftDao(): SavedDao
-    abstract fun trackDao(): RoomDao
+    abstract fun bookDao(): RoomDao
     abstract fun savedPostsDao(): SavedPostsDao
+    abstract fun myPostDao(): MyPostDao
 
 }
 

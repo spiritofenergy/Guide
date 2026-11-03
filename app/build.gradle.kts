@@ -66,6 +66,7 @@ configurations.all {
 dependencies {
 implementation(libs.room.compiler)
     implementation(libs.firebase.ai)
+    implementation(libs.androidx.work.runtime.ktx)
     // ✅ ТЕСТЫ
   /*  testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

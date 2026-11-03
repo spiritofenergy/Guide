@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.kodex.guide.ui.db.SavedDao
 import com.kodex.guide.ui.db.MainDb
+import com.kodex.guide.ui.db.MyPostDao
 import com.kodex.guide.ui.db.RoomDao
 import dagger.Module
 import dagger.Provides
@@ -34,7 +35,13 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun providePostDao(database: MainDb): RoomDao {
-        return database.trackDao()
+        return database.bookDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMyPostDao(database: MainDb): MyPostDao {
+        return database.myPostDao()
     }
 }
 

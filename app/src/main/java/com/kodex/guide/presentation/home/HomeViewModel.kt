@@ -612,7 +612,7 @@ class HomeViewModel @Inject constructor(
 
     fun insertPost(book: Book) = viewModelScope.launch(Dispatchers.IO) {
         // Проверяем, есть ли уже пост в базе
-        val existingPosts = mainDb.trackDao().getAllPosts().first()
+        val existingPosts = mainDb.bookDao().getAllPosts().first()
         val isAlreadySaved = existingPosts.any { it.key == book.key }
 
         if (isAlreadySaved) {
@@ -731,6 +731,7 @@ class HomeViewModel @Inject constructor(
         } else {
             // Пользователь не авторизован — предлагаем войти
             _authEvents.emit(AuthEvent.ShowLogInDialog)
+
         }
     }
 

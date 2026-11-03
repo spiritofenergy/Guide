@@ -24,10 +24,9 @@ class MyPostsViewModel @Inject constructor(
     private val getMyPost: GetMyPostUseCase,
     private val uploadMyPost: UploadMyPostUseCase,
     private val deleteMyPost: DeleteMyPostUseCase,
+    private val saveMyPost: SaveMyPostUseCase,
     private val bitmapEncoder: BitmapEncoder,
     private val authStateProvider: AuthStateProvider,
-   // private val observeLatestDraft: ObserveLatestDraftUseCase
-        val preferenceDataSource : PreferenceDataSource
 ) : ViewModel() {
 
     // Ошибки валидации
@@ -55,25 +54,20 @@ class MyPostsViewModel @Inject constructor(
         loadMyPosts()
     }
 
+
     private fun loadMyPosts() {
         val uid = authStateProvider.currentUser()?.uid ?: return
         viewModelScope.launch {
             observeMyPosts(uid)
                 .onEach { _myPosts.value = it }
-                .launchIn(viewModelScope)
-        }
-    }
-
+                .launchIn(viewModelScope) } }
     fun loadForEdit(key: String) {
         if (key.isEmpty()) return
         viewModelScope.launch {
             getMyPost(key).onSuccess {
                 _editPost.value = it
             }.onFailure {
-                emitToast("Ошибка загрузки: ${it.message}")
-            }
-        }
-    }
+                emitToast("Ошибка загрузки: ${it.message}") } } }
 
     fun savePost(state: PostEditorState, publish: Boolean) {
         if (_isSavingOrUploading.value) return
@@ -82,19 +76,27 @@ class MyPostsViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
+                // ---------- 1. Собираем Book из состояния формы ----------
                 var book = state.toBook()
+
+                // При редактировании сохраняем key существующего поста,
+                // чтобы saveDraft сделал upsert, а не создал дубликат.
                 _editPost.value?.let { original ->
                     book = book.copy(
                         key = original.key,
                         isUploaded = original.isUploaded
                     )
                 }
+
+                // ---------- 2. Фото ----------
                 if (state.imageUri != null) {
                     val base64Image = bitmapEncoder.imageToBase64(state.imageUri)
                     book = book.copy(imageUrl = base64Image)
                 } else if (state.existingImageUrl.isNotEmpty()) {
                     book = book.copy(imageUrl = state.existingImageUrl)
                 }
+
+                // ---------- 3. Валидация ----------
                 val result = validatePost(book)
                 if (!result.isValid) {
                     _validationErrors.value = result.errors
@@ -103,11 +105,15 @@ class MyPostsViewModel @Inject constructor(
                 }
                 _validationErrors.value = emptyList()
 
+                // ---------- 4. Геокодинг (если включён показ на карте) ----------
                 if (state.location) {
-                    val coordinates = geocodePostAddress(state.village, state.street, state.house)
+                    val coordinates = geocodePostAddress(
+                        state.village, state.street, state.house
+                    )
                     if (coordinates == null) {
                         _validationErrors.value = listOf(
-                            "Не удалось определить координаты по адресу. Проверьте населённый пункт, улицу и дом."
+                            "Не удалось определить координаты по адресу. " +
+                                    "Проверьте населённый пункт, улицу и дом."
                         )
                         emitToast("Не удалось определить координаты по адресу")
                         return@launch
@@ -116,42 +122,38 @@ class MyPostsViewModel @Inject constructor(
                         latitude = coordinates.latitude.toString(),
                         longitude = coordinates.longitude.toString()
                     )
-                } else if (!state.location) {
+                } else {
                     book = book.copy(latitude = null, longitude = null)
                 }
 
-                if (!publish) {
-                    // ✅ Сохраняем образец без фото
-                    try {
-                        val sampleAd = PostSampleState(
-                            title = book.title,
-                            description = book.description,
-                            price = book.price,
-                            telephone = book.telephone,
-                            village = book.village,
-                            street = book.street,
-                            house = book.house,
-                            flat = book.flat,
-                            categoryIndex = book.categoryIndex,
-                            delivery = book.delivery,
-                            payment = book.payment,
-                            location = book.location,
-                        )
-                        preferenceDataSource.saveSampleAd(sampleAd)
-                        emitToast("Объявление сохранено")
-                        _uiEvents.emit(MyPostsEvent.NavigateBack)
-                    } catch (e: Exception) {
-                        emitToast("Ошибка сохранения: ${e.message}")
-                    }
+                // ---------- 5. ВСЕГДА сначала сохраняем в Room ----------
+                // saveDraft вернёт Book с уже сгенерированным key и isUploaded = false.
+                val saveResult = saveMyPost(book)
+                if (saveResult.isFailure) {
+                    emitToast("Ошибка сохранения: ${saveResult.exceptionOrNull()?.message}")
+                    return@launch
                 }
-                else {
-                    uploadMyPost(book)
+                val saved = saveResult.getOrThrow()
+
+                // ---------- 6. Ветвление по кнопке ----------
+                if (!publish) {
+                    // «Сохранить» → только Room, статус «Образец»
+                    emitToast("Объявление сохранено")
+                    _uiEvents.emit(MyPostsEvent.NavigateBack)
+                } else {
+                    // «Отправить» → Room уже сохранён, теперь Firebase (+ баннер, если включён)
+                    uploadMyPost(saved)
                         .onSuccess {
                             emitToast("Объявление опубликовано!")
                             _uiEvents.emit(MyPostsEvent.NavigateBack)
                         }
                         .onFailure {
-                            emitToast("Ошибка публикации: ${it.message}")
+                            // Черновик уже в Room — пользователь вернётся в список
+                            // и сможет дослать кнопкой «Опубл.» на карточке.
+                            emitToast(
+                                "Ошибка отправки: ${it.message}. Сохранено локально"
+                            )
+                            _uiEvents.emit(MyPostsEvent.NavigateBack)
                         }
                 }
             } catch (error: Exception) {
@@ -165,26 +167,13 @@ class MyPostsViewModel @Inject constructor(
             }
         }
     }
+
+
     fun upload(book: Book) {
         viewModelScope.launch {
-            val state = PostEditorState(
-                title = book.title,
-                description = book.description,
-                price = book.price.toString(),
-                telephone = book.telephone,
-                village = book.village,
-                street = book.street,
-                house = book.house,
-                flat = book.flat,
-                category = BookCategories.fromId(book.categoryIndex),
-                delivery = book.delivery,
-                payment = book.payment,
-                location = book.location,
-                imageUri = null,
-                existingImageUrl = book.imageUrl
-            )
-            _editPost.value = book
-           // savePost(state = state, publish = true)
+            uploadMyPost(book)
+                .onSuccess { emitToast("Объявление опубликовано!") }
+                .onFailure { emitToast("Ошибка публикации: ${it.message}") }
         }
     }
 

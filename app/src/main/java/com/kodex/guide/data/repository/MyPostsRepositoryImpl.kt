@@ -54,7 +54,6 @@ class MyPostsRepositoryImpl @Inject constructor(
         withContext(Dispatchers.IO) {
             val uid = auth.uid ?: throw IllegalStateException("Нужен вход в аккаунт")
             val currentRole = userRoleRepo.observeUserRole(uid).first()
-
             val published = book.copy(
                 key = book.key.ifEmpty { UUID.randomUUID().toString() },
                 authorUid = uid,
@@ -62,22 +61,27 @@ class MyPostsRepositoryImpl @Inject constructor(
                 authorRole = currentRole.level,
                 isUploaded = true,
                 searchTitle = book.title.lowercase(),
-                timeStamp = System.currentTimeMillis()
-            )
-
+                timeStamp = System.currentTimeMillis())
             // 1. Сохраняем пост в Firebase
             remote.saveBook(published.toBookDTO()).getOrThrow()
-
             // 2. Сохраняем пост в Room
             dao.insertPost(published)
+            // 3. Баннер — только если реально включён
+            if (published.isBanner) {
+                val bannerEntity = published.toBannerEntity()
+                dao.insertBanners(listOf(bannerEntity))
 
-            // 3. СОЗДАЕМ И СОХРАНЯЕМ БАННЕР (теперь всего 2 строки вместо 15!)
+                val bannerBookDto = published.toBookDTO()
+                remote.saveBannerToFirebase(bannerBookDto)
+                //remote.saveBannerToFirebase(published.toBookDTO())
+            }
+
+            /*// 3. СОЗДАЕМ И СОХРАНЯЕМ БАННЕР (теперь всего 2 строки вместо 15!)
             val bannerEntity = published.toBannerEntity()
             dao.insertBanners(listOf(bannerEntity))
-
             // 4. Сохраняем баннер в Firebase
             val bannerBookDto = published.copy(isBanner = true).toBookDTO()
-            remote.saveBannerToFirebase(bannerBookDto)
+            remote.saveBannerToFirebase(bannerBookDto)*/
         }
     }
 

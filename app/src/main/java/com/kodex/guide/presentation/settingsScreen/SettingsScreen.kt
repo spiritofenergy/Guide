@@ -316,7 +316,14 @@ fun SettingsScreen(
                     icon = Icons.Default.Add,
                     title = stringResource(R.string.create_post),
                     onClick = {
-                        onAddPostClick()
+                        if (userRole == UserRole.ANONYMOUS) {
+                            // ✅ Анонима тоже отправляем на выбор тарифа
+                            viewModelHome.desiredRole.value = UserRole.USER
+                            viewModelHome.showAuthDialog.value = true
+                            viewModelHome.isLogoutDialog.value = false
+                        } else {
+                            onAddPostClick()
+                         }
                     }
                 )
             }
@@ -329,7 +336,11 @@ fun SettingsScreen(
                         if (isAuthorized) {
                             viewModelHome.showLogoutTariffDialog()
                         } else {
-                            viewModelHome.onAuthButtonClick()
+                            viewModelHome.desiredRole.value = UserRole.USER
+                           // viewModelHome.onAuthButtonClick()
+                            // ✅ Включаем флаг напрямую
+                            viewModelHome.showAuthDialog.value = true
+                            viewModelHome.isLogoutDialog.value = false
                         }
                     }
                 )
@@ -398,7 +409,7 @@ fun SettingsScreen(
          ) {
              Text("Сохранить")
          }*/
-
+    }
         // Показываем TariffDialog
         ShowTariffDialog(viewModelHome, userRole)
 
@@ -414,7 +425,7 @@ fun SettingsScreen(
             )
         }
     }
-}
+
 
 
 fun getRoleDisplayName(role: UserRole): String {

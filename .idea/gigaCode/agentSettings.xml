@@ -21,6 +21,9 @@
         <Execute>
           <option name="pattern" value="&quot;E:\24\Guide\gradlew.bat&quot; :app:compileDebugKotlin --no-daemon" />
         </Execute>
+        <Execute>
+          <option name="pattern" value="cd *" />
+        </Execute>
       </list>
     </option>
   </component>
