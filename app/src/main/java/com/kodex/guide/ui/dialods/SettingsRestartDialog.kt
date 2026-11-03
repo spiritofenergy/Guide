@@ -3,12 +3,14 @@ package com.kodex.guide.ui.dialods
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.kodex.guide.ui.theme.DrawerColorBlue
+import com.kodex.guide.ui.theme.Orange
 
 @Composable
 fun SettingsRestartDialog(
@@ -41,7 +43,7 @@ fun SettingsRestartDialog(
                         onDismiss()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = DrawerColorBlue
+                        containerColor = Orange
                     )
                 ) {
                     Text(text = "Отмена")
@@ -66,9 +68,17 @@ fun SettingsRestartDialog(
         )
     }
 }
-
 @Composable
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Dialog Preview")
 fun ShowMyDialog() {
-
+    MaterialTheme { // Обязательно оборачиваем для применения стилей
+        SettingsRestartDialog(
+            showDialog = true, // Включаем отображение
+            onDismiss = {},    // Заглушка для закрытия
+            onConfirm = {},    // Заглушка для подтверждения
+            title = "Сброс пароля",
+            message = "Вы действительно хотите сбросить текущий пароль и получить новый?",
+            confirmButtonText = "Сбросить"
+        )
+    }
 }

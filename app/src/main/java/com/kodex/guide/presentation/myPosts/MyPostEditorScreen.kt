@@ -119,7 +119,33 @@ fun MyPostEditorScreen(
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
 
                 is MyPostsEvent.NavigateBack -> onSaved()
-                is MyPostsEvent.RestoreSample -> Unit
+                is MyPostsEvent.RestoreSample -> {
+
+                    // ⬇⬇⬇ ВОТ ЭТОТ БЛОК ДОЛЖЕН БЫТЬ ОБЯЗАТЕЛЬНО ⬇⬇⬇
+                        val s = event.state
+                        title = s.title
+                        description = s.description
+                        price = s.price
+                        telephone = s.telephone
+                        village = s.village
+                        street = s.street
+                        house = s.house
+                        flat = s.flat
+                        category = s.category
+                        delivery = s.delivery
+                        payment = s.payment
+                        location = s.location
+                        publishPeriod = s.publishPeriod
+                        existingImageUrl = s.existingImageUrl
+
+                        isBanner = s.isBanner
+                        bannerTextTopLeft = s.bannerTextTopLeft
+                        bannerTextTopRight = s.bannerTextTopRight
+                        bannerTextBottomLeft = s.bannerTextBottomLeft
+                        bannerTextBottomRight = s.bannerTextBottomRight
+                        bannerPublishDate = s.bannerPublishDate
+                        bannerExpireDate = s.bannerExpireDate
+                }
             }
         }
     }
@@ -163,7 +189,15 @@ fun MyPostEditorScreen(
     }
 
 
-    LaunchedEffect(bookKey) { viewModel.loadForEdit(bookKey) }
+        // LaunchedEffect(bookKey) { viewModel.loadForEdit(bookKey) }
+
+    LaunchedEffect(bookKey) {
+        if (bookKey.isEmpty()) {
+            viewModel.loadLatestSampleForNewPost()
+        } else {
+            viewModel.loadForEdit(bookKey)
+        }
+    }
 
     val publishPeriodNames = stringArrayResource(id = R.array.publish_period_user)
 
@@ -476,7 +510,7 @@ fun BannerSection(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-                
+
                 OutlinedTextField(
                     value = bannerTextBottomLeft,
                     onValueChange = onBannerTextBottomLeftChange,
@@ -484,64 +518,12 @@ fun BannerSection(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-                
-                OutlinedTextField(
-                    value = bannerTextBottomRight,
-                    onValueChange = onBannerTextBottomRightChange,
-                    label = { Text("Справа снизу") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                
-                OutlinedTextField(
-                    value = bannerPhone,
-                    onValueChange = onBannerPhoneChange,
-                    label = { Text("Телефон") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-                
-                // Категория баннера
-                BannerCategoryDropdown(
-                    bannerCategoryIndex,
-                    bannerCategoryExpanded,
-                    bannerCategoryNames,
-                    onBannerCategoryIndexChange,
-                    onBannerCategoryExpandedChange
-                )
             }
         }
     }
 }
 
-// Выпадающий список категории баннера
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BannerCategoryDropdown(
-    categoryIndex: Int,
-    expanded: Boolean,
-    names: Array<String>,
-    onCategoryChange: (Int) -> Unit,
-    onExpandedChange: (Boolean) -> Unit
-) {
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = onExpandedChange) {
-        OutlinedTextField(
-            value = names.getOrNull(categoryIndex) ?: names.first(),
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Категория баннера") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { onExpandedChange(false) }) {
-            names.forEachIndexed { index, name ->
-                DropdownMenuItem(text = { Text(name) }, onClick = { onCategoryChange(index) })
-            }
-        }
-    }
-}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

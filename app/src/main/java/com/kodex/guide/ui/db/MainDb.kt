@@ -18,10 +18,10 @@ import com.kodex.guide.domain.model.Book
 @TypeConverters(BookConverter::class)
 abstract class MainDb: RoomDatabase() {
 
-    abstract fun draftDao(): SavedDao
-    abstract fun bookDao(): RoomDao
-    abstract fun savedPostsDao(): SavedPostsDao
-    abstract fun myPostDao(): MyPostDao
+    abstract fun savedDao(): SavedDao // Пока свободно
+    abstract fun bookDao(): RoomDao   // BeckUp Firebase
+    abstract fun savedPostsDao(): SavedPostsDao // Сохраненные по кнопке маркера
+    abstract fun myPostDao(): MyPostDao // Мои посты Мною созданные
 
 }
 

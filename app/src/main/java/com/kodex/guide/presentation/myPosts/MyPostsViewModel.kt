@@ -8,12 +8,14 @@ import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.PostSampleState
 import com.kodex.guide.domain.model.PostEditorState
+import com.kodex.guide.domain.model.toEditorState
 import com.kodex.guide.domain.tarif.AuthStateProvider
 import com.kodex.guide.domain.usecase.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
 
 
 @HiltViewModel
@@ -27,6 +29,8 @@ class MyPostsViewModel @Inject constructor(
     private val saveMyPost: SaveMyPostUseCase,
     private val bitmapEncoder: BitmapEncoder,
     private val authStateProvider: AuthStateProvider,
+    private val observeLatestSample: ObserveLatestSampleUseCase
+
 ) : ViewModel() {
 
     // Ошибки валидации
@@ -38,6 +42,7 @@ class MyPostsViewModel @Inject constructor(
     private val _isPublishing = MutableStateFlow(false)
     val isPublishing: StateFlow<Boolean> = _isPublishing.asStateFlow()
 
+
     // Список моих постов
     private val _myPosts = MutableStateFlow<List<Book>>(emptyList())
     val myPosts: StateFlow<List<Book>> = _myPosts.asStateFlow()
@@ -47,7 +52,7 @@ class MyPostsViewModel @Inject constructor(
     val editPost: StateFlow<Book?> = _editPost.asStateFlow()
 
     // Поток событий UI (тосты, навигация)
-    private val _uiEvents = MutableSharedFlow<MyPostsEvent>()
+    private val _uiEvents = MutableSharedFlow<MyPostsEvent>(replay = 1)
     val uiEvents: SharedFlow<MyPostsEvent> = _uiEvents.asSharedFlow()
 
     init {
@@ -60,7 +65,10 @@ class MyPostsViewModel @Inject constructor(
         viewModelScope.launch {
             observeMyPosts(uid)
                 .onEach { _myPosts.value = it }
-                .launchIn(viewModelScope) } }
+                .launchIn(viewModelScope)
+        }
+    }
+
     fun loadForEdit(key: String) {
         if (key.isEmpty()) return
         viewModelScope.launch {
@@ -68,6 +76,21 @@ class MyPostsViewModel @Inject constructor(
                 _editPost.value = it
             }.onFailure {
                 emitToast("Ошибка загрузки: ${it.message}") } } }
+
+
+    /**
+     * Вызывается с экрана, когда bookKey пуст (создание нового объявления).
+     * Берёт последний сохранённый образец и отправляет его в UI через RestoreSample.
+     */
+    fun loadLatestSampleForNewPost() {
+        viewModelScope.launch {
+            val uid = authStateProvider.currentUser()?.uid ?: return@launch
+            val latest = observeLatestSample(uid) ?: return@launch
+
+            // val latest = observeMyPosts(uid).first().firstOrNull() ?: return@launch
+            _uiEvents.emit(MyPostsEvent.RestoreSample(latest.toEditorState()))
+        }
+    }
 
     fun savePost(state: PostEditorState, publish: Boolean) {
         if (_isSavingOrUploading.value) return
@@ -111,6 +134,8 @@ class MyPostsViewModel @Inject constructor(
                         state.village, state.street, state.house
                     )
                     if (coordinates == null) {
+                        android.util.Log.w("MyPostDebug", "Geocode failed")
+
                         _validationErrors.value = listOf(
                             "Не удалось определить координаты по адресу. " +
                                     "Проверьте населённый пункт, улицу и дом."
@@ -127,8 +152,11 @@ class MyPostsViewModel @Inject constructor(
                 }
 
                 // ---------- 5. ВСЕГДА сначала сохраняем в Room ----------
+                android.util.Log.d("MyPostDebug", "saveSample: book=$book")
                 // saveDraft вернёт Book с уже сгенерированным key и isUploaded = false.
                 val saveResult = saveMyPost(book)
+                android.util.Log.d("MyPostDebug", "saveResult=$saveResult")
+
                 if (saveResult.isFailure) {
                     emitToast("Ошибка сохранения: ${saveResult.exceptionOrNull()?.message}")
                     return@launch
@@ -191,4 +219,5 @@ class MyPostsViewModel @Inject constructor(
     private suspend fun emitToast(message: String) {
         _uiEvents.emit(MyPostsEvent.Toast(message))
     }
+
 }

@@ -93,3 +93,29 @@ data class PostEditorState(
         )
     }
 }
+
+
+fun Book.toEditorState(): PostEditorState = PostEditorState(
+    title = title,
+    description = description,
+    price = price.toString(),
+    telephone = telephone,
+    village = village,
+    street = street,
+    house = house,
+    flat = flat,
+    category = BookCategories.fromId(categoryIndex),
+    delivery = delivery,
+    payment = payment,
+    location = location,
+    publishPeriod = publishPeriod,
+    imageUri = null,                  // Uri из Room не восстановить — покажем base64 через existingImageUrl
+    existingImageUrl = "",
+    isBanner = isBanner,
+    bannerTextTopLeft = bannerTextTopLeft,
+    bannerTextTopRight = bannerTextTopRight,
+    bannerTextBottomLeft = bannerTextBottomLeft,
+    bannerTextBottomRight = bannerTextBottomRight,
+    bannerPublishDate = bannerPublishDate,
+    bannerExpireDate = bannerExpireDate,
+)

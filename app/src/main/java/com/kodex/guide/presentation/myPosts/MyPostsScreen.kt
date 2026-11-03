@@ -73,18 +73,18 @@ fun MyPostsScreen(
 
     // ✅ Показываем события ViewModel (тосты)
     // ✅ Показываем события ViewModel (тосты)
+
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
                 is MyPostsEvent.Toast ->
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
 
-                is MyPostsEvent.RestoreSample -> {
+                is MyPostsEvent.RestoreSample -> Unit   // не наш экран — игнорируем
 
-                }
-                is MyPostsEvent.NavigateBack -> {
-                    onBack() // Если нужно обрабатывать навигацию и здесь
-                }
+                is MyPostsEvent.NavigateBack -> onBack()
+
+
             }
         }
     }

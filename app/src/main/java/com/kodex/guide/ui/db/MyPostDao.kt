@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.kodex.guide.data.source.local.MyPostEntity
 import com.kodex.guide.data.source.local.SavedEntity
+import com.kodex.guide.domain.model.Book
 import kotlinx.coroutines.flow.Flow
 
     @Dao
@@ -25,6 +26,8 @@ import kotlinx.coroutines.flow.Flow
 
         @Query("SELECT EXISTS(SELECT 1 FROM mypost WHERE `key` = :key)")
         suspend fun existsByKey(key: String): Boolean
+
+
 
       /*  @Query("SELECT * FROM mypost")
         fun getSavedPosts(): Flow<List<MyPostEntity>>

@@ -7,5 +7,5 @@ import javax.inject.Inject
 class SaveMyPostUseCase @Inject constructor(
     private val repo: MyPostsRepo
 ) {
-    suspend operator fun invoke(book: Book): Result<Book> = repo.saveDraft(book)
+    suspend operator fun invoke(book: Book): Result<Book> = repo.saveSample(book)
 }

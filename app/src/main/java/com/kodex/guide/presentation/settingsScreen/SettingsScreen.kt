@@ -108,7 +108,7 @@ fun SettingsScreen(
             pendingDrawerState = null
         },
         title = "Боковое меню",
-        message = "Чтобы изменения вступили в силу, перезапустите приложение.",
+        message = "Показывать или не показывать боковое меню?",
         confirmButtonText = "OK"
     )
 
@@ -390,25 +390,6 @@ fun SettingsScreen(
                 )
             }
         }
-
-        // === SAVE BUTTON ===
-        /* Button(
-             onClick = {
-                 viewModel.newUserSettingsData = UserSettingsData(
-                     imageFormat = dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_FORMAT] ?: 0,
-                     quality = dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_QUALITY] ?: 0,
-                     size = dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_SIZE] ?: 0
-                 )
-                 viewModel.saveSettings()
-             },
-             modifier = Modifier
-                 .fillMaxWidth()
-                 .padding(horizontal = 16.dp, vertical = 16.dp),
-             colors = ButtonDefaults.buttonColors(containerColor = ButtonColorBlue),
-             shape = RoundedCornerShape(12.dp)
-         ) {
-             Text("Сохранить")
-         }*/
     }
         // Показываем TariffDialog
         ShowTariffDialog(viewModelHome, userRole)

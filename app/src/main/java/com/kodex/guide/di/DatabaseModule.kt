@@ -29,7 +29,7 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDraftDao(database: MainDb): SavedDao {
-        return database.draftDao()
+        return database.savedDao()
     }
 
     @Provides

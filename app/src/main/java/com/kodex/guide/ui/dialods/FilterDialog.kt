@@ -23,6 +23,7 @@ import com.kodex.guide.presentation.castom.PricePickerThumb
 import com.kodex.guide.presentation.castom.RadioButtonSet
 import com.kodex.guide.presentation.home.HomeViewModel
 import com.kodex.guide.ui.theme.DrawerColorBlue
+import com.kodex.guide.ui.theme.Orange
 
 @Composable
 @Preview(showBackground = true)
@@ -30,7 +31,7 @@ fun FilterDialog(
     showDialog: Boolean = false,
     onDismiss: () -> Unit = {},
     onConfirm: () -> Unit = {},
-    title: String = "Order by:",
+    title: String = "Фильтр",
     confirmButtonText: String = "Ok",
     viewModel: HomeViewModel = hiltViewModel()
 
@@ -56,7 +57,7 @@ fun FilterDialog(
                         onDismiss()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = DrawerColorBlue
+                        containerColor = Orange
                     )
                 ) {
                     Text(text = stringResource(R.string.cancel))
