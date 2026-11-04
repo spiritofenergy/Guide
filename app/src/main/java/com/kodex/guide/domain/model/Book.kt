@@ -16,9 +16,10 @@ data class Book(
     val description: String ="",
     val price: Int = 0,
     val telephone: String = "",
-    val categoryIndex: BookCategories = BookCategories.OTHER,
+    val openingHours: String = "",
+    val categoryIndex: Int = BookCategories.OTHER.id,
     val imageUrl: String = "",
-    val isFavorite: Boolean = false,
+    val address: String = "",
     val isAuthor: Boolean = false,
     val authorRole: Int = 0,  // ✅ Роль автора (UserRole.level)
     val publishPeriod: Int = 1,
@@ -37,5 +38,15 @@ data class Book(
     val searchTitle: String = title.lowercase(),
     val authorUid: String = "",        // ✅ владелец (uid из Firebase Auth)
     val isUploaded: Boolean = false,   // ✅ опубликован ли в Firebase
+
+    // ✅ Поля для баннера (если isBanner = true)
+    val isBanner: Boolean = false,
+    val active: Boolean = false,     // 🆕 Флаг что это баннер
+    val bannerTextTopLeft: String = "", // 🆕 Текст слева сверху
+    val bannerTextTopRight: String = "", // 🆕 Текст справа сверху
+    val bannerTextBottomLeft: String = "", // 🆕 Текст слева снизу
+ //   val bannerTextBottomRight: String = "", // 🆕 Текст справа снизу
+    val bannerPublishDate: Long = 0,    // 🆕 Дата публикации баннера
+    val bannerExpireDate: Long = 0,     // 🆕 Дата окончания показа баннера
 
     )

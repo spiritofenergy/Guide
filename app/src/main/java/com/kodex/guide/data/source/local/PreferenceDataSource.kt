@@ -2,7 +2,7 @@ package com.kodex.guide.data.source.local
 
 import android.content.Context
 import androidx.core.content.edit
-import com.kodex.guide.domain.model.PostDraftState
+import com.kodex.guide.domain.model.PostSampleState
 import com.kodex.guide.domain.model.User
 import com.kodex.guide.domain.model.UserRole
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -12,59 +12,44 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
-const val POST_DRAFT_KEY = "post_draft_key"
+
+// ✅ Переименовали ключ с POST_DRAFT_KEY на SAMPLE_AD_KEY
+const val SAMPLE_AD_KEY = "sample_ad_key"
 const val CARD_NUMBER_KEY = "card_number_key"
 const val CARD_EXPIRY_KEY = "card_expiry_key"
 const val SHOW_DRAWER_KEY = "show_drawer_key"
 
-
 @Singleton
-class PreferenceDataSource @Inject constructor(@ApplicationContext
-    context: Context
+class PreferenceDataSource @Inject constructor(
+    @ApplicationContext context: Context
 ) {
-// В PreferenceDataSource.kt
+    private val pref = context.getSharedPreferences(MAIN_PREF, Context.MODE_PRIVATE)
 
-    fun savePostDraft(draft: PostDraftState) {
+    // ===== ОБРАЗЕЦ ОБЪЯВЛЕНИЯ (ранее черновик) =====
+
+    // Сохранить образец
+    fun saveSampleAd(ad: PostSampleState) {
         pref.edit {
-            putString(POST_DRAFT_KEY, Json.encodeToString(draft))
+            putString(SAMPLE_AD_KEY, Json.encodeToString(ad))
         }
     }
-    fun getPostDraft(): PostDraftState? {
+
+    // Получить образец
+    fun getSampleAd(): PostSampleState? {
         return try {
-            val json = pref.getString(POST_DRAFT_KEY, null) ?: return null
+            val json = pref.getString(SAMPLE_AD_KEY, null) ?: return null
             Json.decodeFromString(json)
         } catch (e: Exception) {
             null
         }
     }
 
-    fun clearPostDraft() {
-        pref.edit { remove(POST_DRAFT_KEY) }
-    }
-  /*  // ✅ Сохранение черновика
-    fun savePostDraft1(draft: PostDraftState) {
-        pref.edit {
-            putString(POST_DRAFT_KEY, Json.encodeToString(PostDraftState.serializer(), draft))
-        }
+    // Очистить образец (например, после успешной публикации)
+    fun clearSampleAd() {
+        pref.edit { remove(SAMPLE_AD_KEY) }
     }
 
-    // ✅ Загрузка черновика
-    fun getPostDraft1(): PostDraftState? {
-        return try {
-            val json = pref.getString(POST_DRAFT_KEY, null) ?: return null
-            Json.decodeFromString(PostDraftState.serializer(), json)
-        } catch (e: Exception) {
-            null
-        }
-    }*/
-
-    // ✅ Очистка черновика после успешной публикации
-    fun clearPostDraft1() {
-        pref.edit { remove(POST_DRAFT_KEY) }
-    }
-    //  ключи карты
-
-    // ===== Сохранение данных карты (кроме CVV!) =====
+    // ===== ДАННЫЕ КАРТЫ =====
     fun saveCardData(cardNumber: String, expiry: String) {
         pref.edit {
             putString(CARD_NUMBER_KEY, cardNumber)
@@ -72,12 +57,8 @@ class PreferenceDataSource @Inject constructor(@ApplicationContext
         }
     }
 
-    fun getSavedCardNumber(): String =
-        pref.getString(CARD_NUMBER_KEY, "") ?: ""
-
-    fun getSavedCardExpiry(): String =
-        pref.getString(CARD_EXPIRY_KEY, "") ?: ""
-
+    fun getSavedCardNumber(): String = pref.getString(CARD_NUMBER_KEY, "") ?: ""
+    fun getSavedCardExpiry(): String = pref.getString(CARD_EXPIRY_KEY, "") ?: ""
     fun hasSavedCard(): Boolean = getSavedCardNumber().isNotEmpty()
 
     fun clearCardData() {
@@ -86,27 +67,18 @@ class PreferenceDataSource @Inject constructor(@ApplicationContext
             remove(CARD_EXPIRY_KEY)
         }
     }
-    private val pref = context.getSharedPreferences(MAIN_PREF, Context.MODE_PRIVATE)
 
-    fun saveEmail(key: String, value: String){
-        pref.edit { putString(key, value) } }
-    fun saveName(key: String, value: String){
-        pref.edit { putString(key, value) } }
-    fun savePhone(key: String, value: String){
-        pref.edit { putString(key, value) } }
-    fun savePassword(key: String, value: String){
-        pref.edit { putString(key, value) } }
+    // ===== ПОЛЬЗОВАТЕЛЬ =====
+    fun saveEmail(key: String, value: String) { pref.edit { putString(key, value) } }
+    fun saveName(key: String, value: String) { pref.edit { putString(key, value) } }
+    fun savePhone(key: String, value: String) { pref.edit { putString(key, value) } }
+    fun savePassword(key: String, value: String) { pref.edit { putString(key, value) } }
 
-    fun getEmail(key: String, defValue: String): String{
-        return pref.getString(key, defValue)?: defValue }
-    fun getName(key: String, defValue: String): String{
-        return pref.getString(key, defValue)?: defValue }
-    fun getPhone(key: String, defValue: String): String{
-        return pref.getString(key, defValue)?: defValue }
-    fun getPassword(key: String, defValue: String): String{
-        return pref.getString(key, defValue)?: defValue
-    }
-    // ===== ✅ НОВОЕ: кеш текущего профиля для DrawerHeader =====
+    fun getEmail(key: String, defValue: String): String = pref.getString(key, defValue) ?: defValue
+    fun getName(key: String, defValue: String): String = pref.getString(key, defValue) ?: defValue
+    fun getPhone(key: String, defValue: String): String = pref.getString(key, defValue) ?: defValue
+    fun getPassword(key: String, defValue: String): String = pref.getString(key, defValue) ?: defValue
+
     fun saveUser(user: User) {
         pref.edit {
             putString(UID_KEY, user.uid)
@@ -117,6 +89,7 @@ class PreferenceDataSource @Inject constructor(@ApplicationContext
             putBoolean(IS_REGISTERED_KEY, user.isRegistered)
         }
     }
+
     fun saveRole(role: UserRole) {
         pref.edit { putString(ROLE_KEY, role.name) }
     }
@@ -135,8 +108,6 @@ class PreferenceDataSource @Inject constructor(@ApplicationContext
         )
     }
 
-    /** Сброс кеша сессии при выходе (email/пароль для автологина НЕ трогаем) */
-    // Проверить работу этого кода
     fun clearUserSession() {
         pref.edit {
             remove(UID_KEY)
@@ -145,7 +116,15 @@ class PreferenceDataSource @Inject constructor(@ApplicationContext
             remove(IS_REGISTERED_KEY)
         }
     }
-    companion object{
+
+    // ===== НАСТРОЙКИ UI =====
+    fun saveShowDrawer(show: Boolean) {
+        pref.edit { putBoolean(SHOW_DRAWER_KEY, show) }
+    }
+
+    fun getShowDrawer(): Boolean = pref.getBoolean(SHOW_DRAWER_KEY, true)
+
+    companion object {
         const val MAIN_PREF = "main_pref"
         const val EMAIL_KEY = "email_key"
         const val NAME_KEY = "name_key"
@@ -156,11 +135,4 @@ class PreferenceDataSource @Inject constructor(@ApplicationContext
         const val IS_ANONYMOUS_KEY = "is_anonymous_key"
         const val IS_REGISTERED_KEY = "is_registered_key"
     }
-
-    fun saveShowDrawer(show: Boolean) {
-        pref.edit { putBoolean(SHOW_DRAWER_KEY, show) }
-    }
-
-    fun getShowDrawer(): Boolean =
-        pref.getBoolean(SHOW_DRAWER_KEY, true)
 }

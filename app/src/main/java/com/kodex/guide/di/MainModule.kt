@@ -18,6 +18,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -94,4 +98,23 @@ object   MainModule {
         return PreferenceDataSource(app)
     }
 
+
+    // 1. Создаем аннотацию, чтобы отделить этот scope от других
+    @Retention(AnnotationRetention.RUNTIME)
+    @Qualifier
+    annotation class ApplicationScope
+
+    // 2. Создаем модуль для Hilt
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object CoroutinesModule {
+
+        @Provides
+        @Singleton
+        @ApplicationScope // 👈 Привязываем аннотацию
+        fun provideApplicationScope(): CoroutineScope {
+            // SupervisorJob нужен, чтобы падение одной корутины не убивало весь scope
+            return CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        }
+    }
 }

@@ -30,6 +30,8 @@ import com.kodex.guide.domain.model.FilterType
 import com.kodex.guide.domain.model.Permission
 import com.kodex.guide.domain.model.User
 import com.kodex.guide.domain.model.UserRole
+import com.kodex.guide.domain.repository.PaymentRepository
+import com.kodex.guide.domain.repository.PaymentResult
 import com.kodex.guide.domain.repository.UserRoleRepo
 import com.kodex.guide.domain.role.RolePermissionChecker
 import com.kodex.guide.domain.tarif.ApplyRoleResult
@@ -38,9 +40,11 @@ import com.kodex.guide.domain.tarif.TariffPolicy
 import com.kodex.guide.domain.tarif.UpgradeDecision
 import com.kodex.guide.domain.tarif.UpgradeManager
 import com.kodex.guide.domain.usecase.ObserveSavedKeysUseCase
+import com.kodex.guide.presentation.navigation.BottomMenuItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,13 +58,12 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.text.Typography.registered
 
 // ✅ События для UI (диалоги, навигация)
 sealed class AuthEvent {
@@ -84,7 +87,10 @@ class HomeViewModel @Inject constructor(
     private val authStateProvider: AuthStateProvider,
     private val userAccessRepository: UserAccessRepoImpl,
     private val observeSavedKeysUseCase: ObserveSavedKeysUseCase,
-    ) : ViewModel() {
+    private val paymentRepository: PaymentRepository // ✅ Внедряем контракт
+
+) : ViewModel() {
+    
     val showPaymentSheet = mutableStateOf(false)
     val paymentInProgress = mutableStateOf(false)
     val minPriceValue = mutableFloatStateOf(0f)
@@ -95,7 +101,13 @@ class HomeViewModel @Inject constructor(
 
     // ✅ профиль для DrawerHeader
     val headerUser = mutableStateOf<User?>(null)
-
+    // Превращаем Flow из репозитория в StateFlow для UI
+    val banners = booksRepo.getBannersFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(1000),
+            initialValue = emptyList() // Пока данные грузятся, список пуст
+        )
 
     // Состояние для диалога
     val showAuthDialog = mutableStateOf(false)
@@ -119,6 +131,39 @@ class HomeViewModel @Inject constructor(
     private val _showDrawer = MutableStateFlow(preferenceDataSource.getShowDrawer())
     val showDrawer: StateFlow<Boolean> = _showDrawer.asStateFlow()
 
+    // Состояние загрузки оплаты
+    private val _isPaymentLoading = MutableStateFlow(false)
+    val isPaymentLoading = _isPaymentLoading.asStateFlow()
+
+    // События для UI
+    private val _paymentEvents = Channel<PaymentResult>(Channel.BUFFERED)
+    val paymentEvents = _paymentEvents.receiveAsFlow()
+
+    // Функция оплаты
+    fun processPayment(tariff: UserRole) {
+        viewModelScope.launch {
+            _isPaymentLoading.value = true
+
+            // TODO: Сумму лучше запрашивать с бэкенда, чтобы пользователь не мог ее подменить
+            val amount = if (tariff == UserRole.PREMIUM) 500000 else 250000 // в копейках
+
+            val result = paymentRepository.startPayment(tariff, amount)
+
+            _isPaymentLoading.value = false
+            _paymentEvents.send(result)
+
+            if (result is PaymentResult.Success) {
+                // Обновляем локальную роль пользователя после успешной оплаты
+                // (В продакшене роль должен обновлять бэкенд через вебхук,
+                // а приложение просто запрашивает новый профиль)
+                _userRole.value = tariff
+                showPaymentSheet.value = false
+            }
+        }
+    }
+
+
+
     fun setShowDrawer(show: Boolean) {
         _showDrawer.value = show
         preferenceDataSource.saveShowDrawer(show)
@@ -137,24 +182,18 @@ class HomeViewModel @Inject constructor(
             initialValue = emptySet()
         )
     val books: Flow<PagingData<Book>> = combine(
-        savedKeysFlow,
+      //  savedKeysFlow,
         bookFilterStateFlow,
         debounceSearchFlow,
         booksRefreshFlow
-    ) { savedKeys, filter, searchText, _ ->
+    ) {filter, searchText, _ ->
 
-        Triple(
-            savedKeys.toList(),   // ← важно: Set<String> -> List<String>
-            filter,
-            searchText
-        )
-    }.flatMapLatest { (keysList, filter, searchText) ->
-
+        Pair(filter, searchText)
+    }.flatMapLatest { (filter, searchText) ->
         booksRepo.getBooks(
-            keysList,
+            emptyList(), // Передаем пустой список вместо keysList
             filter.copy(searchText = searchText)
         )
-
     }.cachedIn(viewModelScope)
         .combine(bookListUpdate) { pagingData, changedBookList ->
             pagingData.filter { pData ->
@@ -168,7 +207,7 @@ class HomeViewModel @Inject constructor(
                 val book = changedBookList.find { it.key == pData.key }
                 if (book != null) {
                     pData.copy(
-                        isFavorite = book.isFavorite
+                      //  isFavorite = book.isFavorite
                     )
                 } else {
                     pData
@@ -182,6 +221,7 @@ class HomeViewModel @Inject constructor(
 
     private val _authEvents = MutableSharedFlow<AuthEvent>()
     val authEvents = _authEvents.asSharedFlow()
+
     private val _uiState = MutableSharedFlow<MainUiState>()
     val uiState = _uiState.asSharedFlow()
 
@@ -521,14 +561,14 @@ class HomeViewModel @Inject constructor(
             if (changedBook == null) {
                 list + ChangedTempBook(
                     key = book.key,
-                    isFavorite = book.isFavorite,
+                   // isFavorite = book.isFavorite,
                     isDeleted = isDeleted
                 )
             } else {
                 list.map { tempBook ->
                     if (tempBook.key == book.key) {
                         tempBook.copy(
-                            isFavorite = book.isFavorite,
+                           // isFavorite = book.isFavorite,
                             isDeleted = isDeleted
                         )
                     } else {
@@ -612,7 +652,7 @@ class HomeViewModel @Inject constructor(
 
     fun insertPost(book: Book) = viewModelScope.launch(Dispatchers.IO) {
         // Проверяем, есть ли уже пост в базе
-        val existingPosts = mainDb.trackDao().getAllPosts().first()
+        val existingPosts = mainDb.bookDao().getAllPosts().first()
         val isAlreadySaved = existingPosts.any { it.key == book.key }
 
         if (isAlreadySaved) {
@@ -624,11 +664,11 @@ class HomeViewModel @Inject constructor(
         }
 
         // Обновляем состояние isFavorite
-        val updatedBook = book.copy(isFavorite = true)
-        mainDb.trackDao().insertPost(updatedBook)
+      //  val updatedBook = book.copy(isFavorite = true)
+       // mainDb.trackDao().insertPost(updatedBook)
 
         // Обновляем UI через bookListUpdate
-        updateChangedBook(updatedBook, isDeleted = false)
+       // updateChangedBook(updatedBook, isDeleted = false)
 
         withContext(Dispatchers.Main) {
             _uiState.emit(MainUiState.Success)
@@ -731,6 +771,7 @@ class HomeViewModel @Inject constructor(
         } else {
             // Пользователь не авторизован — предлагаем войти
             _authEvents.emit(AuthEvent.ShowLogInDialog)
+
         }
     }
 

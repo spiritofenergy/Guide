@@ -20,7 +20,16 @@ data class PostEditorState(
     val location: Boolean = false,
     val publishPeriod: Int = 1,       // Период публикации в днях
     val imageUri: Uri? = null,       // Выбранное фото (из галереи или камеры)
-    val existingImageUrl: String = "" // URL/Base64 существующего фото при редактировании
+    val existingImageUrl: String = "", // URL/Base64 существующего фото при редактировании
+    
+    // Баннер-поля
+    val isBanner: Boolean = false,
+    val bannerTextTopLeft: String = "",
+    val bannerTextTopRight: String = "",
+    val bannerTextBottomLeft: String = "",
+    val bannerPublishDate: Long = 0L,
+    val bannerExpireDate: Long = 0L,
+   // val bannerCategoryIndex: Int = 0
 ) {
 
     fun toBook(): Book {
@@ -33,13 +42,21 @@ data class PostEditorState(
             street = street,
             house = house,
             flat = flat,
-            categoryIndex = category,
+            categoryIndex = category.id,
             delivery = delivery,
             payment = payment,
             location = location,
             publishPeriod = publishPeriod,
-            imageUrl = if (imageUri != null) "" else existingImageUrl
-
+            imageUrl = if (imageUri != null) "" else existingImageUrl,
+            
+            // Баннер-поля
+            isBanner = isBanner,
+            bannerTextTopLeft = bannerTextTopLeft,
+            bannerTextTopRight = bannerTextTopRight,
+            bannerTextBottomLeft = bannerTextBottomLeft,
+           // bannerTextBottomRight = bannerTextBottomRight,
+            bannerPublishDate = bannerPublishDate,
+            bannerExpireDate = bannerExpireDate,
         )
     }
 
@@ -56,12 +73,47 @@ data class PostEditorState(
             street = book.street,
             house = book.house,
             flat = book.flat,
-            category = book.categoryIndex,
+            category = BookCategories.fromId(book.categoryIndex),
             delivery = book.delivery,
             payment = book.payment,
             location = book.location,
             publishPeriod = book.publishPeriod,
-            existingImageUrl = book.imageUrl ?: ""
+            existingImageUrl = book.imageUrl ?: "",
+            
+            // Баннер-поля
+            isBanner = book.isBanner,
+            bannerTextTopLeft = book.bannerTextTopLeft,
+            bannerTextTopRight = book.bannerTextTopRight,
+            bannerTextBottomLeft = book.bannerTextBottomLeft,
+         //   bannerTextBottomRight = book.bannerTextBottomRight,
+            bannerPublishDate = book.bannerPublishDate,
+            bannerExpireDate = book.bannerExpireDate,
         )
     }
 }
+
+
+fun Book.toEditorState(): PostEditorState = PostEditorState(
+    title = title,
+    description = description,
+    price = price.toString(),
+    telephone = telephone,
+    village = village,
+    street = street,
+    house = house,
+    flat = flat,
+    category = BookCategories.fromId(categoryIndex),
+    delivery = delivery,
+    payment = payment,
+    location = location,
+    publishPeriod = publishPeriod,
+    imageUri = null,                  // Uri из Room не восстановить — покажем base64 через existingImageUrl
+    existingImageUrl = "",
+    isBanner = isBanner,
+    bannerTextTopLeft = bannerTextTopLeft,
+    bannerTextTopRight = bannerTextTopRight,
+    bannerTextBottomLeft = bannerTextBottomLeft,
+  //  bannerTextBottomRight = bannerTextBottomRight,
+    bannerPublishDate = bannerPublishDate,
+    bannerExpireDate = bannerExpireDate,
+)

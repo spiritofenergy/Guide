@@ -20,7 +20,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.kodex.guide.ui.theme.ButtonColor
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 @Composable
 fun RoundedCornerTextField (
     maxLines: Int = 1,

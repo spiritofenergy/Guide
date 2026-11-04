@@ -30,7 +30,7 @@ class SavedPostsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun save(book: Book) {
-        localSource.insert(book.copy(isFavorite = true))
+        localSource.insert(book)
     }
 
     override suspend fun remove(key: String) {
@@ -40,10 +40,11 @@ class SavedPostsRepositoryImpl @Inject constructor(
     override suspend fun toggle(book: Book): Boolean {
         return if (localSource.exists(book.key)) {
             localSource.deleteByKey(book.key)
-            false
+            false // Вернули false, так как удалили
         } else {
-            localSource.insert(book.copy(isFavorite = true))
-            true
+            localSource.insert(book)
+            true // Вернули true, так как добавили
         }
+
     }
 }

@@ -1,13 +1,11 @@
 package com.kodex.guide.presentation.myPosts
 
 import android.widget.Toast
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -32,7 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import coil.compose.AsyncImage
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.PostEditorState
 import com.kodex.guide.ui.theme.Orange
@@ -75,7 +73,7 @@ fun MyPostEditorScreen(
         )
     }
 
-    val draft by viewModel.latestDraft.collectAsStateWithLifecycle()
+   // val draft by viewModel.latestDraft.collectAsStateWithLifecycle()
     val editPost by viewModel.editPost.collectAsState()
     val categoryNames = stringArrayResource(id = R.array.category_add)
 
@@ -95,6 +93,17 @@ fun MyPostEditorScreen(
     var location by remember { mutableStateOf(false) }
     var publishPeriod by remember { mutableStateOf(1) }
     var publishPeriodExpanded by remember { mutableStateOf(false) }
+    
+    // Баннер-поля
+    var isBanner by remember { mutableStateOf(false) }
+    var bannerTextTopLeft by remember { mutableStateOf("") }
+    var bannerTextTopRight by remember { mutableStateOf("") }
+    var bannerTextBottomLeft by remember { mutableStateOf("") }
+    var bannerPublishDate by remember { mutableStateOf(0L) }
+    var bannerExpireDate by remember { mutableStateOf(0L) }
+    var bannerCategoryIndex by remember { mutableStateOf(0) }
+    var bannerCategoryExpanded by remember { mutableStateOf(false) }
+    
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var existingImageUrl by remember { mutableStateOf("") }
 
@@ -108,7 +117,33 @@ fun MyPostEditorScreen(
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
 
                 is MyPostsEvent.NavigateBack -> onSaved()
-                is MyPostsEvent.RestoreDraft -> Unit
+                is MyPostsEvent.RestoreSample -> {
+
+                    // ⬇⬇⬇ ВОТ ЭТОТ БЛОК ДОЛЖЕН БЫТЬ ОБЯЗАТЕЛЬНО ⬇⬇⬇
+                        val s = event.state
+                        title = s.title
+                        description = s.description
+                        price = s.price
+                        telephone = s.telephone
+                        village = s.village
+                        street = s.street
+                        house = s.house
+                        flat = s.flat
+                        category = s.category
+                        delivery = s.delivery
+                        payment = s.payment
+                        location = s.location
+                        publishPeriod = s.publishPeriod
+                        existingImageUrl = s.existingImageUrl
+
+                      //  isBanner = s.isBanner
+                        bannerTextTopLeft = s.bannerTextTopLeft
+                        bannerTextTopRight = s.bannerTextTopRight
+                        bannerTextBottomLeft = s.bannerTextBottomLeft
+                       // bannerTextBottomRight = s.bannerTextBottomRight
+                        bannerPublishDate = s.bannerPublishDate
+                        bannerExpireDate = s.bannerExpireDate
+                }
             }
         }
     }
@@ -129,59 +164,35 @@ fun MyPostEditorScreen(
             imageUri = uri
         }
 
-    // Загрузка данных
-    LaunchedEffect(draft, bookKey) {
-        if (bookKey.isEmpty() && draft != null && title.isBlank()) {
-            draft?.let { d ->
-                title = d.title; description = d.description; price = d.price
-                telephone = d.telephone; village = d.village; street = d.street
-                house = d.house; flat = d.flat; category = d.category
-                delivery = d.delivery; payment = d.payment; location = d.location
-                publishPeriod = d.publishPeriod
-                existingImageUrl = d.existingImageUrl
-            }
-        }
-    }
+
 
     LaunchedEffect(editPost) {
         editPost?.let { b ->
             title = b.title; description = b.description; price = b.price.toString()
             telephone = b.telephone; village = b.village; street = b.street
-            house = b.house; flat = b.flat; category = b.categoryIndex
+            house = b.house; flat = b.flat; category = BookCategories.fromId(b.categoryIndex)
             delivery = b.delivery; payment = b.payment; location = b.location
             publishPeriod = b.publishPeriod
             existingImageUrl = b.imageUrl
+            
+            // Баннер-поля
+            isBanner = b.isBanner
+            bannerTextTopLeft = b.bannerTextTopLeft
+            bannerTextTopRight = b.bannerTextTopRight
+            bannerTextBottomLeft = b.bannerTextBottomLeft
+            //bannerTextBottomRight = b.bannerTextBottomRight
+            bannerPublishDate = b.bannerPublishDate
+            bannerExpireDate = b.bannerExpireDate
         }
     }
 
-    // Автосохранение
-    LaunchedEffect(
-        title,
-        description,
-        price,
-        telephone,
-        village,
-        street,
-        house,
-        flat,
-        category,
-        delivery,
-        payment,
-        location,
-        publishPeriod,
-        existingImageUrl
-    ) {
+    LaunchedEffect(bookKey) {
         if (bookKey.isEmpty()) {
-            viewModel.autoSaveDraft(
-                PostEditorState(
-                    title, description, price, telephone, village, street, house, flat,
-                    category, delivery, payment, location, publishPeriod, imageUri, existingImageUrl
-                )
-            )
+            viewModel.loadLatestSampleForNewPost()
+        } else {
+            viewModel.loadForEdit(bookKey)
         }
     }
-
-    LaunchedEffect(bookKey) { viewModel.loadForEdit(bookKey) }
 
     val publishPeriodNames = stringArrayResource(id = R.array.publish_period_user)
 
@@ -325,6 +336,32 @@ fun MyPostEditorScreen(
                 publishPeriodNames,
                 onPeriodChange = { publishPeriod = it; publishPeriodExpanded = false },
                 onExpandedChange = { publishPeriodExpanded = it })
+            
+            // Секция баннера
+            BannerSection(
+                isBanner = isBanner,
+                onIsBannerChange = { isBanner = it },
+                bannerTextTopLeft = bannerTextTopLeft,
+                onBannerTextTopLeftChange = { bannerTextTopLeft = it },
+                bannerTextTopRight = bannerTextTopRight,
+                onBannerTextTopRightChange = { bannerTextTopRight = it },
+                bannerTextBottomLeft = bannerTextBottomLeft,
+                onBannerTextBottomLeftChange = { bannerTextBottomLeft = it },
+              //  bannerTextBottomRight = bannerTextBottomRight,
+             //   onBannerTextBottomRightChange = {
+                  //  bannerTextBottomRight = it
+             //                                   },
+               // bannerPhone = bannerPhone,
+            //    onBannerPhoneChange = {
+                //    bannerPhone = it
+                //                      },
+
+             //   bannerCategoryIndex = bannerCategoryIndex,
+              //  onBannerCategoryIndexChange = { bannerCategoryIndex = it; bannerCategoryExpanded = false },
+              //  bannerCategoryExpanded = bannerCategoryExpanded,
+             //   onBannerCategoryExpandedChange = { bannerCategoryExpanded = it },
+              //  bannerCategoryNames = stringArrayResource(id = R.array.category_add)
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -352,7 +389,17 @@ fun MyPostEditorScreen(
                         location = location,
                         publishPeriod = publishPeriod,
                         imageUri = imageUri,
-                        existingImageUrl = existingImageUrl
+                        existingImageUrl = existingImageUrl,
+                        // Баннер-поля
+                        isBanner = isBanner,
+                        bannerTextTopLeft = bannerTextTopLeft,
+                        bannerTextTopRight = bannerTextTopRight,
+                        bannerTextBottomLeft = bannerTextBottomLeft,
+                      //  bannerTextBottomRight = bannerTextBottomRight,
+                     //   bannerPhone = bannerPhone,
+                        bannerPublishDate = System.currentTimeMillis(),
+                        bannerExpireDate = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000),
+                      //  bannerCategoryIndex = bannerCategoryIndex
                     )
                 }
 
@@ -390,8 +437,94 @@ fun MyPostEditorScreen(
     }
 }
 
+// Секция настройки баннера
+@Composable
+fun BannerSection(
+    isBanner: Boolean,
+    onIsBannerChange: (Boolean) -> Unit,
+    bannerTextTopLeft: String,
+    onBannerTextTopLeftChange: (String) -> Unit,
+    bannerTextTopRight: String,
+    onBannerTextTopRightChange: (String) -> Unit,
+    bannerTextBottomLeft: String,
+    onBannerTextBottomLeftChange: (String) -> Unit,
+  //  bannerTextBottomRight: String,
+  //  onBannerTextBottomRightChange: (String) -> Unit,
+  //  bannerPhone: String,
+  //  onBannerPhoneChange: (String) -> Unit,
+ //   bannerCategoryIndex: Int,
+ //   onBannerCategoryIndexChange: (Int) -> Unit,
+  //  bannerCategoryExpanded: Boolean,
+ //   onBannerCategoryExpandedChange: (Boolean) -> Unit,
+  //  bannerCategoryNames: Array<String>
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isBanner) ButtonColorBlue.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp)
+        ) {
+            // Переключатель баннера
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Режим баннера",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = if (isBanner) ButtonColorBlue else MaterialTheme.colorScheme.onSurface
+                )
+                Switch(
+                    checked = isBanner,
+                    onCheckedChange = onIsBannerChange,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = ButtonColorBlue,
+                        checkedTrackColor = ButtonColorBlue.copy(alpha = 0.3f)
+                    )
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Поля баннера (показываем только если включен)
+            if (isBanner) {
+                OutlinedTextField(
+                    value = bannerTextTopLeft,
+                    onValueChange = onBannerTextTopLeftChange,
+                    label = { Text("Текст слева сверху") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                
+                OutlinedTextField(
+                    value = bannerTextTopRight,
+                    onValueChange = onBannerTextTopRightChange,
+                    label = { Text("Ткст справа сверху") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
 
-// Вспомогательный компонент для выпадающего списка
+                OutlinedTextField(
+                    value = bannerTextBottomLeft,
+                    onValueChange = onBannerTextBottomLeftChange,
+                    label = { Text("Текст слева снизу") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+        }
+    }
+}
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDropdown(

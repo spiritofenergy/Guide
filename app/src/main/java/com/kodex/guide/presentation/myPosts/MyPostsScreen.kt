@@ -12,13 +12,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -58,11 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kodex.guide.domain.model.Book
-import com.kodex.bookmarketcompose.R
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.R
 import com.kodex.guide.ui.theme.Orange
 import kotlinx.coroutines.flow.collectLatest
-import com.kodex.guide.presentation.myPosts.MyPostsEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,21 +73,18 @@ fun MyPostsScreen(
 
     // ✅ Показываем события ViewModel (тосты)
     // ✅ Показываем события ViewModel (тосты)
+
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collectLatest { event ->
             when (event) {
                 is MyPostsEvent.Toast ->
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
 
-                is MyPostsEvent.RestoreDraft -> {
-                    // Здесь должна быть логика восстановления,
-                    // но так как это экран СПИСКА постов, а не редактор,
-                    // это событие сюда приходить не должно.
-                    // Можно просто игнорировать или залогировать.
-                }
-                is MyPostsEvent.NavigateBack -> {
-                    onBack() // Если нужно обрабатывать навигацию и здесь
-                }
+                is MyPostsEvent.RestoreSample -> Unit   // не наш экран — игнорируем
+
+                is MyPostsEvent.NavigateBack -> onBack()
+
+
             }
         }
     }
@@ -292,7 +285,7 @@ fun MyPostCard(
 fun StatusBadge(isUploaded: Boolean) {
     val bg = if (isUploaded) Color(0xFF10B981).copy(alpha = 0.15f)
     else Color(0xFFF59E0B).copy(alpha = 0.15f)
-    val text = if (isUploaded) "Опубликован" else "Черновик"
+    val text = if (isUploaded) "Опубликован" else "Образец"
     val color = if (isUploaded) Color(0xFF10B981) else Color(0xFFF59E0B)
     Surface(shape = MaterialTheme.shapes.small, color = bg) {
         Text(

@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.kodex.bookmarketcompose.R
+import com.kodex.guide.R
 import com.kodex.guide.ui.dialods.SettingsRestartDialog
 import com.kodex.guide.presentation.navigation.NavRoutes
 

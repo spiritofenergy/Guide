@@ -15,11 +15,11 @@ plugins {
 }
 
 android {
-    namespace = "com.kodex.bookmarketcompose"
+    namespace = "com.kodex.guide"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.kodex.bookmarketcompose"
+        applicationId = "com.kodex.guide"
         minSdk = 24
         targetSdk = 36
         versionCode = 5
@@ -64,8 +64,10 @@ configurations.all {
 }
 
 dependencies {
-implementation(libs.room.compiler)
+
+    implementation(libs.room.compiler)
     implementation(libs.firebase.ai)
+    implementation(libs.androidx.work.runtime.ktx)
     // ✅ ТЕСТЫ
   /*  testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

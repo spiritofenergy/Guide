@@ -4,28 +4,19 @@ import com.kodex.guide.domain.model.BookCategories
 import kotlinx.serialization.Serializable
 
 @Serializable
-class NavRoutes {
-
-
-    @Serializable
-    data class MyPostsNavObject(
-        val uid: String = ""
-    )
+open class NavRoutes {
 
     @Serializable
-    data class MyPostEditorNavObject(
-        val bookKey: String = ""
-    )
+    data class MyPostsNavObject(val uid: String = "")
 
     @Serializable
-    data class HomeDataObject(
-        val uid: String = "",
-        val email: String?
-    )
+    data class MyPostEditorNavObject(val bookKey: String = "")
 
     @Serializable
-    object AdminPanelNavObject {
-    }
+    data class HomeDataObject(val uid: String = "", val email: String?)
+
+    @Serializable
+    object AdminPanelNavObject {}
 
     @Serializable
     object ModerationNavObject
@@ -40,7 +31,7 @@ class NavRoutes {
     object SettingsNavObject
 
     @Serializable
-    data class ParallaxNavObject(
+    data class DetailNavObject(
         val bookId: String = "",
         val title: String = "",
         val description: String = "",
@@ -58,9 +49,9 @@ class NavRoutes {
         val location:  Boolean = false,
         val delivery: Boolean = false,
         val payment: Boolean = false,
-        val latitude: String = "",
-        val longitude: String = "",
-        val categoryIndex: BookCategories = BookCategories.OTHER,
+        val latitude: String? = null,
+        val longitude: String? = null,
+        val categoryIndex: Int = BookCategories.OTHER.id,
         val imageUrl: String = "",
         val author: String = "",
         val timestamp: Long = System.currentTimeMillis(),
@@ -68,65 +59,7 @@ class NavRoutes {
         val ratingsList: List<Int> = emptyList(),
         val hasDelivery: Boolean = true,
         val acceptsCard: Boolean = true,
-        val publishPeriod: Int = 1 )
-                @Serializable
-                data class ParallaxNavObject1(
-                    val bookId: String = "",
-                    val title: String = "",
-                    val address: String = "",
-                    val street: String = "",           //  Улица
-                    val house: String = "",            // 🆕 Дом
-                    val apartment: String? = null,     //  Квартира (опционально)
-                    val price: Int = 0,
-                    val imageUrl: String = "",
-                    val isOpenNow: Boolean = true,
-                    val openingHours: String = "",
-                    val telephone: String = "",
-                    val website: String = "",
-                    val latitude: String = "",
-                    val longitude: String = "",
-                    val description: String = "",
-                    val categoryIndex: BookCategories = BookCategories.OTHER,
-                    val ratingsList: List<Int> = emptyList(),
-                    val hasDelivery: Boolean = false,  // 🆕 Наличие доставки
-                    val acceptsCard: Boolean = false   // 🆕 Оплата картой
-        )
-
-
-    @Serializable
-    data class DetailNavObject(
-        val bookId: String = "",
-        val title: String = "",
-        val description: String = "",
-        val price: String = "",
-        val telephone: String = "",
-        val categoryIndex: BookCategories = BookCategories.OTHER,
-        val imageUrl: String = "",
-        val author: String = "",
-        val timestamp: Long = System.currentTimeMillis(),
-        val isFaves: Boolean = false,
-        val ratingsList: List<Int> = emptyList()
-    )
-
-    @Serializable
-    data class PlaceNavObject(
-        val bookId: String = "",
-        val title: String = "Уютный уголок",
-        val description: String = "Уютная кофейня в центре города. Мы предлагаем свежую выпечку, авторский кофе и приятную атмосферу для работы и встреч с друзьями. У нас есть бесплатный Wi-Fi, розетки и вежливый персонал.",
-        val price: Int = 0,
-        val categoryIndex: BookCategories = BookCategories.OTHER,
-        val imageUrl: String = "",
-        val author: String = "",
-        val address: String = "ул. Центральная, 15, Москва",
-        val isOpen: Boolean = true,
-        val workTime: String = "09:00 - 22:00",
-        val contact: String = "info@cozyplace.ru",
-        val telephone: String = "+7 (999) 123-45-67",
-        val site: String = "https://cozyplace.ru",
-        val timestamp: Long = System.currentTimeMillis(),
-        val isFaves: Boolean = false,
-        val ratingsList: List<Int> = emptyList()
-
+        val publishPeriod: Int = 1
     )
 
     fun DetailNavObject.toCommentsNavData(): CommentsNavData {

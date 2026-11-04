@@ -3,7 +3,7 @@ package com.kodex.guide.presentation.detailScreen
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kodex.guide.data.repository.BooksRepo_Impl
@@ -11,7 +11,6 @@ import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.RatingData
 import com.kodex.guide.domain.usecase.GetRelatedBooksUseCase
-import com.kodex.guide.presentation.navigation.NavRoutes
 import com.kodex.guide.presentation.detailScreen.states.DetailsUiState
 import com.kodex.guide.presentation.events.DetailUiEvents
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,28 +26,71 @@ import javax.inject.Inject
 @HiltViewModel
 class DetailsScreenViewModel @Inject constructor(
     val booksRepo: BooksRepo_Impl,
-    private val getRelatedBooksUseCase: GetRelatedBooksUseCase   // ✅ НОВОЕ
-
+    private val getRelatedBooksUseCase: GetRelatedBooksUseCase,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    // ✅ НОВОЕ: похожие посты
+
+    // ✅ Достаем "bookId", так как в NavRoutes он называется bookId
+    private val bookId: String = savedStateHandle["bookId"] ?: ""
+
+    // Состояние для похожих постов
     private val _relatedBooks = MutableStateFlow<List<Book>>(emptyList())
     val relatedBooks: StateFlow<List<Book>> = _relatedBooks.asStateFlow()
 
-    fun loadRelatedBooks(category: BookCategories, excludeKey: String) {
-        viewModelScope.launch {
-            Log.d("MyLog", "➡️ loadRelatedBooks: category=$category, exclude=$excludeKey")
-            getRelatedBooksUseCase(category, excludeKey)
-                .onSuccess { list ->
-                    Log.d("MyLog", "✅ related loaded: ${list.size} шт")
-                    _relatedBooks.value = list }
-
-                .onFailure { e -> Log.e("MyLog", "related: ${e.message}") }
-        }
-    }
+    // Основное состояние экрана
     private val _uiState = MutableStateFlow(DetailsUiState())
     val uiState = _uiState.asStateFlow()
 
-  private fun insertRating(ratingData: RatingData, bookId: String) {
+    init {
+        Log.d("MyLog", "VM создана. bookId = '$bookId'")
+        if (bookId.isNotEmpty()) {
+            loadBookDetails()
+        }else {
+            Log.e("MyLog", "3. ОШИБКА: bookId пустой! ViewModel не знает, что искать.")
+        }
+        }
+
+    private fun loadBookDetails() {
+        viewModelScope.launch {
+            Log.d("MyLog", "4. Начинаем загрузку. Ищем книгу с ID = $bookId")
+
+            // 1. Локально
+            val localBook = booksRepo.getBookFromLocal(bookId)
+            if (localBook != null) {
+                _uiState.value = _uiState.value.copy(book = localBook)
+            }
+
+            // 2. Из сети
+            Log.d("MyLog", "4b. Идем в Remote (Firebase)...")
+            val remoteBookResult = booksRepo.getBookFromRemote(bookId)
+            remoteBookResult.onSuccess { remoteBook ->
+                if (remoteBook != null) {
+                    Log.d("MyLog", "4c. УСПЕХ из Firebase: ${remoteBook.title}")
+                    _uiState.value = _uiState.value.copy(book = remoteBook)
+                }else{
+                    Log.e("MyLog", "4c. ОШИБКА: Firebase вернул null (книга с таким ID не существует в коллекции books!)")
+                }
+            }.onFailure {
+                Log.e("MyLog", "Ошибка загрузки книги: ${it.message}")
+            }
+        }
+    }
+
+    fun loadRelatedBooks(categoryId: Int, excludeKey: String) {
+        viewModelScope.launch {
+            Log.d("MyLog", "➡️ loadRelatedBooks: category=$categoryId, exclude=$excludeKey")
+            getRelatedBooksUseCase(categoryId, excludeKey)
+                .onSuccess { list ->
+                    Log.d("MyLog", "✅ related loaded: ${list.size} шт")
+                    _relatedBooks.value = list
+                }
+                .onFailure { e ->
+                    Log.e("MyLog", "related: ${e.message}")
+                }
+        }
+    }
+
+    private fun insertRating(ratingData: RatingData, bookId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val result = booksRepo.submitUserRating(ratingData, bookId)
             result.fold(
@@ -58,13 +100,13 @@ class DetailsScreenViewModel @Inject constructor(
                     )
                 },
                 onFailure = { error ->
-
+                    Log.e("MyLog", "Ошибка при отправке рейтинга: ${error.message}")
                 }
             )
         }
     }
 
-  private fun getBookComments(bookId: String) = viewModelScope.launch(Dispatchers.IO) {
+    private fun getBookComments(bookId: String) = viewModelScope.launch(Dispatchers.IO) {
         val result = booksRepo.getBookComments(bookId)
         result.fold(
             onSuccess = { commentsList ->
@@ -73,7 +115,7 @@ class DetailsScreenViewModel @Inject constructor(
                 )
             },
             onFailure = { error ->
-
+                Log.e("MyLog", "Ошибка загрузки комментов: ${error.message}")
             }
         )
     }
@@ -84,11 +126,11 @@ class DetailsScreenViewModel @Inject constructor(
             onSuccess = { rData ->
                 _uiState.value = uiState.value.copy(
                     showRateDialog = true,
-                    ratingData =  rData?: RatingData()
+                    ratingData = rData ?: RatingData()
                 )
             },
             onFailure = { error ->
-
+                Log.e("MyLog", "Ошибка загрузки рейтинга: ${error.message}")
             }
         )
     }
@@ -106,7 +148,8 @@ class DetailsScreenViewModel @Inject constructor(
             }
             is DetailUiEvents.DetailUiEvent.HideUserRatingDialog -> {
                 _uiState.value = uiState.value.copy(
-                    showRateDialog =false)
+                    showRateDialog = false
+                )
             }
             is DetailUiEvents.DetailUiEvent.InsertRatingDialogEvent -> {
                 insertRating(event.ratingData, event.bookId)
@@ -117,25 +160,24 @@ class DetailsScreenViewModel @Inject constructor(
         }
     }
 
-    // Выносим логику шаринга в отдельную функцию
     suspend fun sharePlace(
         context: Context,
-        place: NavRoutes.ParallaxNavObject,
+        book: Book,
         coroutineScope: CoroutineScope
     ) {
         withContext(Dispatchers.IO) {
             val shareText = buildString {
-                appendLine(place.title)
+                appendLine(book.title)
                 appendLine()
-                appendLine("⭐️ Рейтинг: ${place.ratingsList.average().format(1)}/5")
-                appendLine("📍 Адрес: ${place.address}")
-                appendLine("📞 Телефон: ${place.telephone}")
-                appendLine("🕐 Режим работы: ${place.isOpenNow}")
-                if (place.title.isNotEmpty()) {
-                    appendLine("🌐 Сайт: ${place.title}")
+                appendLine("⭐️ Рейтинг: ${book.ratingsList.average().format(1)}/5")
+                appendLine("📍 Адрес: ${book.address}")
+                appendLine("📞 Телефон: ${book.telephone}")
+                appendLine("🕐 Режим работы: ${book.openingHours}")
+                if (book.title.isNotEmpty()) {
+                    appendLine("🌐 Сайт: ${book.title}")
                 }
                 appendLine()
-                appendLine(place.description)
+                appendLine(book.description)
                 appendLine()
                 appendLine("Поделиться из приложения Guide Тамань")
             }
@@ -152,8 +194,5 @@ class DetailsScreenViewModel @Inject constructor(
         }
     }
 
-    // Функция для форматирования числа
     fun Double.format(digits: Int) = "%.${digits}f".format(this)
-
-
 }
