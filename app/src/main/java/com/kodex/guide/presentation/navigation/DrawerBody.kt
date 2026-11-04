@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.LocalGroceryStore
+import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.runtime.Composable
@@ -237,8 +238,8 @@ fun DrawerBody(
                 )
 
                 DrawerMenuItem(
-                    iconDrawableId = if (isAuthorized) Icons.Default.Logout else Icons.Default.Login,
-                    text = if (isAuthorized) categoryAdmin[3] else categoryAdmin[2],
+                    iconDrawableId = Icons.Default.Payment,
+                    text = categoryAdmin[2],
                     onItemClick = {
                         viewModelHome.onAuthButtonClick()
                         onCloseDrawer()

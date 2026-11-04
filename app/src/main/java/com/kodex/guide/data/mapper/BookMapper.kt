@@ -78,7 +78,6 @@ fun Book.toBannerEntity(): BannerEntity {
     return BannerEntity(
         key = this.key,
         postKey = this.key, // Жесткая связь с постом
-        telephone = this.telephone,
         imageUrl = this.imageUrl,
         authorRole = this.authorRole,
         publishPeriod = this.publishPeriod,
@@ -89,7 +88,7 @@ fun Book.toBannerEntity(): BannerEntity {
         bannerTextTopLeft = this.bannerTextTopLeft,
         bannerTextTopRight = this.bannerTextTopRight,
         bannerTextBottomLeft = this.bannerTextBottomLeft,
-        bannerTextBottomRight = this.bannerTextBottomRight,
+      //  bannerTextBottomRight = this.bannerTextBottomRight,
         bannerPublishDate = System.currentTimeMillis(),
         bannerExpireDate = this.bannerExpireDate
     )

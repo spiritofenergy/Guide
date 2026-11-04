@@ -10,7 +10,6 @@ fun Banner.toEntity(): BannerEntity {
     return BannerEntity(
         id = this.id,
         key = this.key,
-        telephone = this.telephone,
         postKey = this.postKey,
         imageUrl = this.imageUrl,
         authorRole = this.authorRole,
@@ -23,7 +22,7 @@ fun Banner.toEntity(): BannerEntity {
         bannerTextTopLeft = this.bannerTextTopLeft,
         bannerTextTopRight = this.bannerTextTopRight,
         bannerTextBottomLeft = this.bannerTextBottomLeft,
-        bannerTextBottomRight = this.bannerTextBottomRight,
+      //  bannerTextBottomRight = this.bannerTextBottomRight,
         bannerPublishDate = this.bannerPublishDate,
         bannerExpireDate = this.bannerExpireDate
     )
@@ -34,7 +33,6 @@ fun BannerEntity.toDomain(): Banner {
     return Banner(
         id = this.id,
         key = this.key,
-        telephone = this.telephone,
         postKey = this.postKey,
         imageUrl = this.imageUrl,
         authorRole = this.authorRole,
@@ -47,7 +45,7 @@ fun BannerEntity.toDomain(): Banner {
         bannerTextTopLeft = this.bannerTextTopLeft,
         bannerTextTopRight = this.bannerTextTopRight,
         bannerTextBottomLeft = this.bannerTextBottomLeft,
-        bannerTextBottomRight = this.bannerTextBottomRight,
+    //    bannerTextBottomRight = this.bannerTextBottomRight,
         bannerPublishDate = this.bannerPublishDate,
         bannerExpireDate = this.bannerExpireDate
     )
@@ -72,7 +70,7 @@ fun Banner.toDTO(): BannerDTO {
         bannerTextTopLeft = this.bannerTextTopLeft,
         bannerTextTopRight = this.bannerTextTopRight,
         bannerTextBottomLeft = this.bannerTextBottomLeft,
-        bannerTextBottomRight = this.bannerTextBottomRight,
+     //   bannerTextBottomRight = this.bannerTextBottomRight,
         bannerPublishDate = this.bannerPublishDate,
         bannerExpireDate = this.bannerExpireDate
     )
@@ -98,7 +96,7 @@ fun BannerDTO.toDomain(): Banner {
         bannerTextTopLeft = this.bannerTextTopLeft,
         bannerTextTopRight = this.bannerTextTopRight,
         bannerTextBottomLeft = this.bannerTextBottomLeft,
-        bannerTextBottomRight = this.bannerTextBottomRight,
+    //    bannerTextBottomRight = this.bannerTextBottomRight,
         bannerPublishDate = this.bannerPublishDate,
         bannerExpireDate = this.bannerExpireDate
     )

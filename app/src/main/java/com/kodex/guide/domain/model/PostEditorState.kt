@@ -27,11 +27,9 @@ data class PostEditorState(
     val bannerTextTopLeft: String = "",
     val bannerTextTopRight: String = "",
     val bannerTextBottomLeft: String = "",
-    val bannerTextBottomRight: String = "",
-    val bannerPhone: String = "",
     val bannerPublishDate: Long = 0L,
     val bannerExpireDate: Long = 0L,
-    val bannerCategoryIndex: Int = 0
+   // val bannerCategoryIndex: Int = 0
 ) {
 
     fun toBook(): Book {
@@ -56,7 +54,7 @@ data class PostEditorState(
             bannerTextTopLeft = bannerTextTopLeft,
             bannerTextTopRight = bannerTextTopRight,
             bannerTextBottomLeft = bannerTextBottomLeft,
-            bannerTextBottomRight = bannerTextBottomRight,
+           // bannerTextBottomRight = bannerTextBottomRight,
             bannerPublishDate = bannerPublishDate,
             bannerExpireDate = bannerExpireDate,
         )
@@ -87,7 +85,7 @@ data class PostEditorState(
             bannerTextTopLeft = book.bannerTextTopLeft,
             bannerTextTopRight = book.bannerTextTopRight,
             bannerTextBottomLeft = book.bannerTextBottomLeft,
-            bannerTextBottomRight = book.bannerTextBottomRight,
+         //   bannerTextBottomRight = book.bannerTextBottomRight,
             bannerPublishDate = book.bannerPublishDate,
             bannerExpireDate = book.bannerExpireDate,
         )
@@ -115,7 +113,7 @@ fun Book.toEditorState(): PostEditorState = PostEditorState(
     bannerTextTopLeft = bannerTextTopLeft,
     bannerTextTopRight = bannerTextTopRight,
     bannerTextBottomLeft = bannerTextBottomLeft,
-    bannerTextBottomRight = bannerTextBottomRight,
+  //  bannerTextBottomRight = bannerTextBottomRight,
     bannerPublishDate = bannerPublishDate,
     bannerExpireDate = bannerExpireDate,
 )

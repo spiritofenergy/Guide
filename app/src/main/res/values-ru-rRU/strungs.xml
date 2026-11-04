@@ -31,7 +31,7 @@
     <string name="delivery">Доставка</string>
     <string name="location">Показать на карте</string>
     <string name="card_payment">Оплата картой</string>
-    <string name="create_post">Создать пост</string>
+    <string name="create_post">Создать объявление</string>
 
     <!-- AddScreen -->
     <string name="check_data">Проверьте данные</string>

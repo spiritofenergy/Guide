@@ -99,8 +99,6 @@ fun MyPostEditorScreen(
     var bannerTextTopLeft by remember { mutableStateOf("") }
     var bannerTextTopRight by remember { mutableStateOf("") }
     var bannerTextBottomLeft by remember { mutableStateOf("") }
-    var bannerTextBottomRight by remember { mutableStateOf("") }
-    var bannerPhone by remember { mutableStateOf("") }
     var bannerPublishDate by remember { mutableStateOf(0L) }
     var bannerExpireDate by remember { mutableStateOf(0L) }
     var bannerCategoryIndex by remember { mutableStateOf(0) }
@@ -138,11 +136,11 @@ fun MyPostEditorScreen(
                         publishPeriod = s.publishPeriod
                         existingImageUrl = s.existingImageUrl
 
-                        isBanner = s.isBanner
+                      //  isBanner = s.isBanner
                         bannerTextTopLeft = s.bannerTextTopLeft
                         bannerTextTopRight = s.bannerTextTopRight
                         bannerTextBottomLeft = s.bannerTextBottomLeft
-                        bannerTextBottomRight = s.bannerTextBottomRight
+                       // bannerTextBottomRight = s.bannerTextBottomRight
                         bannerPublishDate = s.bannerPublishDate
                         bannerExpireDate = s.bannerExpireDate
                 }
@@ -182,14 +180,11 @@ fun MyPostEditorScreen(
             bannerTextTopLeft = b.bannerTextTopLeft
             bannerTextTopRight = b.bannerTextTopRight
             bannerTextBottomLeft = b.bannerTextBottomLeft
-            bannerTextBottomRight = b.bannerTextBottomRight
+            //bannerTextBottomRight = b.bannerTextBottomRight
             bannerPublishDate = b.bannerPublishDate
             bannerExpireDate = b.bannerExpireDate
         }
     }
-
-
-        // LaunchedEffect(bookKey) { viewModel.loadForEdit(bookKey) }
 
     LaunchedEffect(bookKey) {
         if (bookKey.isEmpty()) {
@@ -352,15 +347,20 @@ fun MyPostEditorScreen(
                 onBannerTextTopRightChange = { bannerTextTopRight = it },
                 bannerTextBottomLeft = bannerTextBottomLeft,
                 onBannerTextBottomLeftChange = { bannerTextBottomLeft = it },
-                bannerTextBottomRight = bannerTextBottomRight,
-                onBannerTextBottomRightChange = { bannerTextBottomRight = it },
-                bannerPhone = bannerPhone,
-                onBannerPhoneChange = { bannerPhone = it },
-                bannerCategoryIndex = bannerCategoryIndex,
-                onBannerCategoryIndexChange = { bannerCategoryIndex = it; bannerCategoryExpanded = false },
-                bannerCategoryExpanded = bannerCategoryExpanded,
-                onBannerCategoryExpandedChange = { bannerCategoryExpanded = it },
-                bannerCategoryNames = stringArrayResource(id = R.array.category_add)
+              //  bannerTextBottomRight = bannerTextBottomRight,
+             //   onBannerTextBottomRightChange = {
+                  //  bannerTextBottomRight = it
+             //                                   },
+               // bannerPhone = bannerPhone,
+            //    onBannerPhoneChange = {
+                //    bannerPhone = it
+                //                      },
+
+             //   bannerCategoryIndex = bannerCategoryIndex,
+              //  onBannerCategoryIndexChange = { bannerCategoryIndex = it; bannerCategoryExpanded = false },
+              //  bannerCategoryExpanded = bannerCategoryExpanded,
+             //   onBannerCategoryExpandedChange = { bannerCategoryExpanded = it },
+              //  bannerCategoryNames = stringArrayResource(id = R.array.category_add)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -395,11 +395,11 @@ fun MyPostEditorScreen(
                         bannerTextTopLeft = bannerTextTopLeft,
                         bannerTextTopRight = bannerTextTopRight,
                         bannerTextBottomLeft = bannerTextBottomLeft,
-                        bannerTextBottomRight = bannerTextBottomRight,
-                        bannerPhone = bannerPhone,
-                        bannerPublishDate = bannerPublishDate,
-                        bannerExpireDate = bannerExpireDate,
-                        bannerCategoryIndex = bannerCategoryIndex
+                      //  bannerTextBottomRight = bannerTextBottomRight,
+                     //   bannerPhone = bannerPhone,
+                        bannerPublishDate = System.currentTimeMillis(),
+                        bannerExpireDate = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000),
+                      //  bannerCategoryIndex = bannerCategoryIndex
                     )
                 }
 
@@ -448,15 +448,15 @@ fun BannerSection(
     onBannerTextTopRightChange: (String) -> Unit,
     bannerTextBottomLeft: String,
     onBannerTextBottomLeftChange: (String) -> Unit,
-    bannerTextBottomRight: String,
-    onBannerTextBottomRightChange: (String) -> Unit,
-    bannerPhone: String,
-    onBannerPhoneChange: (String) -> Unit,
-    bannerCategoryIndex: Int,
-    onBannerCategoryIndexChange: (Int) -> Unit,
-    bannerCategoryExpanded: Boolean,
-    onBannerCategoryExpandedChange: (Boolean) -> Unit,
-    bannerCategoryNames: Array<String>
+  //  bannerTextBottomRight: String,
+  //  onBannerTextBottomRightChange: (String) -> Unit,
+  //  bannerPhone: String,
+  //  onBannerPhoneChange: (String) -> Unit,
+ //   bannerCategoryIndex: Int,
+ //   onBannerCategoryIndexChange: (Int) -> Unit,
+  //  bannerCategoryExpanded: Boolean,
+ //   onBannerCategoryExpandedChange: (Boolean) -> Unit,
+  //  bannerCategoryNames: Array<String>
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -498,7 +498,7 @@ fun BannerSection(
                 OutlinedTextField(
                     value = bannerTextTopLeft,
                     onValueChange = onBannerTextTopLeftChange,
-                    label = { Text("Слева сверху") },
+                    label = { Text("Текст слева сверху") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -506,7 +506,7 @@ fun BannerSection(
                 OutlinedTextField(
                     value = bannerTextTopRight,
                     onValueChange = onBannerTextTopRightChange,
-                    label = { Text("Справа сверху") },
+                    label = { Text("Ткст справа сверху") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -514,7 +514,7 @@ fun BannerSection(
                 OutlinedTextField(
                     value = bannerTextBottomLeft,
                     onValueChange = onBannerTextBottomLeftChange,
-                    label = { Text("Слева снизу") },
+                    label = { Text("Текст слева снизу") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )

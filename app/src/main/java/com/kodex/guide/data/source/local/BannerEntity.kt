@@ -14,7 +14,6 @@ data class BannerEntity(
     val id: Int = 0,
     @PrimaryKey
     val key: String = "",
-    val telephone: String = "",
     val postKey: String = "",
     val imageUrl: String = "",
     val authorRole: Int = 0,  // ✅ Роль автора (UserRole.level)
@@ -29,7 +28,7 @@ data class BannerEntity(
     val bannerTextTopLeft: String = "", // 🆕 Текст слева сверху
     val bannerTextTopRight: String = "", // 🆕 Текст справа сверху
     val bannerTextBottomLeft: String = "", // 🆕 Текст слева снизу
-    val bannerTextBottomRight: String = "", // 🆕 Текст справа снизу
+ //   val bannerTextBottomRight: String = "", // 🆕 Текст справа снизу
     val bannerPublishDate: Long = 0,    // 🆕 Дата публикации баннера
     val bannerExpireDate: Long = 0,     // 🆕 Дата окончания показа баннера
 

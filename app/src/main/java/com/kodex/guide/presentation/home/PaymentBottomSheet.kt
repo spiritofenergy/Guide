@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 fun PaymentBottomSheet(
     viewModel: HomeViewModel,
     onDismiss: () -> Unit,
+    isLoading: Boolean = false,
     onPaymentSuccess: () -> Unit
 
 ) {

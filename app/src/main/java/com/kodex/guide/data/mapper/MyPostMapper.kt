@@ -2,6 +2,7 @@ package com.kodex.guide.data.mapper
 
 import com.kodex.guide.data.source.local.MyPostEntity
 import com.kodex.guide.domain.model.Book
+import com.kodex.guide.data.model.BannerDTO
 
 object MyPostMapper {
         fun entityToDomain(e: MyPostEntity): Book = Book(
@@ -29,7 +30,7 @@ object MyPostMapper {
             bannerTextTopLeft = e.bannerTextTopLeft,
             bannerTextTopRight = e.bannerTextTopRight,
             bannerTextBottomLeft = e.bannerTextBottomLeft,
-            bannerTextBottomRight = e.bannerTextBottomRight,
+         //   bannerTextBottomRight = e.bannerTextBottomRight,
             bannerPublishDate = e.bannerPublishDate,
             bannerExpireDate = e.bannerExpireDate,
             // Поля ниже отсутствуют в MyPostEntity, поэтому ставим дефолты
@@ -64,10 +65,31 @@ object MyPostMapper {
             bannerTextTopLeft = b.bannerTextTopLeft,
             bannerTextTopRight = b.bannerTextTopRight,
             bannerTextBottomLeft = b.bannerTextBottomLeft,
-            bannerTextBottomRight = b.bannerTextBottomRight,
+          //  bannerTextBottomRight = b.bannerTextBottomRight,
             bannerPublishDate = b.bannerPublishDate,
             bannerExpireDate = b.bannerExpireDate,
             // ⚠️ ОБЯЗАТЕЛЬНО обновляем дату при каждом сохранении, иначе сортировка сломается
             updatedAt = System.currentTimeMillis()
         )
     }
+
+
+fun Book.toBannerDTO(): BannerDTO {
+    return BannerDTO(
+        key = key,
+        imageUrl = imageUrl ?: "",
+        authorRole = authorRole,
+        publishPeriod = publishPeriod,
+        timeStamp = timeStamp,
+        authorUid = authorUid,
+        isUploaded = isUploaded,
+
+        // ✅ ВОТ ОНИ - НАШИ ПОЛЯ!
+        isBanner = true,
+        bannerTextTopLeft = bannerTextTopLeft,
+        bannerTextTopRight = bannerTextTopRight,
+        bannerTextBottomLeft = bannerTextBottomLeft,
+        bannerPublishDate = bannerPublishDate,
+        bannerExpireDate = bannerExpireDate
+    )
+}

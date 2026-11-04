@@ -6,6 +6,7 @@ package com.kodex.guide.data.source.remote
  import com.google.firebase.firestore.FirebaseFirestore
  import com.google.firebase.firestore.Query
  import com.kodex.guide.data.mapper.toFirebaseFields
+ import com.kodex.guide.data.model.BannerDTO
  import com.kodex.guide.data.model.BookDTO
  import com.kodex.guide.data.model.BooksPageDTO
  import com.kodex.guide.data.model.RatingDataDTO
@@ -29,10 +30,10 @@ class FirebaseBooksDataSource(
 
     ) {
 
-    suspend fun getActiveBannersFromFirebase(): Result<List<BookDTO>> {
+    suspend fun getActiveBannersFromFirebase(): Result<List<BannerDTO>> {
         return try {
             val querySnapshot = fireStore.collection(BANNERS).get().await()
-            val banners = querySnapshot.toObjects(BookDTO::class.java)
+            val banners = querySnapshot.toObjects(BannerDTO::class.java)
             Result.success(banners)
         } catch (e: Exception) {
             Result.failure(e)
@@ -121,7 +122,7 @@ class FirebaseBooksDataSource(
            Result.failure(e)
        }
    }
-    suspend fun saveBannerToFirebase(banner: BookDTO): Result<Unit> {
+    suspend fun saveBannerToFirebase(banner: BannerDTO): Result<Unit> {
         return try {
             val db = fireStore.collection(BANNERS) // Отдельная коллекция
             val key = if (banner.key.isEmpty()) db.document().id else banner.key

@@ -24,6 +24,8 @@ import com.kodex.guide.ui.theme.GreenSea
 import com.kodex.guide.ui.theme.Premium
 import com.kodex.guide.ui.theme.TextGray
 
+
+
 @Composable
 fun TariffDialog(
     currentRoleName: String,
@@ -58,16 +60,22 @@ fun TariffDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                if (nextRoleName != null) {
+                // === МИНИМАЛЬНОЕ ИЗМЕНЕНИЕ: Собираем доступные тарифы в список ===
+                val availableRoles = mutableListOf<String>()
+                if (showNextButton && nextRoleName != null) availableRoles.add(nextRoleName)
+                if (showBusinessButton) availableRoles.add("Бизнес")
+                if (showPremiumButton) availableRoles.add(premiumRoleName)
+
+                if (availableRoles.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Доступно повышение до: $nextRoleName",
+                        text = "Доступно повышение до: ${availableRoles.distinct().joinToString(" или ")}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = if (nextRequiresPayment) {
+                        text = if (nextRequiresPayment || showBusinessButton || showPremiumButton) {
                             "Для перехода требуется оплата"
                         } else {
                             "Для перехода требуется регистрация"
@@ -82,6 +90,7 @@ fun TariffDialog(
                         color = Color.Gray
                     )
                 }
+                // =================================================================
             }
         },
         confirmButton = {
@@ -95,7 +104,10 @@ fun TariffDialog(
                     Button(
                         onClick = onNextTariffClick,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = TextGray.copy(alpha = 0.4f))
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = TextGray.copy(alpha = 0.4f),
+                            contentColor = Color.White
+                        )
                     ) {
                         Text("Перейти на «$nextRoleName»")
                     }
@@ -107,7 +119,10 @@ fun TariffDialog(
                     Button(
                         onClick = onBusinessClick,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = GreenSea)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = GreenSea,
+                            contentColor = Color.White // Явно белый текст
+                        )
                     ) {
                         Text("Перейти на «Бизнес»")
                     }
@@ -119,7 +134,10 @@ fun TariffDialog(
                     Button(
                         onClick = onPremiumClick,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Premium)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Premium,
+                            contentColor = Color.White // Явно белый текст
+                        )
                     ) {
                         Text("Перейти на «$premiumRoleName»")
                     }

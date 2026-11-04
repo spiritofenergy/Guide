@@ -2,6 +2,7 @@ package com.kodex.guide.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.kodex.guide.data.mapper.MyPostMapper
+import com.kodex.guide.data.mapper.toBannerDTO
 import com.kodex.guide.data.mapper.toBannerEntity
 import com.kodex.guide.data.mapper.toBookDTO
 import com.kodex.guide.data.source.remote.FirebaseBooksDataSource
@@ -85,9 +86,13 @@ class MyPostsRepositoryImpl @Inject constructor(
             dao.insertPost(MyPostMapper.domainToEntity(published))
             // 3. Баннер — только если реально включён
             if (published.isBanner) {
-                val bannerEntity = published.toBannerEntity()
+                // ✅ Отправляем в Firebase правильный DTO с текстами
+                remote.saveBannerToFirebase(published.toBannerDTO()).getOrThrow()
+
+                // if (published.isBanner) {
+             //   val bannerEntity = published.toBannerEntity()
                 // dao.insertBanners(listOf(bannerEntity)) // Раскомментируйте, если этот метод есть
-                remote.saveBannerToFirebase(published.toBookDTO())
+            //    remote.saveBannerToFirebase(published.toBookDTO())
             }
             // val bannerBookDto = published.toBookDTO()
             //  remote.saveBannerToFirebase(bannerBookDto)

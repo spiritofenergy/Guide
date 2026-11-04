@@ -14,7 +14,7 @@ import com.kodex.guide.domain.model.Book
     SavedEntity::class,
     BannerEntity::class,
     MyPostEntity::class],
-    version = 7, exportSchema = false)
+    version = 8, exportSchema = false)
 @TypeConverters(BookConverter::class)
 abstract class MainDb: RoomDatabase() {
 

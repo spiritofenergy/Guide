@@ -77,7 +77,7 @@
     <string-array name="category_admin">
         <item>Панель администратора</item>
         <item>Добавить</item>
-        <item>Вход</item>
+        <item>Тарифы</item>
         <item>Выход</item>
         <item>Сохраненные</item>
         <item>Мои объявления</item>

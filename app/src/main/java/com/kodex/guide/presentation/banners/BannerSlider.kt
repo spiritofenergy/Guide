@@ -110,6 +110,7 @@ fun BannerItem(
     banner: Banner, // ✅ ТЕПЕРЬ ПРИНИМАЕТ BANNER
     onBannerClick: (Banner) -> Unit
 ) {
+
     Card(
         modifier = Modifier
             .fillMaxSize()
@@ -195,14 +196,14 @@ fun BannerItem(
                 )
             }
 
-            if (banner.bannerTextBottomRight.isNotEmpty()) {
+         /*   if (banner.bannerTextBottomRight.isNotEmpty()) {
                 TextWithShadow(
                     text = banner.bannerTextBottomRight,
                     fontSize = smallTextSize,
                     color = Color.White,
                     modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp)
                 )
-            }
+            }*/
 
             // 3. Метка "РЕКЛАМА" в правом нижнем углу
             val adBackgroundColor = when (banner.authorRole) {

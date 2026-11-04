@@ -6,6 +6,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.kodex.guide.data.images.BitmapEncoder
+import com.kodex.guide.data.mapper.toBannerDTO
 import com.kodex.guide.data.mapper.toBannerEntity
 import com.kodex.guide.data.mapper.toBookDTO
 import com.kodex.guide.data.mapper.toDTO
@@ -96,32 +97,23 @@ class BooksRepo_Impl @Inject constructor(
     override suspend fun publishPostAndBanner(book: Book, uri: Uri?): Result<Unit> {
         return try {
             val imageUrl = if (uri != null) bitmapEncoder.imageToBase64(uri) else book.imageUrl
-            val preparedBook = book.copy(imageUrl = imageUrl)
+            // ✅ СРАЗУ ставим флаг isBanner = true
+            val preparedBook = book.copy(imageUrl = imageUrl, isBanner = true)
 
             // 1. Сохраняем пост в Firebase
             val postResult = dataSource.saveBook(preparedBook.toBookDTO())
             if (postResult.isFailure) return Result.failure(postResult.exceptionOrNull()!!)
 
-            // 2. Сохраняем пост в Room (если нужно, добавьте dao.insertPost(preparedBook))
+            // 2. Сохраняем баннер в Room
+            dao.insertBanner(preparedBook.toBannerEntity())
 
-            // 3. СОЗДАЕМ И СОХРАНЯЕМ БАННЕР через единую функцию
-            val bannerEntity = preparedBook.toBannerEntity()
-            dao.insertBanner(bannerEntity)
-
-            // 4. Сохраняем в Firebase (отдельная коллекция)
-            val bannerResult =
-                dataSource.saveBannerToFirebase(preparedBook.copy(isBanner = true).toBookDTO())
+            // 3. Сохраняем баннер в Firebase (ОДИН РАЗ!)
+            val bannerResult = dataSource.saveBannerToFirebase(preparedBook.toBannerDTO())
             if (bannerResult.isFailure) {
-                // Логируем ошибку, но пост и локальный баннер уже сохранены
+                android.util.Log.e("BannerSave", "Ошибка: ${bannerResult.exceptionOrNull()?.message}")
             }
-            // В самом конце метода publishPostAndBanner:
-            val bannerDto = preparedBook.copy(
-                isBanner = true,
-                active = true // <--- Важно добавить, чтобы фильтр в Firebase работал!
-            ).toBookDTO()
 
-            dataSource.saveBannerToFirebase(bannerDto)
-
+            // ❌ ВСЁ, ЧТО НИЖЕ (второй вызов saveBannerToFirebase), УДАЛИТЬ!
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -166,7 +158,7 @@ class BooksRepo_Impl @Inject constructor(
         if (result.isSuccess) {
             val remoteBanners = result.getOrNull() ?: return
             val entities: List<BannerEntity> = remoteBanners.map { dto ->
-                dto.toBannerEntity()
+                dto.toEntity()
             }
             // 3. Обновляем Room одной транзакцией (без моргания)
             dao.replaceAllBanners(entities)

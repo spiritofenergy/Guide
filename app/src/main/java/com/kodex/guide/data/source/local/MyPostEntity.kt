@@ -29,7 +29,7 @@ data class MyPostEntity(
     val bannerTextTopLeft: String,
     val bannerTextTopRight: String,
     val bannerTextBottomLeft: String,
-    val bannerTextBottomRight: String,
+  //  val bannerTextBottomRight: String,
     val bannerPublishDate: Long,
     val bannerExpireDate: Long,
     // для сортировки «свежие сверху»

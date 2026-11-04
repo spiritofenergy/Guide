@@ -41,7 +41,6 @@ fun BookDTO.toBannerEntity(): BannerEntity {
     return BannerEntity(
         key = this.key,
         postKey = this.key, // Связываем баннер с ключом поста
-        telephone = this.telephone,
         imageUrl = this.imageUrl,
         authorRole = this.authorRole,
         publishPeriod = this.publishPeriod,
