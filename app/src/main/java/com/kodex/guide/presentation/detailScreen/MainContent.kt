@@ -52,6 +52,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -150,22 +151,30 @@ fun MainContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(320.dp)
+               // .height(320.dp)
         ) {
-
-            // Фото на весь фон
-            AsyncImage(
-                model = bitmap,
-                contentDescription = book.title,
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .then(
-                        if (bitmap != null) Modifier.clickable(onClick = onShowImageClick)
-                        else Modifier
-                    ),
-                contentScale = ContentScale.Crop,
-               // transition = androidx.compose.animation.core.tween(durationMillis = 300)
-            )
+                    .fillMaxWidth()
+                    //.height(200.dp) // нужная высота
+                    // Скругляем контейнер целиком
+                    .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
+            ) {
+                // Фото на весь фон
+                AsyncImage(
+                    model = bitmap,
+                    contentDescription = book.title,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(
+                            if (bitmap != null) Modifier.clickable(onClick = onShowImageClick)
+                            else Modifier
+
+                        ),
+                    contentScale = ContentScale.Crop,
+                    // transition = androidx.compose.animation.core.tween(durationMillis = 300)
+                )
+            }
 
             // Затемнение снизу для читаемости текста
             Box(

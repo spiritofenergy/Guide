@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -166,15 +167,16 @@ fun BannerItem(
             }
 
             // 2. Текстовые поля на баннере
-            val smallTextSize = 10.sp
-            val largeTextSize = 14.sp
+            val smallTextSize = 16.sp
+            val largeTextSize = 20.sp
+            val maxTextSize = 24.sp
 
             if (banner.bannerTextTopLeft.isNotEmpty()) {
                 TextWithShadow(
                     text = banner.bannerTextTopLeft,
-                    fontSize = largeTextSize,
+                    fontSize = smallTextSize,
                     color = Color.White,
-                    modifier = Modifier.align(Alignment.TopStart).padding(8.dp)
+                    modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
                 )
             }
 
@@ -183,16 +185,16 @@ fun BannerItem(
                     text = banner.bannerTextTopRight,
                     fontSize = largeTextSize,
                     color = Color.White,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
+                    modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
                 )
             }
 
             if (banner.bannerTextBottomLeft.isNotEmpty()) {
                 TextWithShadow(
                     text = banner.bannerTextBottomLeft,
-                    fontSize = smallTextSize,
+                    fontSize = maxTextSize,
                     color = Color.White,
-                    modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)
+                    modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)
                 )
             }
 
@@ -231,26 +233,3 @@ fun BannerItem(
     }
 }
 
-@Composable
-fun TextWithShadow(
-    text: String,
-    fontSize: androidx.compose.ui.unit.TextUnit,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Box(modifier = modifier) {
-        Text(
-            text = text,
-            fontSize = fontSize,
-            color = Color.Black.copy(alpha = 0.7f),
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.offset(1.dp, 1.dp)
-        )
-        Text(
-            text = text,
-            fontSize = fontSize,
-            color = color,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
