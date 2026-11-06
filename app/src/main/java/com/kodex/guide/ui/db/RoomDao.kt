@@ -36,6 +36,11 @@ interface RoomDao {
     suspend fun deleteByKey(key: String): Int
 
     // --- Методы для баннеров ---
+
+    // Добавляем метод для обновления даты истечения
+    @Query("UPDATE banners SET bannerExpireDate = :todayDate WHERE postKey = :postKey")
+    suspend fun setBannerExpireDate(postKey: String, todayDate: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBanners(banners: List<BannerEntity>)
 
@@ -65,6 +70,7 @@ interface RoomDao {
         deleteByKey(key)
         deleteBannerByKey(key)
     }
+
     @Transaction
     suspend fun replaceAllBanners(banners: List<BannerEntity>) {
         deleteAllBanners()

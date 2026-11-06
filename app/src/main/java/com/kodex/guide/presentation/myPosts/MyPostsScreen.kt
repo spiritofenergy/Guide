@@ -55,10 +55,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.R
 import com.kodex.guide.ui.theme.Orange
 import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +75,9 @@ fun MyPostsScreen(
 ) {
     val posts by viewModel.myPosts.collectAsState()
     val context = LocalContext.current
+
+    val postToDelete by viewModel.postPendingDelete.collectAsStateWithLifecycle()
+    val isDeleting by viewModel.isDeleting.collectAsStateWithLifecycle()
 
     // ✅ Показываем события ViewModel (тосты)
     // ✅ Показываем события ViewModel (тосты)
@@ -155,6 +163,39 @@ fun MyPostsScreen(
                     )
                 }
             }
+        }
+        if (postToDelete != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    if (!isDeleting) viewModel.dismissDeleteDialog()
+                },
+                title = { Text("Удалить объявление?") },
+                text = {
+                    Text(
+                        "Объявление «${postToDelete?.title?.ifEmpty { "Без названия" }}» " +
+                                "будет удалено без возможности восстановления."
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        enabled = !isDeleting,
+                        onClick = { viewModel.confirmDelete() }
+                    ) {
+                        Text(
+                            text = if (isDeleting) "Удаление..." else "Удалить",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        enabled = !isDeleting,
+                        onClick = { viewModel.dismissDeleteDialog() }
+                    ) {
+                        Text("Отмена")
+                    }
+                }
+            )
         }
     }
 }

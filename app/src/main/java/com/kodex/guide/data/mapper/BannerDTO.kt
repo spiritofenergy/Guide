@@ -21,7 +21,6 @@ fun BannerDTO.toEntity(): BannerEntity {
         bannerTextTopLeft = this.bannerTextTopLeft,
         bannerTextTopRight = this.bannerTextTopRight,
         bannerTextBottomLeft = this.bannerTextBottomLeft,
-       // bannerTextBottomRight = this.bannerTextBottomRight,
         bannerPublishDate = this.bannerPublishDate,
         bannerExpireDate = this.bannerExpireDate
     )

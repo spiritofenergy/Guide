@@ -28,7 +28,6 @@ data class BannerEntity(
     val bannerTextTopLeft: String = "", // 🆕 Текст слева сверху
     val bannerTextTopRight: String = "", // 🆕 Текст справа сверху
     val bannerTextBottomLeft: String = "", // 🆕 Текст слева снизу
- //   val bannerTextBottomRight: String = "", // 🆕 Текст справа снизу
     val bannerPublishDate: Long = 0,    // 🆕 Дата публикации баннера
     val bannerExpireDate: Long = 0,     // 🆕 Дата окончания показа баннера
 
