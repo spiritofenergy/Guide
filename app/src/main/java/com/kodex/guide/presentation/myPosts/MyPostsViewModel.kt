@@ -39,6 +39,7 @@ class MyPostsViewModel @Inject constructor(
 
     private val _isSavingOrUploading = MutableStateFlow(false)
     val isSavingOrUploading: StateFlow<Boolean> = _isSavingOrUploading.asStateFlow()
+
     private val _isPublishing = MutableStateFlow(false)
     val isPublishing: StateFlow<Boolean> = _isPublishing.asStateFlow()
 
@@ -55,12 +56,71 @@ class MyPostsViewModel @Inject constructor(
     private val _uiEvents = MutableSharedFlow<MyPostsEvent>(replay = 1)
     val uiEvents: SharedFlow<MyPostsEvent> = _uiEvents.asSharedFlow()
 
+    // Пост, который пользователь хочет удалить (для диалога подтверждения)
+    private val _postPendingDelete = MutableStateFlow<Book?>(null)
+    val postPendingDelete: StateFlow<Book?> = _postPendingDelete.asStateFlow()
+
+    // Чекбокс «Удалить баннер» в диалоге
+    private val _deleteBanner = MutableStateFlow(false)
+    val deleteBanner: StateFlow<Boolean> = _deleteBanner.asStateFlow()
+
+    // Чтобы заблокировать кнопку во время удаления
+    private val _isDeleting = MutableStateFlow(false)
+    val isDeleting: StateFlow<Boolean> = _isDeleting.asStateFlow()
+
     init {
         loadMyPosts()
     }
 
+    /**
+     * Вызывается с карточки поста.
+     * Не удаляет сразу, а открывает диалог подтверждения.
+     */
+    private fun requestDelete(book: Book) {
+        _postPendingDelete.value = book
+    }
 
-    private fun loadMyPosts() {
+    /**
+     * Оставлено для обратной совместимости со старым вызовом delete(book):
+     * теперь он тоже только открывает диалог.
+     */
+   fun delete(book: Book) = requestDelete(book)
+
+    fun dismissDeleteDialog() {
+        if (!_isDeleting.value) {
+            _postPendingDelete.value = null
+        }
+    }
+
+
+    /* fun delete(book: Book) {
+        viewModelScope.launch {
+            deleteMyPost(book)
+                .onSuccess { emitToast("Объявление удалено") }
+                .onFailure { emitToast("Ошибка удаления: ${it.message}") }
+        }
+    }*/
+    fun confirmDelete() {
+        val book = _postPendingDelete.value ?: return
+        if (_isDeleting.value) return
+
+        _isDeleting.value = true
+        viewModelScope.launch {
+            try {
+                deleteMyPost(book)
+                    .onSuccess {
+                        emitToast("Объявление удалено")
+                    }
+                    .onFailure {
+                        emitToast("Ошибка удаления: ${it.message}")
+                    }
+            } finally {
+                _postPendingDelete.value = null
+                _isDeleting.value = false
+            }
+        }
+    }
+     fun loadMyPosts() {
         val uid = authStateProvider.currentUser()?.uid ?: return
         viewModelScope.launch {
             observeMyPosts(uid)
@@ -205,13 +265,13 @@ class MyPostsViewModel @Inject constructor(
         }
     }
 
-    fun delete(book: Book) {
+   /* fun delete(book: Book) {
         viewModelScope.launch {
             deleteMyPost(book)
                 .onSuccess { emitToast("Объявление удалено") }
                 .onFailure { emitToast("Ошибка удаления: ${it.message}") }
         }
-    }
+    }*/
 
     fun clearValidationErrors() {
         _validationErrors.value = emptyList()
