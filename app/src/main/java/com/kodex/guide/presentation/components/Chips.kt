@@ -10,33 +10,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kodex.guide.ui.theme.Orange
-import com.kodex.guide.ui.theme.StatusOpen
+import com.kodex.guide.ui.theme.Business
 
 @Composable
 fun StatusChip(isOpen: Boolean) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = if (isOpen) StatusOpen.copy(alpha = 0.1f) else Orange.copy(alpha = 0.1f)
+        color = if (isOpen) Business.copy(alpha = 0.1f) else Orange.copy(alpha = 0.1f)
     ) {
         Text(
             text = if (isOpen) "Открыто" else "Закрыто",
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
-            color = if (isOpen) StatusOpen else Orange
+            color = if (isOpen) Business else Orange
         )
     }
 }
 
 @Composable
 fun DeliveryChip() {
-    Surface(shape = RoundedCornerShape(16.dp), color = StatusOpen.copy(alpha = 0.1f)) {
+    Surface(shape = RoundedCornerShape(16.dp), color = Business.copy(alpha = 0.1f)) {
         Text(
             text = "Доставка",
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
-            color = StatusOpen
+            color = Business
         )
     }
 }

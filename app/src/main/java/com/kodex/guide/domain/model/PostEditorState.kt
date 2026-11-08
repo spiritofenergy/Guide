@@ -18,12 +18,14 @@ data class PostEditorState(
     val delivery: Boolean = false,
     val payment: Boolean = false,
     val location: Boolean = false,
-    val publishPeriod: Int = 1,       // Период публикации в днях
+    val publishPeriod: Int = 1,
+    val deleteDate: Long = 0L,       // Период публикации в днях
     val imageUri: Uri? = null,       // Выбранное фото (из галереи или камеры)
     val existingImageUrl: String = "", // URL/Base64 существующего фото при редактировании
     
     // Баннер-поля
     val isBanner: Boolean = false,
+    val frame: Boolean = false,
     val bannerTextTopLeft: String = "",
     val bannerTextTopRight: String = "",
     val bannerTextBottomLeft: String = "",

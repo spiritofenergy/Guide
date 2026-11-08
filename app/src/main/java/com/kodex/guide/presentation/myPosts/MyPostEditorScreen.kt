@@ -73,7 +73,7 @@ fun MyPostEditorScreen(
         )
     }
 
-   // val draft by viewModel.latestDraft.collectAsStateWithLifecycle()
+    // val draft by viewModel.latestDraft.collectAsStateWithLifecycle()
     val editPost by viewModel.editPost.collectAsState()
     val categoryNames = stringArrayResource(id = R.array.category_add)
 
@@ -93,7 +93,10 @@ fun MyPostEditorScreen(
     var location by remember { mutableStateOf(false) }
     var publishPeriod by remember { mutableStateOf(1) }
     var publishPeriodExpanded by remember { mutableStateOf(false) }
-    
+
+    // ===== РЕЖИМ РАМКИ =====
+    var isFrame by remember { mutableStateOf(false) }
+
     // Баннер-поля
     var isBanner by remember { mutableStateOf(false) }
     var bannerTextTopLeft by remember { mutableStateOf("") }
@@ -101,9 +104,6 @@ fun MyPostEditorScreen(
     var bannerTextBottomLeft by remember { mutableStateOf("") }
     var bannerPublishDate by remember { mutableStateOf(0L) }
     var bannerExpireDate by remember { mutableStateOf(0L) }
-    var bannerCategoryIndex by remember { mutableStateOf(0) }
-    var bannerCategoryExpanded by remember { mutableStateOf(false) }
-    
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var existingImageUrl by remember { mutableStateOf("") }
 
@@ -120,29 +120,28 @@ fun MyPostEditorScreen(
                 is MyPostsEvent.RestoreSample -> {
 
                     // ⬇⬇⬇ ВОТ ЭТОТ БЛОК ДОЛЖЕН БЫТЬ ОБЯЗАТЕЛЬНО ⬇⬇⬇
-                        val s = event.state
-                        title = s.title
-                        description = s.description
-                        price = s.price
-                        telephone = s.telephone
-                        village = s.village
-                        street = s.street
-                        house = s.house
-                        flat = s.flat
-                        category = s.category
-                        delivery = s.delivery
-                        payment = s.payment
-                        location = s.location
-                        publishPeriod = s.publishPeriod
-                        existingImageUrl = s.existingImageUrl
-
-                      //  isBanner = s.isBanner
-                        bannerTextTopLeft = s.bannerTextTopLeft
-                        bannerTextTopRight = s.bannerTextTopRight
-                        bannerTextBottomLeft = s.bannerTextBottomLeft
-                       // bannerTextBottomRight = s.bannerTextBottomRight
-                        bannerPublishDate = s.bannerPublishDate
-                        bannerExpireDate = s.bannerExpireDate
+                    val s = event.state
+                    title = s.title
+                    description = s.description
+                    price = s.price
+                    telephone = s.telephone
+                    village = s.village
+                    street = s.street
+                    house = s.house
+                    flat = s.flat
+                    category = s.category
+                    delivery = s.delivery
+                    payment = s.payment
+                    location = s.location
+                    publishPeriod = s.publishPeriod
+                    existingImageUrl = s.existingImageUrl
+                    bannerTextTopLeft = s.bannerTextTopLeft
+                    bannerTextTopRight = s.bannerTextTopRight
+                    bannerTextBottomLeft = s.bannerTextBottomLeft
+                    bannerPublishDate = s.bannerPublishDate
+                    bannerExpireDate = s.bannerExpireDate
+                    // Восстанавливаем режим рамки (поле должно быть в PostEditorState)
+                    isFrame = s.frame
                 }
             }
         }
@@ -174,15 +173,17 @@ fun MyPostEditorScreen(
             delivery = b.delivery; payment = b.payment; location = b.location
             publishPeriod = b.publishPeriod
             existingImageUrl = b.imageUrl
-            
+
             // Баннер-поля
             isBanner = b.isBanner
             bannerTextTopLeft = b.bannerTextTopLeft
             bannerTextTopRight = b.bannerTextTopRight
             bannerTextBottomLeft = b.bannerTextBottomLeft
-            //bannerTextBottomRight = b.bannerTextBottomRight
             bannerPublishDate = b.bannerPublishDate
             bannerExpireDate = b.bannerExpireDate
+
+            // Режим рамки
+            isFrame = b.frame
         }
     }
 
@@ -195,6 +196,12 @@ fun MyPostEditorScreen(
     }
 
     val publishPeriodNames = stringArrayResource(id = R.array.publish_period_user)
+
+// Дни выбранного периода — берём прямо из массива, чтобы не было рассинхрона
+    val publishPeriodDays: Long = publishPeriodNames
+        .getOrNull(publishPeriod - 1)
+        ?.toLongOrNull()
+        ?: 30L
 
     Scaffold(
         topBar = {
@@ -234,7 +241,7 @@ fun MyPostEditorScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
 
-                    )
+                        )
 
                     existingImageUrl.isNotEmpty() && !existingImageUrl.startsWith("http") -> {
                         val bitmap = decodeBase64ToBitmap(existingImageUrl)
@@ -327,8 +334,6 @@ fun MyPostEditorScreen(
                 location,
                 { location = it })
 
-            OptionsSection(delivery, { delivery = it }, payment, { payment = it })
-
             // Период публикации
             PublishPeriodDropdown(
                 publishPeriod,
@@ -336,7 +341,16 @@ fun MyPostEditorScreen(
                 publishPeriodNames,
                 onPeriodChange = { publishPeriod = it; publishPeriodExpanded = false },
                 onExpandedChange = { publishPeriodExpanded = it })
-            
+
+            OptionsSection(delivery, { delivery = it }, payment, { payment = it })
+
+
+            // ===== РЕЖИМ РАМКИ (над баннером) =====
+            FrameSection(
+                isFrame = isFrame,
+                onIsFrameChange = { isFrame = it }
+            )
+
             // Секция баннера
             BannerSection(
                 isBanner = isBanner,
@@ -347,20 +361,6 @@ fun MyPostEditorScreen(
                 onBannerTextTopRightChange = { bannerTextTopRight = it },
                 bannerTextBottomLeft = bannerTextBottomLeft,
                 onBannerTextBottomLeftChange = { bannerTextBottomLeft = it },
-              //  bannerTextBottomRight = bannerTextBottomRight,
-             //   onBannerTextBottomRightChange = {
-                  //  bannerTextBottomRight = it
-             //                                   },
-               // bannerPhone = bannerPhone,
-            //    onBannerPhoneChange = {
-                //    bannerPhone = it
-                //                      },
-
-             //   bannerCategoryIndex = bannerCategoryIndex,
-              //  onBannerCategoryIndexChange = { bannerCategoryIndex = it; bannerCategoryExpanded = false },
-              //  bannerCategoryExpanded = bannerCategoryExpanded,
-             //   onBannerCategoryExpandedChange = { bannerCategoryExpanded = it },
-              //  bannerCategoryNames = stringArrayResource(id = R.array.category_add)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -388,18 +388,16 @@ fun MyPostEditorScreen(
                         payment = payment,
                         location = location,
                         publishPeriod = publishPeriod,
+                        deleteDate = System.currentTimeMillis() + publishPeriodDays * 24L * 60L * 60L * 1000L,
                         imageUri = imageUri,
                         existingImageUrl = existingImageUrl,
-                        // Баннер-поля
+                        frame = isFrame,
                         isBanner = isBanner,
                         bannerTextTopLeft = bannerTextTopLeft,
                         bannerTextTopRight = bannerTextTopRight,
                         bannerTextBottomLeft = bannerTextBottomLeft,
-                      //  bannerTextBottomRight = bannerTextBottomRight,
-                     //   bannerPhone = bannerPhone,
                         bannerPublishDate = System.currentTimeMillis(),
                         bannerExpireDate = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000),
-                      //  bannerCategoryIndex = bannerCategoryIndex
                     )
                 }
 
@@ -437,6 +435,44 @@ fun MyPostEditorScreen(
     }
 }
 
+// ===== НОВАЯ СЕКЦИЯ: РЕЖИМ РАМКИ =====
+@Composable
+fun FrameSection(
+    isFrame: Boolean,
+    onIsFrameChange: (Boolean) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isFrame) ButtonColorBlue.copy(alpha = 0.1f)
+            else MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Режим рамки",
+                style = MaterialTheme.typography.titleMedium,
+                color = if (isFrame) ButtonColorBlue else MaterialTheme.colorScheme.onSurface
+            )
+            Switch(
+                checked = isFrame,
+                onCheckedChange = onIsFrameChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = ButtonColorBlue,
+                    checkedTrackColor = ButtonColorBlue.copy(alpha = 0.3f)
+                )
+            )
+        }
+    }
+}
+
 // Секция настройки баннера
 @Composable
 fun BannerSection(
@@ -448,15 +484,6 @@ fun BannerSection(
     onBannerTextTopRightChange: (String) -> Unit,
     bannerTextBottomLeft: String,
     onBannerTextBottomLeftChange: (String) -> Unit,
-  //  bannerTextBottomRight: String,
-  //  onBannerTextBottomRightChange: (String) -> Unit,
-  //  bannerPhone: String,
-  //  onBannerPhoneChange: (String) -> Unit,
- //   bannerCategoryIndex: Int,
- //   onBannerCategoryIndexChange: (Int) -> Unit,
-  //  bannerCategoryExpanded: Boolean,
- //   onBannerCategoryExpandedChange: (Boolean) -> Unit,
-  //  bannerCategoryNames: Array<String>
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -490,9 +517,9 @@ fun BannerSection(
                     )
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Поля баннера (показываем только если включен)
             if (isBanner) {
                 OutlinedTextField(
@@ -502,7 +529,7 @@ fun BannerSection(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
-                
+
                 OutlinedTextField(
                     value = bannerTextTopRight,
                     onValueChange = onBannerTextTopRightChange,
