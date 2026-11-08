@@ -97,9 +97,10 @@ fun BookListItemUi(
     val isSaved = savedKeys.contains(book.key)
 
     // ===== Определяем роль для рамки =====
+    val isUser = book.authorRole == UserRole.USER.level
     val isBusiness = book.authorRole == UserRole.BUSINESS.level
     val isPremium = book.authorRole == UserRole.PREMIUM.level
-    val hasAnimatedBorder = isBusiness || isPremium
+    val hasAnimatedBorder = isBusiness || isPremium || isUser
 
     val categoryBackgroundColor = when (book.authorRole) {
         UserRole.BUSINESS.level -> GreenSea.copy(alpha = 0.5f)
@@ -130,6 +131,18 @@ fun BookListItemUi(
     // ===== Градиенты для разных тарифов =====
 
     // BUSINESS: Оранжевый -> Белый -> Синий -> Синий -> Белый -> Оранжевый
+    val userBrush = remember {
+        Brush.sweepGradient(
+            0.00f to ButtonColorBlue,
+            0.20f to ButtonColorBlue,
+            0.25f to Color.White,
+            0.30f to Orange,
+            0.70f to Orange,
+            0.75f to Color.White,
+            0.80f to ButtonColorBlue,
+            1.00f to ButtonColorBlue,
+        )
+    }  // BUSINESS: Оранжевый -> Белый -> Синий -> Синий -> Белый -> Оранжевый
     val businessBrush = remember {
         Brush.sweepGradient(
             0.00f to ButtonColorBlue,
@@ -160,6 +173,7 @@ fun BookListItemUi(
     }
 
     val borderBrush = when {
+        isUser -> userBrush
         isBusiness -> businessBrush
         isPremium -> premiumBrush
         else -> null

@@ -63,6 +63,7 @@ import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kodex.guide.presentation.myPosts.components.decodeBase64ToBitmap
 
 
 @OptIn(ExperimentalMaterial3Api::class)
