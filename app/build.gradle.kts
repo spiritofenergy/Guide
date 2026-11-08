@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.kodex.guide"
-        minSdk = 24
+        minSdk = 29
         targetSdk = 36
         versionCode = 5
         versionName = "1.0"
@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.room.compiler)
     implementation(libs.firebase.ai)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.remote.creation.compose)
     // ✅ ТЕСТЫ
   /*  testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -146,5 +147,8 @@ dependencies {
        // implementation("com.google.code.gson:gson:2.14.0")
         implementation("com.google.code.gson:gson:2.11.0")
 
+    }
+    configurations.all {
+        exclude(group = "androidx.compose.remote", module = "remote-creation-compose")
     }
 }

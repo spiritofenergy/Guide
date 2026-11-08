@@ -19,7 +19,7 @@ data class BookDTO(
     val authorRole: Int = 0,  // ✅ Роль автора (UserRole.level)
     val publishPeriod: Int = 1,
     val timeStamp: Long = System.currentTimeMillis(),
-    val deleteDate: Int = 0,
+    val deleteDate: Long = 0L,
     val village: String = "",
     val street: String = "",
     val house: String = "",
@@ -33,6 +33,15 @@ data class BookDTO(
     val authorUid: String = "",        // ✅ владелец (uid из Firebase Auth)
     val isUploaded: Boolean = false,   // ✅ опубликован ли в Firebase
     val categoryName: String? = null,  // ✅ для обратной совместимости с Firebase
+    
+    // ✅ Поля для баннера (если isBanner = true)
+    val isBanner: Boolean = false,
+    val frame: Boolean = false,
+    val bannerTextTopLeft: String = "",
+    val bannerTextTopRight: String = "",
+    val bannerTextBottomLeft: String = "",
+    val bannerPublishDate: Long = 0,
+    val bannerExpireDate: Long = 0
 )
 
 

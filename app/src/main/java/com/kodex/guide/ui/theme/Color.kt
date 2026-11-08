@@ -1,6 +1,5 @@
 package com.kodex.guide.ui.theme
 
-import androidx.compose.material3.DrawerValue
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)
@@ -12,7 +11,6 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 val BoxFilterColor = Color(0x31008BF5)
 val ButtonColor = Color(0xAD008BF5)
-val ButtonColorBlue = Color(0xFF008BF5)
 val DrawerColorBlue = Color(0xFF0D6EBD)
 val DarkBlue = Color(0x9c1c384c)
 val DarkWhite = Color(0xFFF3F2F6)
@@ -37,5 +35,7 @@ val DividerColor = Color(0xFFE5E7EB)
 val IconBgLight = Color(0xFFF0EDFF)
 
 // Статусы
-val StatusOpen = Color(0x7511A423)
+val ButtonColorBlue = Color(0xFF008BF5)
+
+val Business = Color(0x7511A423)
 val Premium = Color(0xFF9C27B0)

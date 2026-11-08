@@ -52,11 +52,11 @@
     </string-array>
 
     <string-array name="publish_period_user">
-        <item>30</item>
-        <item>14</item>
-        <item>7</item>
-        <item>3</item>
-        <item>1</item>
+        <item>30 days </item>
+        <item>14 days </item>
+        <item>7 days </item>
+        <item>3 days </item>
+        <item>1 day </item>
     </string-array>
 <string-array name="publish_period_business">
         <item>1</item>

@@ -24,7 +24,7 @@ data class Book(
     val authorRole: Int = 0,  // ✅ Роль автора (UserRole.level)
     val publishPeriod: Int = 1,
     val timeStamp: Long = System.currentTimeMillis(),
-    val deleteDate: Int = 0,
+    val deleteDate: Long = 0L,
     val village: String = "",
     val street: String = "",
     val house: String = "",
@@ -41,7 +41,7 @@ data class Book(
 
     // ✅ Поля для баннера (если isBanner = true)
     val isBanner: Boolean = false,
- //   val active: Boolean = false,     // 🆕 Флаг что это баннер
+    val frame: Boolean = false,
     val bannerTextTopLeft: String = "", // 🆕 Текст слева сверху
     val bannerTextTopRight: String = "", // 🆕 Текст справа сверху
     val bannerTextBottomLeft: String = "", // 🆕 Текст слева снизу

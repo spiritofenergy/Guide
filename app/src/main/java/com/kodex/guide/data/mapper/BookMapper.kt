@@ -40,6 +40,15 @@ fun BookDTO.toBook(): Book {
         longitude = longitude?.toString(),
         authorUid = authorUid,
         isUploaded = isUploaded,
+        
+        // ✅ Баннер-поля
+        isBanner = isBanner,
+        frame = frame,
+        bannerTextTopLeft = bannerTextTopLeft,
+        bannerTextTopRight = bannerTextTopRight,
+        bannerTextBottomLeft = bannerTextBottomLeft,
+        bannerPublishDate = bannerPublishDate,
+        bannerExpireDate = bannerExpireDate
     )
 }
 
@@ -72,6 +81,15 @@ fun Book.toBookDTO(): BookDTO {
         longitude = longitude,
         authorUid = authorUid,
         isUploaded = isUploaded,
+        
+        // ✅ Баннер-поля
+        isBanner = isBanner,
+        frame = frame,
+        bannerTextTopLeft = bannerTextTopLeft,
+        bannerTextTopRight = bannerTextTopRight,
+        bannerTextBottomLeft = bannerTextBottomLeft,
+        bannerPublishDate = bannerPublishDate,
+        bannerExpireDate = bannerExpireDate
     )
 }
 fun Book.toBannerEntity(): BannerEntity {
@@ -116,14 +134,14 @@ fun BookDTO.toDomain(): Book {
         isUploaded = this.isUploaded,
         timeStamp = this.timeStamp,
         publishPeriod = this.publishPeriod,
-       /* openingHours = this.openingHours,
+        
+        // ✅ Баннер-поля
         isBanner = this.isBanner,
+        frame = this.frame,
         bannerTextTopLeft = this.bannerTextTopLeft,
         bannerTextTopRight = this.bannerTextTopRight,
         bannerTextBottomLeft = this.bannerTextBottomLeft,
-        bannerTextBottomRight = this.bannerTextBottomRight,
         bannerPublishDate = this.bannerPublishDate,
-        bannerExpireDate = this.bannerExpireDate*/
-        // Добавьте сюда остальные поля, которые есть в вашей модели Book и BookDTO
+        bannerExpireDate = this.bannerExpireDate
     )
 }

@@ -15,7 +15,7 @@ data class BookFirestore(
     val authorRole: Int = 0,  // ✅ Роль автора (UserRole.level)
     val publishPeriod: Int = 1,
     val timeStamp: Long = System.currentTimeMillis(),
-    val deleteDate: Int = 0,
+    val deleteDate: Long = 0L,
     val village: String = "",
     val delivery: Boolean = false,
     val ratingsList: List<Int> = emptyList(),
