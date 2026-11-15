@@ -18,6 +18,7 @@ data class PostEditorState(
     val delivery: Boolean = false,
     val payment: Boolean = false,
     val location: Boolean = false,
+    val timeStamp: Long = 0L,
     val publishPeriod: Int = 1,
     val deleteDate: Long = 0L,       // Период публикации в днях
     val imageUri: Uri? = null,       // Выбранное фото (из галереи или камеры)
@@ -48,7 +49,9 @@ data class PostEditorState(
             delivery = delivery,
             payment = payment,
             location = location,
+            timeStamp = timeStamp,
             publishPeriod = publishPeriod,
+            deleteDate = deleteDate,
             imageUrl = if (imageUri != null) "" else existingImageUrl,
             
             // Баннер-поля
@@ -80,6 +83,7 @@ data class PostEditorState(
             payment = book.payment,
             location = book.location,
             publishPeriod = book.publishPeriod,
+            deleteDate = book.deleteDate,
             existingImageUrl = book.imageUrl ?: "",
             
             // Баннер-поля
@@ -109,13 +113,13 @@ fun Book.toEditorState(): PostEditorState = PostEditorState(
     payment = payment,
     location = location,
     publishPeriod = publishPeriod,
+    deleteDate = deleteDate,
     imageUri = null,                  // Uri из Room не восстановить — покажем base64 через existingImageUrl
     existingImageUrl = "",
     isBanner = isBanner,
     bannerTextTopLeft = bannerTextTopLeft,
     bannerTextTopRight = bannerTextTopRight,
     bannerTextBottomLeft = bannerTextBottomLeft,
-  //  bannerTextBottomRight = bannerTextBottomRight,
     bannerPublishDate = bannerPublishDate,
     bannerExpireDate = bannerExpireDate,
 )

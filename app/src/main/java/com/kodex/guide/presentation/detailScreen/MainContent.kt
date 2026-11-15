@@ -624,30 +624,40 @@ fun MainContent(
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
+            }
 
-                // Дата публикации
-                val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-                val publicationDate = dateFormat.format(book.timeStamp)
+            // ✅ Дата и период публикации — показываются ВСЕГДА
+            val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+            val publicationDate = dateFormat.format(book.timeStamp)
+            Text(
+                text = "Дата публикации: $publicationDate",
+                fontSize = 14.sp,
+                color = TextGray,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+            // ✅ Дата удаления публикации — показываются ВСЕГДА
+            val dateDelete = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+            val deleteDate = dateDelete.format(book.deleteDate)
+            Text(
+                text = "Дата удаления: $deleteDate",
+                fontSize = 14.sp,
+                color = TextGray,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+
+            // Период публикации
+            val publishPeriodNames = stringArrayResource(id = R.array.publish_period_user)
+            val periodText = publishPeriodNames.getOrNull(book.publishPeriod - 1) ?: ""
+            if (periodText.isNotEmpty()) {
                 Text(
-                    text = "Дата публикации: $publicationDate",
+                    text = "Период публикации: $periodText",
                     fontSize = 14.sp,
                     color = TextGray,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(vertical = 4.dp)
+                    modifier = Modifier.padding(vertical = 2.dp)
                 )
-
-                // Период публикации
-                val publishPeriodNames = stringArrayResource(id = R.array.publish_period_user)
-                val periodText = publishPeriodNames.getOrNull(book.publishPeriod - 1) ?: ""
-                if (periodText.isNotEmpty()) {
-                    Text(
-                        text = "Период публикации: $periodText",
-                        fontSize = 14.sp,
-                        color = TextGray,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    )
-                }
             }
 
             // ===== Секция: Отзывы =====

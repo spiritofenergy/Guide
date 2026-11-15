@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 
 
 @Composable
@@ -44,7 +44,7 @@ fun SettingsMenuToggle(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = ButtonColorBlue,
+            tint = ColorBlue,
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -59,10 +59,10 @@ fun SettingsMenuToggle(
             checked = isChecked,
             onCheckedChange = onCheckedChange,
             colors = androidx.compose.material3.SwitchDefaults.colors(
-                checkedThumbColor = ButtonColorBlue,
-                checkedTrackColor = ButtonColorBlue.copy(alpha = 0.5f),
-                uncheckedThumbColor = ButtonColorBlue,
-                uncheckedTrackColor = ButtonColorBlue.copy(alpha = 0.5f)
+                checkedThumbColor = ColorBlue,
+                checkedTrackColor = ColorBlue.copy(alpha = 0.5f),
+                uncheckedThumbColor = ColorBlue,
+                uncheckedTrackColor = ColorBlue.copy(alpha = 0.5f)
             )
         )
     }

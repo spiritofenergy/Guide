@@ -1,4 +1,4 @@
-package com.kodex.guide.presentation.home
+package com.kodex.guide.presentation.payment
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,8 +23,6 @@ import androidx.compose.ui.unit.dp
 import com.kodex.guide.ui.theme.GreenSea
 import com.kodex.guide.ui.theme.Premium
 import com.kodex.guide.ui.theme.TextGray
-
-
 
 @Composable
 fun TariffDialog(
@@ -60,7 +58,7 @@ fun TariffDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // === МИНИМАЛЬНОЕ ИЗМЕНЕНИЕ: Собираем доступные тарифы в список ===
+                // === Собираем доступные тарифы в список для текста ===
                 val availableRoles = mutableListOf<String>()
                 if (showNextButton && nextRoleName != null) availableRoles.add(nextRoleName)
                 if (showBusinessButton) availableRoles.add("Бизнес")
@@ -90,7 +88,6 @@ fun TariffDialog(
                         color = Color.Gray
                     )
                 }
-                // =================================================================
             }
         },
         confirmButton = {
@@ -99,7 +96,7 @@ fun TariffDialog(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
             ) {
-                // Бесплатное повышение (серая кнопка)
+                // 1. Бесплатное повышение (Пользователь)
                 if (showNextButton && nextRoleName != null) {
                     Button(
                         onClick = onNextTariffClick,
@@ -109,37 +106,39 @@ fun TariffDialog(
                             contentColor = Color.White
                         )
                     ) {
-                        Text("Перейти на «$nextRoleName»")
+                        // Если переход бесплатный, добавляем пометку "Бесплатно"
+                        val freeSuffix = if (!nextRequiresPayment) " Бесплатно" else ""
+                        Text("«$nextRoleName»$freeSuffix")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                // BUSINESS — зелёная кнопка
+                // 2. BUSINESS — зелёная кнопка
                 if (showBusinessButton) {
                     Button(
                         onClick = onBusinessClick,
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = GreenSea,
-                            contentColor = Color.White // Явно белый текст
+                            contentColor = Color.White
                         )
                     ) {
-                        Text("Перейти на «Бизнес»")
+                        Text("«Бизнес» - 350р/мес")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                // PREMIUM — фиолетовая кнопка
+                // 3. PREMIUM — фиолетовая кнопка
                 if (showPremiumButton) {
                     Button(
                         onClick = onPremiumClick,
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Premium,
-                            contentColor = Color.White // Явно белый текст
+                            contentColor = Color.White
                         )
                     ) {
-                        Text("Перейти на «$premiumRoleName»")
+                        Text("«$premiumRoleName» - 2500р/год")
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -165,6 +164,7 @@ fun TariffDialog(
         dismissButton = {}
     )
 }
+
 // ==========================================
 // ПРЕДПРОСМОТРЫ (PREVIEW)
 // ==========================================
@@ -176,7 +176,7 @@ fun TariffDialogAnonymousPreview() {
         TariffDialog(
             currentRoleName = "Гостевой",
             nextRoleName = "Пользователь",
-            nextRequiresPayment = false, // Регистрация бесплатна
+            nextRequiresPayment = false,
             showNextButton = true,
             showBusinessButton = false,
             showPremiumButton = false,
@@ -197,11 +197,11 @@ fun TariffDialogUserPreview() {
         TariffDialog(
             currentRoleName = "Пользователь",
             nextRoleName = "Бизнес",
-            nextRequiresPayment = true, // Нужна оплата
+            nextRequiresPayment = true,
             showNextButton = true,
             showBusinessButton = true,
             showPremiumButton = true,
-            showGuestButton = true, // Кнопка "Гостевой" для выхода
+            showGuestButton = true,
             onDismiss = {},
             onNextTariffClick = {},
             onBusinessClick = {},

@@ -1,5 +1,8 @@
 package com.kodex.guide.presentation.myPosts
-
+import android.util.Log
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -63,6 +66,7 @@ import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kodex.guide.presentation.myPosts.components.MyPostCard
 import com.kodex.guide.presentation.myPosts.components.decodeBase64ToBitmap
 
 
@@ -80,7 +84,6 @@ fun MyPostsScreen(
     val postToDelete by viewModel.postPendingDelete.collectAsStateWithLifecycle()
     val isDeleting by viewModel.isDeleting.collectAsStateWithLifecycle()
 
-    // ✅ Показываем события ViewModel (тосты)
     // ✅ Показываем события ViewModel (тосты)
 
     LaunchedEffect(Unit) {
@@ -156,6 +159,7 @@ fun MyPostsScreen(
             ) {
 
                 items(posts, key = { it.key }) { book ->
+                    android.util.Log.d("DATE_DEBUG", "Отрисовка карточки: ${book.title}, Дата: ${book.deleteDate}")
                     MyPostCard(
                         book = book,
                         onEdit = { onEditClick(book) },
@@ -201,144 +205,7 @@ fun MyPostsScreen(
     }
 }
 
-@Composable
-fun MyPostCard(
-    book: Book,
-    onEdit: () -> Unit,
-    onUpload: () -> Unit,
-    onDelete: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),   // ✅ было: fillMaxW idth
-        elevation = CardDefaults.cardElevation(2.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .height(100.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val thumbnailModifier = Modifier
-                .width(72.dp)
-                .fillMaxHeight()
-                .clip(RoundedCornerShape(10.dp))
-            if (book.imageUrl.startsWith("http")) {
-                coil.compose.AsyncImage(
-                    model = book.imageUrl,
-                    contentDescription = "Фото объявления: ${book.title}",
-                    modifier = thumbnailModifier,
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                val imageBitmap = remember(book.imageUrl) {
-                    book.imageUrl.takeIf { it.isNotBlank() }
-                        ?.let(::decodeBase64ToBitmap)
-                }
-                if (imageBitmap != null) {
-                    Image(
-                        bitmap = imageBitmap.asImageBitmap(),
-                        contentDescription = "Фото объявления: ${book.title}",
-                        modifier = thumbnailModifier,
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Image(
-                        painter = painterResource(R.drawable.placeholder_color),
-                        contentDescription = "Фото не задано",
-                        modifier = thumbnailModifier,
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
 
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = book.title.ifEmpty { "Без названия" },
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        StatusBadge(isUploaded = book.isUploaded)
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = book.description.take(100) +
-                            if (book.description.length > 100) "..." else "",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedButton(
-                            onClick = onEdit,
-                            modifier = Modifier.weight(1f),
-                            contentPadding = PaddingValues(horizontal = 4.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Orange,
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Icon(Icons.Default.Edit, contentDescription = null)
-                            Spacer(Modifier.width(4.dp))
-                            Text("Ред.")
-                        }
-                        if (!book.isUploaded) {
-                            Button(
-                                onClick = onUpload,
-                                modifier = Modifier.weight(1f),
-                                contentPadding = PaddingValues(horizontal = 4.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF2196F3),
-                                    contentColor = Color.White
-                                )
-                            ) {
-                                Icon(Icons.Default.Publish, contentDescription = null)
-                                Spacer(Modifier.width(4.dp))
-                                Text("Опубл.")
-                            }
-                        }
-                        IconButton(onClick = onDelete) {
-                            Icon(Icons.Default.Delete, tint = Orange, contentDescription = null)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun StatusBadge(isUploaded: Boolean) {
-    val bg = if (isUploaded) Color(0xFF10B981).copy(alpha = 0.15f)
-    else Color(0xFFF59E0B).copy(alpha = 0.15f)
-    val text = if (isUploaded) "Опубликован" else "Образец"
-    val color = if (isUploaded) Color(0xFF10B981) else Color(0xFFF59E0B)
-    Surface(shape = MaterialTheme.shapes.small, color = bg) {
-        Text(
-            text = text,
-            fontSize = 11.sp,
-            color = color,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        )
-    }
-}
 
 
 // Предпросмотр экрана с несколькими объявлениями

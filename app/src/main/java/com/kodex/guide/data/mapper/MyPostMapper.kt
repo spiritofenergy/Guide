@@ -33,6 +33,7 @@ object MyPostMapper {
          //   bannerTextBottomRight = e.bannerTextBottomRight,
             bannerPublishDate = e.bannerPublishDate,
             bannerExpireDate = e.bannerExpireDate,
+            deleteDate = e.deleteDate,
             // Поля ниже отсутствуют в MyPostEntity, поэтому ставим дефолты
 
 
@@ -68,6 +69,7 @@ object MyPostMapper {
           //  bannerTextBottomRight = b.bannerTextBottomRight,
             bannerPublishDate = b.bannerPublishDate,
             bannerExpireDate = b.bannerExpireDate,
+            deleteDate = b.deleteDate,
             // ⚠️ ОБЯЗАТЕЛЬНО обновляем дату при каждом сохранении, иначе сортировка сломается
             updatedAt = System.currentTimeMillis()
         )

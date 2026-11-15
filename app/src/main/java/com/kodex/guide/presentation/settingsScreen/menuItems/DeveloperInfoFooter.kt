@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kodex.guide.ui.theme.ButtonColorBlue
 import com.kodex.guide.ui.theme.DrawerColorBlue
 import androidx.core.net.toUri
 

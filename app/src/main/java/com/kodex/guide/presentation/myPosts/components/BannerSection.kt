@@ -19,7 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 
 
 // Секция настройки баннера
@@ -37,7 +37,7 @@ fun BannerSection(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isBanner) ButtonColorBlue.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
+            containerColor = if (isBanner) ColorBlue.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -55,14 +55,14 @@ fun BannerSection(
                 Text(
                     text = "Режим баннера",
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (isBanner) ButtonColorBlue else MaterialTheme.colorScheme.onSurface
+                    color = if (isBanner) ColorBlue else MaterialTheme.colorScheme.onSurface
                 )
                 Switch(
                     checked = isBanner,
                     onCheckedChange = onIsBannerChange,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = ButtonColorBlue,
-                        checkedTrackColor = ButtonColorBlue.copy(alpha = 0.3f)
+                        checkedThumbColor = ColorBlue,
+                        checkedTrackColor = ColorBlue.copy(alpha = 0.3f)
                     )
                 )
             }

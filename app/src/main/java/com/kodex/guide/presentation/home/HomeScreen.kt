@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -70,6 +69,8 @@ import com.kodex.guide.presentation.navigation.DrawerBody
 import com.kodex.guide.presentation.navigation.DrawerHeader
 import com.kodex.guide.presentation.navigation.MainTopBar
 import com.kodex.guide.presentation.navigation.NavRoutes
+import com.kodex.guide.presentation.payment.PaymentBottomSheet
+import com.kodex.guide.presentation.payment.ShowTariffDialog
 import com.kodex.guide.ui.dialods.FilterDialog
 import com.kodex.guide.ui.theme.Orange
 import kotlinx.coroutines.launch
@@ -374,6 +375,10 @@ fun HomeScreen(
                             viewModel.getAllBooksFromCategory(category = BookCategories.ALL)
                         },
                         onSettingsClick = {
+                            // ✅ Сначала показываем диалог тарифов
+                            viewModel.showAuthDialog.value = true
+                            viewModel.isLogoutDialog.value = false
+
                             onSettingsClick()
                             viewModel.selectedBottomItemState.intValue =
                                 BottomMenuItem.Settings.titleId

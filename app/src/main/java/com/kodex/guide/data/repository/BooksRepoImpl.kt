@@ -121,7 +121,21 @@ class BooksRepo_Impl @Inject constructor(
     }
 
     override suspend fun deleteBook(book: Book): Result<Unit> {
-        return dataSource.deleteBook(book.toBookDTO())
+        return try {
+            // ✅ Удаляем из Firebase
+            dataSource.deleteBook(book.toBookDTO()).getOrThrow()
+            // ✅ Удаляем из Room
+            dao.deleteByKey(book.key)
+            
+            // ✅ Если это баннер — удаляем связанный баннер
+            if (book.isBanner) {
+                dao.deleteBannerByKey(book.key)
+            }
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     // only BASE64 image

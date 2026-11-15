@@ -1,5 +1,6 @@
 package com.kodex.guide.presentation.myPosts
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kodex.guide.data.images.BitmapEncoder
@@ -124,7 +125,10 @@ class MyPostsViewModel @Inject constructor(
         val uid = authStateProvider.currentUser()?.uid ?: return
         viewModelScope.launch {
             observeMyPosts(uid)
-                .onEach { _myPosts.value = it }
+                .onEach { posts ->
+                    _myPosts.value = posts
+                }
+               //.onEach { _myPosts.value = it }
                 .launchIn(viewModelScope)
         }
     }
@@ -159,15 +163,13 @@ class MyPostsViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                // ---------- 1. Собираем Book из состояния формы ----------
                 var book = state.toBook()
-
-                // При редактировании сохраняем key существующего поста,
-                // чтобы saveDraft сделал upsert, а не создал дубликат.
                 _editPost.value?.let { original ->
                     book = book.copy(
                         key = original.key,
-                        isUploaded = original.isUploaded
+                        isUploaded = original.isUploaded,
+                        timeStamp = original.timeStamp
+
                     )
                 }
 

@@ -1,9 +1,7 @@
 package com.kodex.guide.presentation.myPosts
 
 import android.widget.Toast
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -44,7 +42,7 @@ import com.kodex.guide.presentation.myPosts.components.PhotoSection
 import com.kodex.guide.presentation.myPosts.components.PublishPeriodDropdown
 import com.kodex.guide.presentation.myPosts.components.capitalizeFirst
 import com.kodex.guide.presentation.myPosts.components.decodeBase64ToBitmap
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,7 +74,7 @@ fun MyPostEditorScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.clearValidationErrors() }) {
-                    Text("Понятно", color = ButtonColorBlue)
+                    Text("Понятно", color = ColorBlue)
                 }
             }
         )
@@ -205,12 +203,9 @@ fun MyPostEditorScreen(
     }
 
     val publishPeriodNames = stringArrayResource(id = R.array.publish_period_user)
-
-// Дни выбранного периода — берём прямо из массива, чтобы не было рассинхрона
-    val publishPeriodDays: Long = publishPeriodNames
-        .getOrNull(publishPeriod - 1)
-        ?.toLongOrNull()
-        ?: 30L
+// Достаем строку (например, "30 days") и оставляем только цифры
+    val publishPeriodText = publishPeriodNames.getOrNull(publishPeriod - 1) ?: "30"
+    val publishPeriodDays: Long = publishPeriodText.filter { it.isDigit() }.toLongOrNull() ?: 30L
 
     Scaffold(
         topBar = {
@@ -372,9 +367,7 @@ fun MyPostEditorScreen(
                 onBannerTextBottomLeftChange = { bannerTextBottomLeft = it },
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // ✅ ДВЕ КНОПКИ ВНИЗУ (вместо BottomSheet)
             Row(
@@ -383,6 +376,12 @@ fun MyPostEditorScreen(
             ) {
                 // Вспомогательная лямбда для сбора текущего состояния
                 val getCurrentState: () -> PostEditorState = {
+                    // Если редактируем старый пост, берем его дату публикации. Если новый — сегодняшнюю.
+                    val baseTimestamp = editPost?.timeStamp ?: System.currentTimeMillis()
+
+                    // Высчитываем дату удаления: дата публикации + (дни * 24 часа * 60 минут * 60 секунд * 1000 мс)
+                    val calculatedDeleteDate = baseTimestamp + (publishPeriodDays * 24L * 60L * 60L * 1000L)
+
                     PostEditorState(
                         title = title,
                         description = description,
@@ -397,7 +396,7 @@ fun MyPostEditorScreen(
                         payment = payment,
                         location = location,
                         publishPeriod = publishPeriod,
-                        deleteDate = System.currentTimeMillis() + publishPeriodDays * 24L * 60L * 60L * 1000L,
+                        deleteDate = calculatedDeleteDate,
                         imageUri = imageUri,
                         existingImageUrl = existingImageUrl,
                         frame = isFrame,
@@ -428,7 +427,7 @@ fun MyPostEditorScreen(
                 ActionSheetButton(
                     text = if (isSavingOrUploading && isPublishing) "Отправка…" else "Отправить",
                     icon = Icons.Default.Star,
-                    containerColor = ButtonColorBlue,
+                    containerColor = ColorBlue,
                     enabled = !isSavingOrUploading,
                     isLoading = isSavingOrUploading && isPublishing,
                     loadingText = "Отправка…",
@@ -439,7 +438,7 @@ fun MyPostEditorScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

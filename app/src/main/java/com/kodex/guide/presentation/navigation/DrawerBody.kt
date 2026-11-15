@@ -232,7 +232,14 @@ fun DrawerBody(
                     iconDrawableId = Icons.Default.Add,
                     text = stringResource(id = R.string.create_post),
                     onItemClick = {
-                        onAddBookClick()
+                        // ✅ ЕСЛИ ГОСТЬ — ПОКАЗЫВАЕМ ДИАЛОГ, ИНАЧЕ — СОЗДАЕМ ПОСТ
+                        if (userRole == UserRole.ANONYMOUS) {
+                            viewModelHome.desiredRole.value = UserRole.USER
+                            viewModelHome.showAuthDialog.value = true
+                            viewModelHome.isLogoutDialog.value = false
+                        } else {
+                            onAddBookClick()
+                        }
                         onCloseDrawer()
                     }
                 )
