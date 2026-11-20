@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -44,6 +45,7 @@ import com.kodex.guide.presentation.myPosts.components.capitalizeFirst
 import com.kodex.guide.presentation.myPosts.components.decodeBase64ToBitmap
 import com.kodex.guide.ui.theme.ColorBlue
 import java.io.File
+import com.kodex.guide.BuildConfig  // ВАЖНО: ваш пакет, не чужой!
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,6 +118,7 @@ fun MyPostEditorScreen(
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+    val isGeneratingDescription by viewModel.isGeneratingDescription.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collectLatest { event ->
@@ -150,6 +153,8 @@ fun MyPostEditorScreen(
                     // Восстанавливаем режим рамки (поле должно быть в PostEditorState)
                     isFrame = s.frame
                 }
+                is MyPostsEvent.DescriptionGenerated ->
+                    description = event.text.capitalizeFirst()
             }
         }
     }
@@ -292,6 +297,15 @@ fun MyPostEditorScreen(
                 singleLine = true
             )
 
+         /*   OutlinedTextField(
+                value = description,
+                onValueChange = { description = it.capitalizeFirst() },
+                label = { Text("Описание") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                maxLines = 5
+            )*/
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it.capitalizeFirst() },
@@ -301,6 +315,36 @@ fun MyPostEditorScreen(
                     .height(120.dp),
                 maxLines = 5
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (isGeneratingDescription) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Генерация…", style = MaterialTheme.typography.bodySmall)
+                } else {
+                    TextButton(
+                        enabled = title.isNotBlank(),
+                        onClick = {
+                            viewModel.generateDescription(
+                                title = title,
+                                imageUri = imageUri,
+                                existingImageUrl = existingImageUrl
+                            )
+                        }
+                    ) {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                        Spacer(Modifier.width(4.dp))
+                        Text("Сгенерировать описание")
+                    }
+                }
+            }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(

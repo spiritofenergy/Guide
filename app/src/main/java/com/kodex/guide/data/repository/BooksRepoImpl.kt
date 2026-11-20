@@ -1,7 +1,6 @@
 package com.kodex.guide.data.repository
 
 import android.net.Uri
-import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -13,10 +12,9 @@ import com.kodex.guide.data.mapper.toDTO
 import com.kodex.guide.data.mapper.toDomain
 import com.kodex.guide.data.mapper.toEntity
 import com.kodex.guide.data.mapper.toRatingData
-import com.kodex.guide.data.model.toBannerEntity
 import com.kodex.guide.data.source.local.BannerEntity
 import com.kodex.guide.data.source.remote.FirebaseBooksDataSource
-import com.kodex.guide.di.MainModule
+import com.kodex.guide.di.FirebaseModule
 import com.kodex.guide.domain.model.Banner
 import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookFilterState
@@ -27,7 +25,6 @@ import com.kodex.guide.ui.db.RoomDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -38,7 +35,7 @@ class BooksRepo_Impl @Inject constructor(
     private val dao: RoomDao,
     //private val storageDataSource: FireBaseStorageDataSource,
     private val bitmapEncoder: BitmapEncoder,
-    @MainModule.ApplicationScope private val externalScope: CoroutineScope // 👈 Добавили аннотацию
+    @FirebaseModule.ApplicationScope private val externalScope: CoroutineScope // 👈 Добавили аннотацию
 
 ) : BooksRepo {
 

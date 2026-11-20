@@ -33,10 +33,34 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import com.kodex.guide.data.images.ImagePreparer
+import com.kodex.guide.data.images.ImagePreparerImpl
+import com.kodex.guide.data.repository.YandexPaymentRepositoryImpl
+import com.kodex.guide.domain.ai.FirebasePostDescriptionGenerator
+import com.kodex.guide.domain.ai.PostDescriptionGenerator
+import com.kodex.guide.domain.repository.PaymentRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepoModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindPaymentRepository(
+        impl: YandexPaymentRepositoryImpl
+    ): PaymentRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPostDescriptionGenerator(
+        impl: FirebasePostDescriptionGenerator
+    ): PostDescriptionGenerator
+
+    @Binds
+    @Singleton
+    abstract fun bindImagePreparer(
+        impl: ImagePreparerImpl
+    ): ImagePreparer
 
 
     @Binds

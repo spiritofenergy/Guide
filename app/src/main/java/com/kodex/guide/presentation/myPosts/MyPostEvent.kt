@@ -9,7 +9,8 @@ import com.kodex.guide.domain.model.PostEditorState
 sealed interface MyPostsEvent {
 
     data class Toast(val message: String) : MyPostsEvent
-
     data class RestoreSample(val state: PostEditorState) : MyPostsEvent
+    data class DescriptionGenerated(val text: String) : MyPostsEvent
+
     object NavigateBack : MyPostsEvent
 }

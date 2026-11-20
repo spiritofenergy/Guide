@@ -17,7 +17,10 @@ plugins {
 android {
     namespace = "com.kodex.guide"
     compileSdk = 35
-
+    buildFeatures {
+        buildConfig = true          // ← ДОБАВИТЬ ЭТУ СТРОКУ
+        compose = true
+    }
     defaultConfig {
         applicationId = "com.kodex.guide"
         minSdk = 29
@@ -41,13 +44,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-   /* kotlinOptions {
-        jvmTarget = "11"
-    }*/
-
-    buildFeatures {
-        compose = true
-    }
 }
 
 kotlin {
@@ -66,9 +62,15 @@ configurations.all {
 dependencies {
 
     implementation(libs.room.compiler)
-    implementation(libs.firebase.ai)
+
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.remote.creation.compose)
+
+    implementation(libs.firebase.ai)
+    implementation(libs.firebase.appcheck.debug)
+    implementation(libs.firebase.appcheck.playintegrity)
+
+
     // ✅ ТЕСТЫ
   /*  testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -120,8 +122,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.firebase.database)
     implementation(libs.firebase.firestore)
-    implementation(libs.firebase.storage)
-    implementation(libs.firebase.storage)
 
   //  testImplementation(libs.junit)
     implementation(libs.coil.compose)

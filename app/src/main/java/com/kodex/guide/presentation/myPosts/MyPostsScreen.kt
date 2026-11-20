@@ -67,6 +67,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kodex.guide.presentation.myPosts.components.MyPostCard
+import com.kodex.guide.presentation.myPosts.components.capitalizeFirst
 import com.kodex.guide.presentation.myPosts.components.decodeBase64ToBitmap
 
 
@@ -95,7 +96,8 @@ fun MyPostsScreen(
                 is MyPostsEvent.RestoreSample -> Unit   // не наш экран — игнорируем
 
                 is MyPostsEvent.NavigateBack -> onBack()
-
+                is MyPostsEvent.DescriptionGenerated ->{}
+                   // description = event.text.capitalizeFirst()
 
             }
         }

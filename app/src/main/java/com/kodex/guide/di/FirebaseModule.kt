@@ -6,8 +6,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.storage
 import com.kodex.guide.data.source.remote.FirebaseBooksDataSource
 import com.kodex.guide.data.source.remote.FirebaseFavoritesDataSource
 import com.kodex.guide.data.source.local.PreferenceDataSource
@@ -26,14 +24,9 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object   MainModule {
+object   FirebaseModule {
 
 
-    @Provides
-    @Singleton
-    fun provideFirebaseStorage(): FirebaseStorage {
-        return Firebase.storage
-    }
     @Provides
     @Singleton
 
