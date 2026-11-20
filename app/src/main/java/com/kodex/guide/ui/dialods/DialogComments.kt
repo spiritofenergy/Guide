@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.RatingData
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 
 
 @Composable
@@ -38,7 +38,7 @@ import com.kodex.guide.ui.theme.ButtonColorBlue
                     Button(onClick = {
                         onConfirm()
                     }, colors = ButtonDefaults.buttonColors(
-                        containerColor = ButtonColorBlue
+                        containerColor = ColorBlue
                     )) {
                         Text(text = confirmButtonText)
                     }

@@ -1,9 +1,7 @@
 package com.kodex.guide.presentation.myPosts
 
 import android.widget.Toast
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -13,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -44,8 +43,9 @@ import com.kodex.guide.presentation.myPosts.components.PhotoSection
 import com.kodex.guide.presentation.myPosts.components.PublishPeriodDropdown
 import com.kodex.guide.presentation.myPosts.components.capitalizeFirst
 import com.kodex.guide.presentation.myPosts.components.decodeBase64ToBitmap
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 import java.io.File
+import com.kodex.guide.BuildConfig  // ВАЖНО: ваш пакет, не чужой!
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +76,7 @@ fun MyPostEditorScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.clearValidationErrors() }) {
-                    Text("Понятно", color = ButtonColorBlue)
+                    Text("Понятно", color = ColorBlue)
                 }
             }
         )
@@ -118,6 +118,7 @@ fun MyPostEditorScreen(
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+    val isGeneratingDescription by viewModel.isGeneratingDescription.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collectLatest { event ->
@@ -152,6 +153,8 @@ fun MyPostEditorScreen(
                     // Восстанавливаем режим рамки (поле должно быть в PostEditorState)
                     isFrame = s.frame
                 }
+                is MyPostsEvent.DescriptionGenerated ->
+                    description = event.text.capitalizeFirst()
             }
         }
     }
@@ -205,12 +208,9 @@ fun MyPostEditorScreen(
     }
 
     val publishPeriodNames = stringArrayResource(id = R.array.publish_period_user)
-
-// Дни выбранного периода — берём прямо из массива, чтобы не было рассинхрона
-    val publishPeriodDays: Long = publishPeriodNames
-        .getOrNull(publishPeriod - 1)
-        ?.toLongOrNull()
-        ?: 30L
+// Достаем строку (например, "30 days") и оставляем только цифры
+    val publishPeriodText = publishPeriodNames.getOrNull(publishPeriod - 1) ?: "30"
+    val publishPeriodDays: Long = publishPeriodText.filter { it.isDigit() }.toLongOrNull() ?: 30L
 
     Scaffold(
         topBar = {
@@ -297,6 +297,15 @@ fun MyPostEditorScreen(
                 singleLine = true
             )
 
+         /*   OutlinedTextField(
+                value = description,
+                onValueChange = { description = it.capitalizeFirst() },
+                label = { Text("Описание") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                maxLines = 5
+            )*/
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it.capitalizeFirst() },
@@ -306,6 +315,36 @@ fun MyPostEditorScreen(
                     .height(120.dp),
                 maxLines = 5
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (isGeneratingDescription) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Генерация…", style = MaterialTheme.typography.bodySmall)
+                } else {
+                    TextButton(
+                        enabled = title.isNotBlank(),
+                        onClick = {
+                            viewModel.generateDescription(
+                                title = title,
+                                imageUri = imageUri,
+                                existingImageUrl = existingImageUrl
+                            )
+                        }
+                    ) {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                        Spacer(Modifier.width(4.dp))
+                        Text("Сгенерировать описание")
+                    }
+                }
+            }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
@@ -372,9 +411,7 @@ fun MyPostEditorScreen(
                 onBannerTextBottomLeftChange = { bannerTextBottomLeft = it },
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // ✅ ДВЕ КНОПКИ ВНИЗУ (вместо BottomSheet)
             Row(
@@ -383,6 +420,12 @@ fun MyPostEditorScreen(
             ) {
                 // Вспомогательная лямбда для сбора текущего состояния
                 val getCurrentState: () -> PostEditorState = {
+                    // Если редактируем старый пост, берем его дату публикации. Если новый — сегодняшнюю.
+                    val baseTimestamp = editPost?.timeStamp ?: System.currentTimeMillis()
+
+                    // Высчитываем дату удаления: дата публикации + (дни * 24 часа * 60 минут * 60 секунд * 1000 мс)
+                    val calculatedDeleteDate = baseTimestamp + (publishPeriodDays * 24L * 60L * 60L * 1000L)
+
                     PostEditorState(
                         title = title,
                         description = description,
@@ -397,7 +440,7 @@ fun MyPostEditorScreen(
                         payment = payment,
                         location = location,
                         publishPeriod = publishPeriod,
-                        deleteDate = System.currentTimeMillis() + publishPeriodDays * 24L * 60L * 60L * 1000L,
+                        deleteDate = calculatedDeleteDate,
                         imageUri = imageUri,
                         existingImageUrl = existingImageUrl,
                         frame = isFrame,
@@ -428,7 +471,7 @@ fun MyPostEditorScreen(
                 ActionSheetButton(
                     text = if (isSavingOrUploading && isPublishing) "Отправка…" else "Отправить",
                     icon = Icons.Default.Star,
-                    containerColor = ButtonColorBlue,
+                    containerColor = ColorBlue,
                     enabled = !isSavingOrUploading,
                     isLoading = isSavingOrUploading && isPublishing,
                     loadingText = "Отправка…",
@@ -439,7 +482,7 @@ fun MyPostEditorScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

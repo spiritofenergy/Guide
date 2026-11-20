@@ -103,5 +103,7 @@
     <string name="name">name</string>
     <string name="email">email\n</string>
 
+    <!-- Firebase AI API Key -->
+    <string name="firebase_ai_api_key">YOUR_API_KEY_HERE</string>
 
 </resources>

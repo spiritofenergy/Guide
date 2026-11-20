@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 
 
 @Composable
@@ -28,7 +28,7 @@ fun OptionSwitchCard(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
-            containerColor = if (checked) ButtonColorBlue.copy(alpha = 0.1f)
+            containerColor = if (checked) ColorBlue.copy(alpha = 0.1f)
             else MaterialTheme.colorScheme.surface
         ),
         shape = RoundedCornerShape(12.dp)
@@ -43,14 +43,14 @@ fun OptionSwitchCard(
             Text(
                 text = label,
                 style = MaterialTheme.typography.titleMedium,
-                color = if (checked) ButtonColorBlue else MaterialTheme.colorScheme.onSurface
+                color = if (checked) ColorBlue else MaterialTheme.colorScheme.onSurface
             )
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = ButtonColorBlue,
-                    checkedTrackColor = ButtonColorBlue.copy(alpha = 0.3f)
+                    checkedThumbColor = ColorBlue,
+                    checkedTrackColor = ColorBlue.copy(alpha = 0.3f)
                 )
             )
         }

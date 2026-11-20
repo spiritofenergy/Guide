@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 
 
 // ===== НОВАЯ СЕКЦИЯ: РЕЖИМ РАМКИ =====
@@ -27,7 +27,7 @@ fun FrameSection(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isFrame) ButtonColorBlue.copy(alpha = 0.1f)
+            containerColor = if (isFrame) ColorBlue.copy(alpha = 0.1f)
             else MaterialTheme.colorScheme.surface
         ),
         shape = RoundedCornerShape(12.dp)
@@ -42,14 +42,14 @@ fun FrameSection(
             Text(
                 text = "Режим рамки",
                 style = MaterialTheme.typography.titleMedium,
-                color = if (isFrame) ButtonColorBlue else MaterialTheme.colorScheme.onSurface
+                color = if (isFrame) ColorBlue else MaterialTheme.colorScheme.onSurface
             )
             Switch(
                 checked = isFrame,
                 onCheckedChange = onIsFrameChange,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = ButtonColorBlue,
-                    checkedTrackColor = ButtonColorBlue.copy(alpha = 0.3f)
+                    checkedThumbColor = ColorBlue,
+                    checkedTrackColor = ColorBlue.copy(alpha = 0.3f)
                 )
             )
         }

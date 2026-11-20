@@ -1,5 +1,7 @@
 package com.kodex.guide.presentation.myPosts
 
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kodex.guide.data.images.BitmapEncoder
@@ -29,9 +31,12 @@ class MyPostsViewModel @Inject constructor(
     private val saveMyPost: SaveMyPostUseCase,
     private val bitmapEncoder: BitmapEncoder,
     private val authStateProvider: AuthStateProvider,
-    private val observeLatestSample: ObserveLatestSampleUseCase
+    private val observeLatestSample: ObserveLatestSampleUseCase,
+    private val generatePostDescription: GeneratePostDescriptionUseCase
 
 ) : ViewModel() {
+    private val _isGeneratingDescription = MutableStateFlow(false)
+    val isGeneratingDescription: StateFlow<Boolean> = _isGeneratingDescription.asStateFlow()
 
     // Ошибки валидации
     private val _validationErrors = MutableStateFlow<List<String>>(emptyList())
@@ -70,6 +75,29 @@ class MyPostsViewModel @Inject constructor(
 
     init {
         loadMyPosts()
+    }
+
+    fun generateDescription(
+        title: String,
+        imageUri: Uri?,
+        existingImageUrl: String?
+    ) {
+        if (_isGeneratingDescription.value) return
+        _isGeneratingDescription.value = true
+
+        viewModelScope.launch {
+            try {
+                generatePostDescription(title, imageUri, existingImageUrl)
+                    .onSuccess { text ->
+                        _uiEvents.emit(MyPostsEvent.DescriptionGenerated(text))
+                    }
+                    .onFailure { error ->
+                        emitToast(error.message ?: "Не удалось сгенерировать описание")
+                    }
+            } finally {
+                _isGeneratingDescription.value = false
+            }
+        }
     }
 
     /**
@@ -124,7 +152,10 @@ class MyPostsViewModel @Inject constructor(
         val uid = authStateProvider.currentUser()?.uid ?: return
         viewModelScope.launch {
             observeMyPosts(uid)
-                .onEach { _myPosts.value = it }
+                .onEach { posts ->
+                    _myPosts.value = posts
+                }
+               //.onEach { _myPosts.value = it }
                 .launchIn(viewModelScope)
         }
     }
@@ -159,15 +190,13 @@ class MyPostsViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                // ---------- 1. Собираем Book из состояния формы ----------
                 var book = state.toBook()
-
-                // При редактировании сохраняем key существующего поста,
-                // чтобы saveDraft сделал upsert, а не создал дубликат.
                 _editPost.value?.let { original ->
                     book = book.copy(
                         key = original.key,
-                        isUploaded = original.isUploaded
+                        isUploaded = original.isUploaded,
+                        timeStamp = original.timeStamp
+
                     )
                 }
 

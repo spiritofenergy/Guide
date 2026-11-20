@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 
 
 @Composable
@@ -43,7 +43,7 @@ fun SettingsMenuItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = ButtonColorBlue,
+            tint = ColorBlue,
             modifier = Modifier.size(24.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))

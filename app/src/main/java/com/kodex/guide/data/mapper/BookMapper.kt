@@ -134,6 +134,7 @@ fun BookDTO.toDomain(): Book {
         isUploaded = this.isUploaded,
         timeStamp = this.timeStamp,
         publishPeriod = this.publishPeriod,
+        deleteDate = this.deleteDate,
         
         // ✅ Баннер-поля
         isBanner = this.isBanner,

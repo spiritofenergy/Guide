@@ -50,7 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.presentation.home.HomeViewModel
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 import com.kodex.guide.ui.theme.DarkBlue
 import com.kodex.guide.ui.theme.GuideTheme
 import com.kodex.guide.ui.theme.Orange
@@ -96,7 +96,7 @@ fun MainTopBar(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
-        color = ButtonColorBlue.copy(alpha = 0.6f),
+        color = ColorBlue.copy(alpha = 0.6f),
         shadowElevation = 4.dp
     ) {
         Row(

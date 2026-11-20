@@ -16,7 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 import com.kodex.guide.ui.theme.Orange
 
 
@@ -42,7 +42,7 @@ fun PhotoSection(
         OutlinedButton(
             onClick = onCameraClick,
             modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.outlinedButtonColors(containerColor = ButtonColorBlue)
+            colors = ButtonDefaults.outlinedButtonColors(containerColor = ColorBlue)
         ) {
             Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(4.dp))

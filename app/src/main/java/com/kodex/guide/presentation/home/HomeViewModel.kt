@@ -128,6 +128,7 @@ class HomeViewModel @Inject constructor(
     val bookToDelete = mutableStateOf<Book?>(null)
 
     // ✅ Показ бокового меню
+
     private val _showDrawer = MutableStateFlow(preferenceDataSource.getShowDrawer())
     val showDrawer: StateFlow<Boolean> = _showDrawer.asStateFlow()
 

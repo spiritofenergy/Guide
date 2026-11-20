@@ -32,6 +32,7 @@ data class MyPostEntity(
   //  val bannerTextBottomRight: String,
     val bannerPublishDate: Long,
     val bannerExpireDate: Long,
+    val deleteDate: Long,
     // для сортировки «свежие сверху»
     val updatedAt: Long = System.currentTimeMillis()
 )

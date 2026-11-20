@@ -24,7 +24,7 @@ data class Book(
     val authorRole: Int = 0,  // ✅ Роль автора (UserRole.level)
     val publishPeriod: Int = 1,
     val timeStamp: Long = System.currentTimeMillis(),
-    val deleteDate: Long = 0L,
+    val deleteDate: Long = System.currentTimeMillis(),
     val village: String = "",
     val street: String = "",
     val house: String = "",

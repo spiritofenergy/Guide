@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 
 
 @Composable
@@ -37,7 +37,7 @@ fun AddressSection(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(checked = location, onCheckedChange = onLocationChange,
-                colors = CheckboxDefaults.colors(checkedColor = ButtonColorBlue))
+                colors = CheckboxDefaults.colors(checkedColor = ColorBlue))
             Text("Показать на карте")
         }
 
@@ -46,7 +46,7 @@ fun AddressSection(
             label = {
                 Row {
                     Text("Улица")
-                    if (location) Text(" *", color = ButtonColorBlue)
+                    if (location) Text(" *", color = ColorBlue)
                 }
             },
             modifier = Modifier.fillMaxWidth(), singleLine = true
@@ -58,7 +58,7 @@ fun AddressSection(
                 label = {
                     Row {
                         Text("Дом")
-                        if (location) Text(" *", color = ButtonColorBlue)
+                        if (location) Text(" *", color = ColorBlue)
                     }
                 },
                 modifier = Modifier.weight(1f), singleLine = true

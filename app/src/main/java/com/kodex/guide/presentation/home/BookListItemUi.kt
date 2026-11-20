@@ -53,7 +53,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
-import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.layout.ContentScale
@@ -69,7 +68,7 @@ import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.R
 import com.kodex.guide.ui.theme.Business
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 import com.kodex.guide.ui.theme.GreenSea
 import com.kodex.guide.ui.theme.Orange
 import com.kodex.guide.ui.theme.Red
@@ -133,26 +132,26 @@ fun BookListItemUi(
     // BUSINESS: Оранжевый -> Белый -> Синий -> Синий -> Белый -> Оранжевый
     val userBrush = remember {
         Brush.sweepGradient(
-            0.00f to ButtonColorBlue,
-            0.20f to ButtonColorBlue,
+            0.00f to ColorBlue,
+            0.20f to ColorBlue,
             0.25f to Color.White,
             0.30f to Orange,
             0.70f to Orange,
             0.75f to Color.White,
-            0.80f to ButtonColorBlue,
-            1.00f to ButtonColorBlue,
+            0.80f to ColorBlue,
+            1.00f to ColorBlue,
         )
     }  // BUSINESS: Оранжевый -> Белый -> Синий -> Синий -> Белый -> Оранжевый
     val businessBrush = remember {
         Brush.sweepGradient(
-            0.00f to ButtonColorBlue,
-            0.20f to ButtonColorBlue,
+            0.00f to ColorBlue,
+            0.20f to ColorBlue,
             0.25f to Color.White,
             0.30f to Business,
             0.70f to Business,
             0.75f to Color.White,
-            0.80f to ButtonColorBlue,
-            1.00f to ButtonColorBlue,
+            0.80f to ColorBlue,
+            1.00f to ColorBlue,
         )
     }
 
@@ -161,14 +160,14 @@ fun BookListItemUi(
     // и чуть более светлого оттенка Premium для эффекта "переливания".
     val premiumBrush = remember {
         Brush.sweepGradient(
-            0.00f to ButtonColorBlue,
-            0.20f to ButtonColorBlue,
+            0.00f to ColorBlue,
+            0.20f to ColorBlue,
             0.25f to Color.White,
             0.45f to Premium,
             0.55f to Premium,
             0.65f to Color.White,
-            0.70f to ButtonColorBlue,
-            1.00f to ButtonColorBlue,
+            0.70f to ColorBlue,
+            1.00f to ColorBlue,
         )
     }
 

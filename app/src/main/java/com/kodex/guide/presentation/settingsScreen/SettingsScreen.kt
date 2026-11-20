@@ -1,11 +1,9 @@
 package com.kodex.guide.presentation.settingsScreen
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,11 +19,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesomeMotion
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Payment
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,7 +41,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,22 +50,18 @@ import com.kodex.guide.domain.model.AddressData
 import com.kodex.guide.domain.model.PersonalData
 import com.kodex.guide.domain.model.User
 import com.kodex.guide.domain.model.UserRole
-import com.kodex.guide.domain.model.UserSettingsBundle
-import com.kodex.guide.domain.model.UserSettingsData
 import com.kodex.guide.domain.repository.PaymentResult
 import com.kodex.guide.presentation.home.HomeViewModel
-import com.kodex.guide.presentation.home.PaymentBottomSheet
-import com.kodex.guide.presentation.home.ShowTariffDialog
+import com.kodex.guide.presentation.payment.PaymentBottomSheet
+import com.kodex.guide.presentation.payment.ShowTariffDialog
 import com.kodex.guide.presentation.settingsScreen.menuItems.DeveloperInfoFooter
 import com.kodex.guide.presentation.settingsScreen.menuItems.SettingsMenuItem
 import com.kodex.guide.presentation.settingsScreen.menuItems.SettingsMenuToggle
 import com.kodex.guide.presentation.settingsScreen.menuItems.getRoleDisplayName
 import com.kodex.guide.ui.dialods.AccountDialog
 import com.kodex.guide.ui.dialods.SettingsRestartDialog
-import com.kodex.guide.ui.theme.ButtonColorBlue
+import com.kodex.guide.ui.theme.ColorBlue
 import com.kodex.guide.ui.theme.Orange
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun SettingsScreen(
@@ -109,7 +99,7 @@ fun SettingsScreen(
     // Отслеживаем showAuthDialog
     val showAuthDialog by viewModelHome.showAuthDialog
 
-    LaunchedEffect(Unit) {
+ /*   LaunchedEffect(Unit) {
         viewModel.getSettings()
         viewModel.settingsBundleState.collect { settingsData ->
             dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_FORMAT] =
@@ -119,8 +109,12 @@ fun SettingsScreen(
             dropDownMenuSelectedOptions.value[DropDownMenuType.IMAGE_SIZE] =
                 settingsData.userSettingsData.size
         }
+    }*/
+    // ✅ ДОБАВЛЕННЫЙ БЛОК: Автоматически показываем диалог тарифов при входе
+    LaunchedEffect(Unit) {
+        viewModelHome.showAuthDialog.value = true
+        viewModelHome.isLogoutDialog.value = false
     }
-
     SettingsRestartDialog(
         showDialog = showConfirmDeleteDialog,
         onDismiss = { showConfirmDeleteDialog = false },
@@ -199,7 +193,7 @@ fun SettingsScreen(
         Surface(
             modifier = Modifier
                 .fillMaxWidth(),
-            color = ButtonColorBlue.copy(alpha = 0.7f),
+            color = ColorBlue.copy(alpha = 0.7f),
             shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
         ) {
             Column(
@@ -400,8 +394,8 @@ fun SettingsScreen(
                     title = "Боковое меню",
                     isChecked = showDrawer,
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = ButtonColorBlue,
-                        checkedTrackColor = ButtonColorBlue.copy(alpha = 0.3f)
+                        checkedThumbColor = ColorBlue,
+                        checkedTrackColor = ColorBlue.copy(alpha = 0.3f)
                     ),
                     onCheckedChange = { newValue ->
                         pendingDrawerState = newValue
