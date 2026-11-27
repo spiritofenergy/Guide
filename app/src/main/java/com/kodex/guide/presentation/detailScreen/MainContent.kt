@@ -625,8 +625,19 @@ fun MainContent(
 
                 Spacer(modifier = Modifier.height(4.dp))
             }
+            // ✅ Дата публикации и удаления в одну строку
+            val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+            val publicationDate = dateFormat.format(book.timeStamp)
+            val deleteDate = dateFormat.format(book.deleteDate)
 
-            // ✅ Дата и период публикации — показываются ВСЕГДА
+            Text(
+                text = "Дата публикации и удаления: $publicationDate / $deleteDate",
+                fontSize = 14.sp,
+                color = TextGray,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+         /*   // ✅ Дата и период публикации — показываются ВСЕГДА
             val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
             val publicationDate = dateFormat.format(book.timeStamp)
             Text(
@@ -659,7 +670,7 @@ fun MainContent(
                     modifier = Modifier.padding(vertical = 2.dp)
                 )
             }
-
+*/
             // ===== Секция: Отзывы =====
             SectionHeader(title = "Отзывы")
 

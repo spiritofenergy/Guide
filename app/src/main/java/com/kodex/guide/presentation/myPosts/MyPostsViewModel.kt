@@ -12,6 +12,8 @@ import com.kodex.guide.domain.model.PostSampleState
 import com.kodex.guide.domain.model.PostEditorState
 import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.domain.model.toEditorState
+import com.kodex.guide.domain.repository.PaymentRepository
+import com.kodex.guide.domain.repository.PaymentResult
 import com.kodex.guide.domain.repository.UserRoleRepo
 import com.kodex.guide.domain.tarif.AuthStateProvider
 import com.kodex.guide.domain.usecase.*
@@ -38,7 +40,9 @@ class MyPostsViewModel @Inject constructor(
     private val authStateProvider: AuthStateProvider,
     private val observeLatestSample: ObserveLatestSampleUseCase,
     private val generatePostDescription: GeneratePostDescriptionUseCase,
-    private val userRoleRepo: UserRoleRepo
+    private val userRoleRepo: UserRoleRepo,
+    private val paymentRepository: PaymentRepository,
+    private val preferenceDataSource: PreferenceDataSource
 
 ) : ViewModel() {
     private val _isGeneratingDescription = MutableStateFlow(false)
@@ -61,6 +65,18 @@ class MyPostsViewModel @Inject constructor(
         const val GENERATION_TIMEOUT_MS = 60_000L
     }
 
+    private var paidForPost: Pair<String, Int>? = null
+
+    fun getSavedCardData(): Pair<String, String> =
+        preferenceDataSource.getSavedCardNumber() to preferenceDataSource.getSavedCardExpiry()
+
+    fun saveCardData(cardNumber: String, expiry: String) {
+        preferenceDataSource.saveCardData(cardNumber, expiry)
+    }
+
+    fun clearCardData() {
+        preferenceDataSource.clearCardData()
+    }
 
     // Список моих постов
     private val _myPosts = MutableStateFlow<List<Book>>(emptyList())
@@ -214,7 +230,14 @@ class MyPostsViewModel @Inject constructor(
         }
     }
 
-    fun savePost(state: PostEditorState, publish: Boolean) {
+    fun savePost(
+        state: PostEditorState,
+        publish: Boolean,
+        paymentAmountRubles: Int? = null,
+        saveCard: Boolean = false,
+        cardNumber: String? = null,
+        cardExpiry: String? = null
+    ) {
         if (_isSavingOrUploading.value) return
         _isSavingOrUploading.value = true
         _isPublishing.value = publish
@@ -282,6 +305,7 @@ class MyPostsViewModel @Inject constructor(
                     return@launch
                 }
                 val saved = saveResult.getOrThrow()
+                _editPost.value = saved
 
                 // ---------- 6. Ветвление по кнопке ----------
                 if (!publish) {
@@ -289,19 +313,44 @@ class MyPostsViewModel @Inject constructor(
                     emitToast("Объявление сохранено")
                     _uiEvents.emit(MyPostsEvent.NavigateBack)
                 } else {
-                    // «Отправить» → Room уже сохранён, теперь Firebase (+ баннер, если включён)
+                    val amount = paymentAmountRubles?.takeIf { it > 0 }
+                    val alreadyPaid = amount != null &&
+                        paidForPost == (saved.key to amount)
+                    val paymentResult = if (amount != null && !alreadyPaid) {
+                        paymentRepository.startPayment(UserRole.BUSINESS, amount * 100)
+                    } else {
+                        null
+                    }
+
+                    when (paymentResult) {
+                        is PaymentResult.Success -> {
+                            amount?.let { paidForPost = saved.key to it }
+                            if (saveCard && !cardNumber.isNullOrEmpty() && !cardExpiry.isNullOrEmpty()) {
+                                saveCardData(cardNumber, cardExpiry)
+                            } else {
+                                clearCardData()
+                            }
+                        }
+                        is PaymentResult.Error -> {
+                            emitToast("Ошибка оплаты: ${paymentResult.message}")
+                            return@launch
+                        }
+                        PaymentResult.Cancelled -> {
+                            emitToast("Оплата отменена")
+                            return@launch
+                        }
+                        else -> Unit
+                    }
+
+                    // Room уже сохранён, теперь Firebase (+ баннер, если включён)
                     uploadMyPost(saved)
                         .onSuccess {
+                            paidForPost = null
                             emitToast("Объявление опубликовано!")
                             _uiEvents.emit(MyPostsEvent.NavigateBack)
                         }
                         .onFailure {
-                            // Черновик уже в Room — пользователь вернётся в список
-                            // и сможет дослать кнопкой «Опубл.» на карточке.
-                            emitToast(
-                                "Ошибка отправки: ${it.message}. Сохранено локально"
-                            )
-                            _uiEvents.emit(MyPostsEvent.NavigateBack)
+                            emitToast("Ошибка отправки: ${it.message}. Сохранено локально")
                         }
                 }
             } catch (error: Exception) {

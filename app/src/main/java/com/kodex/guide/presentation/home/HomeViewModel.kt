@@ -846,6 +846,7 @@ class HomeViewModel @Inject constructor(
 
         }
     }
+
  /*!   // 2. ИСПРАВЛЕНИЕ: Убираем !! чтобы избежать краша у неавторизованных пользователей
     fun isAdmin(onAdmin: (Boolean) -> Unit) {
         val uid = Firebase.auth.currentUser?.uid ?: run {
@@ -883,3 +884,4 @@ class HomeViewModel @Inject constructor(
             }
     }*/
 }
+

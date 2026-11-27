@@ -24,6 +24,7 @@ object MyPostMapper {
             publishPeriod = e.publishPeriod,
             imageUrl = e.imageUrl,
             isUploaded = e.isUploaded,
+            frame = e.frame,
             latitude = e.latitude,
             longitude = e.longitude,
             isBanner = e.isBanner,
@@ -61,6 +62,7 @@ object MyPostMapper {
             publishPeriod = b.publishPeriod,
             imageUrl = b.imageUrl,
             isUploaded = b.isUploaded,
+            frame = b.frame,
             latitude = b.latitude,
             longitude = b.longitude,
             isBanner = b.isBanner,
@@ -88,7 +90,7 @@ fun Book.toBannerDTO(): BannerDTO {
         isUploaded = isUploaded,
 
         // ✅ ВОТ ОНИ - НАШИ ПОЛЯ!
-        isBanner = true,
+        isBanner = isBanner,
         bannerTextTopLeft = bannerTextTopLeft,
         bannerTextTopRight = bannerTextTopRight,
         bannerTextBottomLeft = bannerTextBottomLeft,

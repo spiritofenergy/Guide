@@ -23,7 +23,9 @@ object RoomModule {
             context,
             MainDb::class.java,
             "books"
-        )   .fallbackToDestructiveMigration()
+        )
+            .addMigrations(MainDb.MIGRATION_9_10)
+            .fallbackToDestructiveMigration()
             .build()
     }
     @Provides

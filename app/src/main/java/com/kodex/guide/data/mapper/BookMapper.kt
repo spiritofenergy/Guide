@@ -104,7 +104,7 @@ fun Book.toBannerEntity(): BannerEntity {
         timeStamp = this.timeStamp,
         authorUid = this.authorUid,
         isUploaded = this.isUploaded,
-        isBanner = true, // Баннер всегда true
+        isBanner = this.isBanner,
         bannerTextTopLeft = this.bannerTextTopLeft,
         bannerTextTopRight = this.bannerTextTopRight,
         bannerTextBottomLeft = this.bannerTextBottomLeft,

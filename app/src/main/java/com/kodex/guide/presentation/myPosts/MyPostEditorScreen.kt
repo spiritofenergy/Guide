@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import coil.compose.AsyncImage
@@ -45,6 +46,7 @@ import com.kodex.guide.presentation.myPosts.components.PublishPeriodDropdown
 import com.kodex.guide.presentation.myPosts.components.WorkingHoursDropdown
 import com.kodex.guide.presentation.myPosts.components.capitalizeFirst
 import com.kodex.guide.presentation.myPosts.components.decodeBase64ToBitmap
+import com.kodex.guide.presentation.payment.PublishPaymentBottomSheet
 import com.kodex.guide.ui.theme.ColorBlue
 import java.io.File
 import com.kodex.guide.BuildConfig  // ВАЖНО: ваш пакет, не чужой!
@@ -122,6 +124,8 @@ fun MyPostEditorScreen(
 
     // Баннер-поля
     var isBanner by remember { mutableStateOf(false) }
+    var pendingPromotion by remember { mutableStateOf<PromotionType?>(null) }
+    var showPaymentSheet by remember { mutableStateOf(false) }
     var bannerTextTopLeft by remember { mutableStateOf("") }
     var bannerTextTopRight by remember { mutableStateOf("") }
     var bannerTextBottomLeft by remember { mutableStateOf("") }
@@ -167,6 +171,7 @@ fun MyPostEditorScreen(
                     bannerTextBottomLeft = s.bannerTextBottomLeft
                     bannerPublishDate = s.bannerPublishDate
                     bannerExpireDate = s.bannerExpireDate
+                    isBanner = s.isBanner
                     // Восстанавливаем режим рамки (поле должно быть в PostEditorState)
                     isFrame = s.frame
                 }
@@ -231,6 +236,78 @@ fun MyPostEditorScreen(
 // Достаем строку (например, "30 days") и оставляем только цифры
     val publishPeriodText = publishPeriodNames.getOrNull(publishPeriod - 1) ?: "30"
     val publishPeriodDays: Long = publishPeriodText.filter { it.isDigit() }.toLongOrNull() ?: 30L
+    val framePrice = if (isFrame) priceForPeriod(1600, publishPeriodDays) else 0
+    val bannerPrice = if (isBanner) priceForPeriod(5000, publishPeriodDays) else 0
+    val totalPromotionPrice = framePrice + bannerPrice
+
+    val getCurrentState: () -> PostEditorState = {
+        val baseTimestamp = editPost?.timeStamp ?: System.currentTimeMillis()
+        val calculatedDeleteDate =
+            baseTimestamp + (publishPeriodDays * 24L * 60L * 60L * 1000L)
+
+        PostEditorState(
+            title = title,
+            description = description,
+            price = price,
+            telephone = telephone,
+            village = village,
+            street = street,
+            house = house,
+            flat = flat,
+            category = category,
+            delivery = delivery,
+            payment = payment,
+            location = location,
+            publishPeriod = publishPeriod,
+            openingHours = if (canEditWorkingHours) {
+                "$openingHoursFrom - $openingHoursTo"
+            } else {
+                editPost?.openingHours ?: ""
+            },
+            deleteDate = calculatedDeleteDate,
+            imageUri = imageUri,
+            existingImageUrl = existingImageUrl,
+            frame = isFrame,
+            isBanner = isBanner,
+            bannerTextTopLeft = bannerTextTopLeft,
+            bannerTextTopRight = bannerTextTopRight,
+            bannerTextBottomLeft = bannerTextBottomLeft,
+            bannerPublishDate = baseTimestamp,
+            bannerExpireDate = calculatedDeleteDate,
+        )
+    }
+
+    pendingPromotion?.let { promotion ->
+        val priceForThirtyDays = when (promotion) {
+            PromotionType.FRAME -> 1600
+            PromotionType.BANNER -> 5000
+        }
+        val promotionName = when (promotion) {
+            PromotionType.FRAME -> "рамку"
+            PromotionType.BANNER -> "баннер"
+        }
+        AlertDialog(
+            onDismissRequest = { pendingPromotion = null },
+            title = { Text("Подключить продвижение?") },
+            text = {
+                Text("Стоимость за 30 дней: $priceForThirtyDays ₽. Подключить $promotionName?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        when (promotion) {
+                            PromotionType.FRAME -> isFrame = true
+                            PromotionType.BANNER -> isBanner = true
+                        }
+                        pendingPromotion = null
+                    }
+                ) { Text("Согласен") }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingPromotion = null }) { Text("Отмена") }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -442,13 +519,17 @@ fun MyPostEditorScreen(
             // ===== РЕЖИМ РАМКИ (над баннером) =====
             FrameSection(
                 isFrame = isFrame,
-                onIsFrameChange = { isFrame = it }
+                onIsFrameChange = { enabled ->
+                    if (enabled) pendingPromotion = PromotionType.FRAME else isFrame = false
+                }
             )
 
             // Секция баннера
             BannerSection(
                 isBanner = isBanner,
-                onIsBannerChange = { isBanner = it },
+                onIsBannerChange = { enabled ->
+                    if (enabled) pendingPromotion = PromotionType.BANNER else isBanner = false
+                },
                 bannerTextTopLeft = bannerTextTopLeft,
                 onBannerTextTopLeftChange = { bannerTextTopLeft = it },
                 bannerTextTopRight = bannerTextTopRight,
@@ -464,46 +545,6 @@ fun MyPostEditorScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Вспомогательная лямбда для сбора текущего состояния
-                val getCurrentState: () -> PostEditorState = {
-                    // Если редактируем старый пост, берем его дату публикации. Если новый — сегодняшнюю.
-                    val baseTimestamp = editPost?.timeStamp ?: System.currentTimeMillis()
-
-                    // Высчитываем дату удаления: дата публикации + (дни * 24 часа * 60 минут * 60 секунд * 1000 мс)
-                    val calculatedDeleteDate = baseTimestamp + (publishPeriodDays * 24L * 60L * 60L * 1000L)
-
-                    PostEditorState(
-                        title = title,
-                        description = description,
-                        price = price,
-                        telephone = telephone,
-                        village = village,
-                        street = street,
-                        house = house,
-                        flat = flat,
-                        category = category,
-                        delivery = delivery,
-                        payment = payment,
-                        location = location,
-                        publishPeriod = publishPeriod,
-                        openingHours = if (canEditWorkingHours) {
-                            "$openingHoursFrom - $openingHoursTo"
-                        } else {
-                            editPost?.openingHours ?: ""
-                        },
-                        deleteDate = calculatedDeleteDate,
-                        imageUri = imageUri,
-                        existingImageUrl = existingImageUrl,
-                        frame = isFrame,
-                        isBanner = isBanner,
-                        bannerTextTopLeft = bannerTextTopLeft,
-                        bannerTextTopRight = bannerTextTopRight,
-                        bannerTextBottomLeft = bannerTextBottomLeft,
-                        bannerPublishDate = System.currentTimeMillis(),
-                        bannerExpireDate = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000),
-                    )
-                }
-
                 // Кнопка "Сохранить как черновик"
                 ActionSheetButton(
                     text = if (isSavingOrUploading && !isPublishing) "Сохранение…" else "Сохранить",
@@ -527,7 +568,7 @@ fun MyPostEditorScreen(
                     isLoading = isSavingOrUploading && isPublishing,
                     loadingText = "Отправка…",
                     onClick = {
-                        viewModel.savePost(state = getCurrentState(), publish = true)
+                        showPaymentSheet = true
                     },
                     modifier = Modifier.weight(1f)
                 )
@@ -536,6 +577,28 @@ fun MyPostEditorScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
+
+    if (showPaymentSheet) {
+        PublishPaymentBottomSheet(
+            viewModel = viewModel,
+            postState = getCurrentState(),
+            periodDays = publishPeriodDays,
+            framePrice = framePrice,
+            bannerPrice = bannerPrice,
+            totalPrice = totalPromotionPrice,
+            isLoading = isSavingOrUploading,
+            onDismiss = { if (!isSavingOrUploading) showPaymentSheet = false },
+
+        )
+    }
 }
+
+private enum class PromotionType {
+    FRAME,
+    BANNER
+}
+
+private fun priceForPeriod(priceForThirtyDays: Int, periodDays: Long): Int =
+    ((priceForThirtyDays.toLong() * periodDays + 29L) / 30L).toInt()
 
 

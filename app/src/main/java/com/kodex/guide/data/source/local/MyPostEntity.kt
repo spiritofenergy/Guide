@@ -2,6 +2,7 @@ package com.kodex.guide.data.source.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.ColumnInfo
 
 @Entity(tableName = "mypost")
 data class MyPostEntity(
@@ -23,6 +24,8 @@ data class MyPostEntity(
     val publishPeriod: Int,
     val imageUrl: String,          // base64 или http
     val isUploaded: Boolean,
+    @ColumnInfo(defaultValue = "0")
+    val frame: Boolean = false,
     val latitude: String?,
     val longitude: String?,
     // Баннер
