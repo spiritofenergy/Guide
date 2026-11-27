@@ -57,6 +57,7 @@ data class PostEditorState(
             imageUrl = if (imageUri != null) "" else existingImageUrl,
             
             // Баннер-поля
+            frame = frame,
             isBanner = isBanner,
             bannerTextTopLeft = bannerTextTopLeft,
             bannerTextTopRight = bannerTextTopRight,
@@ -90,6 +91,7 @@ data class PostEditorState(
             existingImageUrl = book.imageUrl ?: "",
             
             // Баннер-поля
+            frame = book.frame,
             isBanner = book.isBanner,
             bannerTextTopLeft = book.bannerTextTopLeft,
             bannerTextTopRight = book.bannerTextTopRight,
@@ -121,6 +123,7 @@ fun Book.toEditorState(): PostEditorState = PostEditorState(
     imageUri = null,                  // Uri из Room не восстановить — покажем base64 через existingImageUrl
     existingImageUrl = "",
     isBanner = isBanner,
+    frame = frame,
     bannerTextTopLeft = bannerTextTopLeft,
     bannerTextTopRight = bannerTextTopRight,
     bannerTextBottomLeft = bannerTextBottomLeft,

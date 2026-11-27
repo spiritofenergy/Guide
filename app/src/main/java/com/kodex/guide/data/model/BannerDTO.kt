@@ -15,7 +15,7 @@ data class BannerDTO(
     val deleteDate: Int = 0,
     val authorUid: String = "",
     val isUploaded: Boolean = false,
-    val isBanner: Boolean = true,
+    val isBanner: Boolean = false,
     val bannerTextTopLeft: String = "",
     val bannerTextTopRight: String = "",
     val bannerTextBottomLeft: String = "",

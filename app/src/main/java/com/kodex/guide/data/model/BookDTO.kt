@@ -58,6 +58,6 @@ fun BookDTO.toBannerEntity(): BannerEntity {
         timeStamp = this.timeStamp,
         authorUid = this.authorUid,
         isUploaded = this.isUploaded,
-        isBanner = true, // Принудительно ставим true
+        isBanner = this.isBanner,
     )
 }

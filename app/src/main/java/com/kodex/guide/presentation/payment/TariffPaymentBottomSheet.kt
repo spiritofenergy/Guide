@@ -3,7 +3,6 @@ package com.kodex.guide.presentation.payment
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding // ✅ ДОБАВЛЕН ИМПОРТ
@@ -26,7 +25,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,7 +46,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PaymentBottomSheet(
+fun TariffPaymentBottomSheet(
     viewModel: HomeViewModel,
     onDismiss: () -> Unit,
     isLoading: Boolean = false,
@@ -64,13 +62,16 @@ fun PaymentBottomSheet(
     }
 
     val coroutineScope = rememberCoroutineScope()
-    var cardNumber by remember { mutableStateOf("") }
-    var expiry by remember { mutableStateOf("") }
+    val savedCardData = remember(viewModel) { viewModel.getSavedCardData() }
+    var cardNumber by remember(viewModel) { mutableStateOf(savedCardData.first) }
+    var expiry by remember(viewModel) { mutableStateOf(savedCardData.second) }
     var cvv by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val isFormValid = cardNumber.length == 16 && expiry.length == 5 && cvv.length == 3
-    var saveCard by remember { mutableStateOf(false) }
+    var saveCard by remember(viewModel) {
+        mutableStateOf(savedCardData.first.isNotEmpty())
+    }
 
     val textFieldColors = OutlinedTextFieldDefaults.colors(
         focusedContainerColor = Color.White,
@@ -79,15 +80,6 @@ fun PaymentBottomSheet(
         focusedBorderColor = ColorBlue,
         unfocusedBorderColor = Color.Gray
     )
-
-    LaunchedEffect(Unit) {
-        val (savedNumber, savedExpiry) = viewModel.getSavedCardData()
-        if (savedNumber.isNotEmpty()) {
-            cardNumber = savedNumber
-            expiry = savedExpiry
-            saveCard = true
-        }
-    }
 
     ModalBottomSheet(
         onDismissRequest = {},
@@ -98,16 +90,13 @@ fun PaymentBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-              //  .fillMaxHeight(0.9f)
-                // ✅ Добавляем отступ для системных кнопок навигации снизу
                 .navigationBarsPadding()
                 .padding(horizontal = 8.dp)
-                .padding(bottom = 8.dp), // ✅ Даем отступ снизу для Column
+                .padding(bottom = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(
                 modifier = Modifier
-                   // .weight(1f)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -198,12 +187,6 @@ fun PaymentBottomSheet(
             Button(
                 onClick = {
                     errorMessage = null
-                    if (saveCard) {
-                        viewModel.saveCardData(cardNumber, expiry)
-                    } else {
-                        viewModel.clearCardData()
-                    }
-
                     viewModel.paymentInProgress.value = true
 
                     coroutineScope.launch {
@@ -220,6 +203,11 @@ fun PaymentBottomSheet(
                                     onSuccess = {
                                         viewModel.paymentInProgress.value = false
                                         viewModel.showPaymentSheet.value = false
+                                        if (saveCard) {
+                                            viewModel.saveCardData(cardNumber, expiry)
+                                        } else {
+                                            viewModel.clearCardData()
+                                        }
                                         onPaymentSuccess()
                                         onDismiss()
                                     },
@@ -258,3 +246,5 @@ fun PaymentBottomSheet(
         }
     }
 }
+
+

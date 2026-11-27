@@ -69,7 +69,7 @@ import com.kodex.guide.presentation.navigation.DrawerBody
 import com.kodex.guide.presentation.navigation.DrawerHeader
 import com.kodex.guide.presentation.navigation.MainTopBar
 import com.kodex.guide.presentation.navigation.NavRoutes
-import com.kodex.guide.presentation.payment.PaymentBottomSheet
+import com.kodex.guide.presentation.payment.TariffPaymentBottomSheet
 import com.kodex.guide.presentation.payment.ShowTariffDialog
 import com.kodex.guide.ui.dialods.FilterDialog
 import com.kodex.guide.ui.theme.Orange
@@ -559,7 +559,7 @@ fun HomeScreen(
 
                     // Обёртка для отображения bottom sheet
                     if (showPaymentSheet.value) {
-                        PaymentBottomSheet(
+                        TariffPaymentBottomSheet(
                             viewModel = viewModel,
                             onDismiss = { showPaymentSheet.value = false },
                             onPaymentSuccess = {

@@ -52,7 +52,7 @@ import com.kodex.guide.domain.model.User
 import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.domain.repository.PaymentResult
 import com.kodex.guide.presentation.home.HomeViewModel
-import com.kodex.guide.presentation.payment.PaymentBottomSheet
+import com.kodex.guide.presentation.payment.TariffPaymentBottomSheet
 import com.kodex.guide.presentation.payment.ShowTariffDialog
 import com.kodex.guide.presentation.settingsScreen.menuItems.DeveloperInfoFooter
 import com.kodex.guide.presentation.settingsScreen.menuItems.SettingsMenuItem
@@ -453,7 +453,7 @@ fun SettingsScreen(
             }
         }
 
-        PaymentBottomSheet(
+        TariffPaymentBottomSheet(
             viewModel = viewModelHome,
             isLoading = isPaymentLoading, // ✅ Передаем состояние загрузки в UI
             onDismiss = { viewModelHome.showPaymentSheet.value = false },
