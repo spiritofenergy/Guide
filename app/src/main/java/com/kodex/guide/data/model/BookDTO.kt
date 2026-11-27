@@ -26,6 +26,7 @@ data class BookDTO(
     val flat: String = "",
     val location: Boolean = false,
     val delivery: Boolean = false,
+   // val uploaded: Boolean = false,
     val payment: Boolean = false,
     val ratingsList: List<Int> = emptyList(),
     val latitude: Any? = null,

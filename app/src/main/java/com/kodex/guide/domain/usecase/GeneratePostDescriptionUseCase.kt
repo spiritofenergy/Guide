@@ -19,7 +19,9 @@ class GeneratePostDescriptionUseCase @Inject constructor(
         if (cleanTitle.length < 2) {
             return Result.failure(IllegalArgumentException("Сначала введите название объявления"))
         }
-        val image = imagePreparer.prepare(imageUri, existingImage)
+        val image = runCatching {
+            imagePreparer.prepare(imageUri, existingImage)
+        }.getOrNull()
         return generator.generate(cleanTitle, image)
     }
 }
