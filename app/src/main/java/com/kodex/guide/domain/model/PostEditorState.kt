@@ -20,6 +20,7 @@ data class PostEditorState(
     val location: Boolean = false,
     val timeStamp: Long = 0L,
     val publishPeriod: Int = 1,
+    val openingHours: String = "",
     val deleteDate: Long = 0L,       // Период публикации в днях
     val imageUri: Uri? = null,       // Выбранное фото (из галереи или камеры)
     val existingImageUrl: String = "", // URL/Base64 существующего фото при редактировании
@@ -51,6 +52,7 @@ data class PostEditorState(
             location = location,
             timeStamp = timeStamp,
             publishPeriod = publishPeriod,
+            openingHours = openingHours,
             deleteDate = deleteDate,
             imageUrl = if (imageUri != null) "" else existingImageUrl,
             
@@ -83,6 +85,7 @@ data class PostEditorState(
             payment = book.payment,
             location = book.location,
             publishPeriod = book.publishPeriod,
+            openingHours = book.openingHours,
             deleteDate = book.deleteDate,
             existingImageUrl = book.imageUrl ?: "",
             
@@ -113,6 +116,7 @@ fun Book.toEditorState(): PostEditorState = PostEditorState(
     payment = payment,
     location = location,
     publishPeriod = publishPeriod,
+    openingHours = openingHours,
     deleteDate = deleteDate,
     imageUri = null,                  // Uri из Room не восстановить — покажем base64 через existingImageUrl
     existingImageUrl = "",

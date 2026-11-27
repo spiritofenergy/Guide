@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.google.firebase.ai.FirebaseAI
-import com.kodex.guide.domain.ai.PostDescriptionGenerator
+import com.google.firebase.ai.type.content
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,8 +28,17 @@ class FirebasePostDescriptionGenerator @Inject constructor() : PostDescriptionGe
     }
 
     override suspend fun generate(title: String, image: Bitmap?): Result<String> = runCatching {
-        val prompt = buildPrompt(title, hasImage = image != null)
-        val response = model.generateContent(prompt)
+        val promptText = buildPrompt(title, hasImage = image != null)
+        val response = if (image != null) {
+            model.generateContent(
+                content {
+                    text(promptText)
+                    image(image)
+                }
+            )
+        } else {
+            model.generateContent(promptText)
+        }
         response.text?.trim().orEmpty().ifEmpty {
             error("Модель вернула пустой ответ")
         }
@@ -38,11 +47,12 @@ class FirebasePostDescriptionGenerator @Inject constructor() : PostDescriptionGe
     private fun buildPrompt(title: String, hasImage: Boolean): String = buildString {
         append("Название объявления: \"").append(title).append("\"\n")
         if (hasImage) append("На фото — предмет или услуга объявления.\n")
-        append("Напиши привлекательное описание на русском: 2–4 предложения, ")
+        append("Напиши привлекательное описание на русском: 2–4 предложения," +
+                " сделай 2 или 3 обзаца, во втором из чего сделаны, в аоследнм варианты применения ")
         append("без markdown, без эмодзи, без кавычек вокруг ответа.")
     }
 
     private companion object {
-        const val MODEL_NAME = "gemini-2.0-flash"
+        const val MODEL_NAME = "gemini-3.5-flash-lite"
     }
 }

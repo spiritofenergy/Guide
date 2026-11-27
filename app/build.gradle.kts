@@ -69,6 +69,8 @@ dependencies {
     implementation(libs.firebase.ai)
     implementation(libs.firebase.appcheck.debug)
     implementation(libs.firebase.appcheck.playintegrity)
+    //implementation("com.google.firebase:firebase-appcheck-debug:17.1.2") // проверьте актуальную версию
+    //implementation("com.google.firebase:firebase-appcheck-playintegrity:17.1.2")
 
 
     // ✅ ТЕСТЫ

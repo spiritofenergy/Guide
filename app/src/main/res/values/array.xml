@@ -132,4 +132,27 @@
     <item>300</item>
     <item>600</item>
     </string-array>
+
+    <string-array name="working_hours_from">
+        <item>05:00</item>
+        <item>06:00</item>
+        <item>07:00</item>
+        <item>08:00</item>
+        <item>09:00</item>
+        <item>10:00</item>
+        <item>11:00</item>
+        <item>12:00</item>
+    </string-array>
+    <string-array name="working_hours_to">
+        <item>16:00</item>
+        <item>17:00</item>
+        <item>18:00</item>
+        <item>19:00</item>
+        <item>20:00</item>
+        <item>21:00</item>
+        <item>22:00</item>
+        <item>23:00</item>
+        <item>24:00</item>
+    </string-array>
+
 </resources>

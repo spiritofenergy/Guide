@@ -15,23 +15,31 @@ class WorkingHoursServiceImpl : WorkingHoursService {
     override fun isOpenNow(openingHours: String, now: LocalTime): Boolean {
         val source = openingHours.trim()
         if (source.isEmpty()) return false
-        if (source.contains("24", ignoreCase = true) ||
-            source.contains("круглосуточно", ignoreCase = true)
+
+        val normalized = source.lowercase()
+        if (normalized == "24" ||
+            normalized == "24/7" ||
+            normalized.contains("круглосуточно", ignoreCase = true)
         ) return true
 
         return try {
             val parts = source.split("-", "–", "—").map { it.trim() }
             if (parts.size != 2) return false
-            val open = LocalTime.parse(parts[0], timeFormat)
-            val close = LocalTime.parse(parts[1], timeFormat)
+
+            val open = parseTime(parts[0])
+            val close = if (parts[1] == "24:00") LocalTime.MAX else parseTime(parts[1])
+
             when {
-                // обычный день: 09:00 - 20:00
+                // Обычный интервал: 09:00 - 20:00
                 close.isAfter(open) -> !now.isBefore(open) && !now.isAfter(close)
-                // переход через полночь: 22:00 - 06:00
+                // Переход через полночь: 22:00 - 06:00
                 else -> !now.isBefore(open) || !now.isAfter(close)
             }
         } catch (e: Exception) {
             false
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun parseTime(value: String): LocalTime = LocalTime.parse(value, timeFormat)
 }

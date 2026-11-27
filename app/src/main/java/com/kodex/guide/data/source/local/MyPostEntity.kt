@@ -11,6 +11,7 @@ data class MyPostEntity(
     val description: String,
     val price: Int,
     val telephone: String,
+    val openingHours: String = "",
     val village: String,
     val street: String,
     val house: String,

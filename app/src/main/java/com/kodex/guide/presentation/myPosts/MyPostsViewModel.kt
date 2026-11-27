@@ -10,12 +10,17 @@ import com.kodex.guide.domain.model.Book
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.PostSampleState
 import com.kodex.guide.domain.model.PostEditorState
+import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.domain.model.toEditorState
+import com.kodex.guide.domain.repository.UserRoleRepo
 import com.kodex.guide.domain.tarif.AuthStateProvider
 import com.kodex.guide.domain.usecase.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
@@ -32,7 +37,8 @@ class MyPostsViewModel @Inject constructor(
     private val bitmapEncoder: BitmapEncoder,
     private val authStateProvider: AuthStateProvider,
     private val observeLatestSample: ObserveLatestSampleUseCase,
-    private val generatePostDescription: GeneratePostDescriptionUseCase
+    private val generatePostDescription: GeneratePostDescriptionUseCase,
+    private val userRoleRepo: UserRoleRepo
 
 ) : ViewModel() {
     private val _isGeneratingDescription = MutableStateFlow(false)
@@ -47,6 +53,13 @@ class MyPostsViewModel @Inject constructor(
 
     private val _isPublishing = MutableStateFlow(false)
     val isPublishing: StateFlow<Boolean> = _isPublishing.asStateFlow()
+
+    private val _userRole = MutableStateFlow(UserRole.ANONYMOUS)
+    val userRole: StateFlow<UserRole> = _userRole.asStateFlow()
+
+    private companion object {
+        const val GENERATION_TIMEOUT_MS = 60_000L
+    }
 
 
     // Список моих постов
@@ -75,6 +88,16 @@ class MyPostsViewModel @Inject constructor(
 
     init {
         loadMyPosts()
+        loadUserRole()
+    }
+
+    private fun loadUserRole() {
+        val uid = authStateProvider.currentUser()?.uid ?: return
+        viewModelScope.launch {
+            userRoleRepo.observeUserRole(uid)
+                .catch { _userRole.value = UserRole.ANONYMOUS }
+                .collect { _userRole.value = it }
+        }
     }
 
     fun generateDescription(
@@ -87,13 +110,21 @@ class MyPostsViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                generatePostDescription(title, imageUri, existingImageUrl)
-                    .onSuccess { text ->
-                        _uiEvents.emit(MyPostsEvent.DescriptionGenerated(text))
-                    }
-                    .onFailure { error ->
-                        emitToast(error.message ?: "Не удалось сгенерировать описание")
-                    }
+                withTimeout(GENERATION_TIMEOUT_MS) {
+                    generatePostDescription(title, imageUri, existingImageUrl)
+                        .onSuccess { text ->
+                            _uiEvents.emit(MyPostsEvent.DescriptionGenerated(text))
+                        }
+                        .onFailure { error ->
+                            emitToast(error.message ?: "Не удалось сгенерировать описание")
+                        }
+                }
+            } catch (e: TimeoutCancellationException) {
+                emitToast("Истекло время генерации описания")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                emitToast(e.message ?: "Не удалось сгенерировать описание")
             } finally {
                 _isGeneratingDescription.value = false
             }

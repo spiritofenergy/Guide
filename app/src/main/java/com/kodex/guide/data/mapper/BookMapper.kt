@@ -21,6 +21,7 @@ fun BookDTO.toBook(): Book {
         description = description,
         price = price,
         telephone = telephone,
+        openingHours = openingHours,
         categoryIndex = categoryIndex,
         imageUrl = imageUrl,
         isAuthor = isAuthor,
@@ -61,6 +62,7 @@ fun Book.toBookDTO(): BookDTO {
         description = description,
         price = price,
         telephone = telephone,
+        openingHours = openingHours,
         categoryIndex = categoryIndex,
         //categoryName = categoryIndex.name,  // ✅ Имя для обратной совместимости
         imageUrl = imageUrl,
@@ -118,6 +120,7 @@ fun BookDTO.toDomain(): Book {
         description = this.description,
         price = this.price,
         telephone = this.telephone,
+        openingHours = this.openingHours,
         village = this.village,
         street = this.street,
         house = this.house,
