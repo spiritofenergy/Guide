@@ -32,6 +32,7 @@ fun Book.toParallaxNavObject(): NavRoutes.DetailNavObject {
         location = location,
         categoryIndex = categoryIndex,
         telephone = telephone,
+        openingHours = openingHours,
         payment = payment,
         delivery = delivery,
         ratingsList = ratingsList,

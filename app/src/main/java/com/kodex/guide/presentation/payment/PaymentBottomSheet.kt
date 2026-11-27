@@ -3,11 +3,14 @@ package com.kodex.guide.presentation.payment
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding // ✅ ДОБАВЛЕН ИМПОРТ
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -87,105 +90,111 @@ fun PaymentBottomSheet(
     }
 
     ModalBottomSheet(
-        onDismissRequest = {
-            if (!viewModel.paymentInProgress.value) onDismiss()
-        },
-        sheetState = rememberModalBottomSheetState(),
+        onDismissRequest = {},
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        dragHandle = null,
         contentColor = Color(0xFF212121)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+              //  .fillMaxHeight(0.9f)
                 // ✅ Добавляем отступ для системных кнопок навигации снизу
                 .navigationBarsPadding()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp), // ✅ Даем отступ снизу для Column
+                .padding(horizontal = 8.dp)
+                .padding(bottom = 8.dp), // ✅ Даем отступ снизу для Column
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Оплата «$targetRoleName»",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Стоимость: $basePrice ₽",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = ColorBlue
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                   // .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Checkbox(
-                    checked = saveCard,
-                    onCheckedChange = { saveCard = it },
-                    colors = CheckboxDefaults.colors(checkedColor = ColorBlue)
-                )
                 Text(
-                    text = "Сохранить данные карты",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Оплата «$targetRoleName»",
+                    style = MaterialTheme.typography.titleLarge
                 )
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = "Стоимость: $basePrice ₽",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = ColorBlue
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+
+                HorizontalDivider(modifier = Modifier.padding(bottom = 4.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = saveCard,
+                        onCheckedChange = { saveCard = it },
+                        colors = CheckboxDefaults.colors(checkedColor = ColorBlue)
+                    )
+                    Text(
+                        text = "Сохранить данные карты",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                Text(
+                    text = "CVV не сохраняется в целях безопасности",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+
+                OutlinedTextField(
+                    value = cardNumber.chunked(4).joinToString(" "),
+                    onValueChange = { cardNumber = it.filter { c -> c.isDigit() }.take(16) },
+                    label = { Text("Номер карты") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = textFieldColors
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+
+                OutlinedTextField(
+                    value = expiry,
+                    onValueChange = { newValue ->
+                        val digits = newValue.filter { it.isDigit() }.take(4)
+                        expiry = if (digits.length > 2) {
+                            "${digits.take(2)}/${digits.drop(2)}"
+                        } else {
+                            digits
+                        }
+                    },
+                    label = { Text("ММ/ГГ") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = textFieldColors
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+
+                OutlinedTextField(
+                    value = cvv,
+                    onValueChange = { cvv = it.filter { c -> c.isDigit() }.take(3) },
+                    label = { Text("CVV") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = textFieldColors
+                )
+
+                errorMessage?.let {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
-            Text(
-                text = "CVV не сохраняется в целях безопасности",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+
             Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = cardNumber.chunked(4).joinToString(" "),
-                onValueChange = { cardNumber = it.filter { c -> c.isDigit() }.take(16) },
-                label = { Text("Номер карты") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-                colors = textFieldColors
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-
-            OutlinedTextField(
-                value = expiry,
-                onValueChange = { newValue ->
-                    val digits = newValue.filter { it.isDigit() }.take(4)
-                    expiry = if (digits.length > 2) {
-                        "${digits.take(2)}/${digits.drop(2)}"
-                    } else {
-                        digits
-                    }
-                },
-                label = { Text("ММ/ГГ") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-                colors = textFieldColors
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-
-            OutlinedTextField(
-                value = cvv,
-                onValueChange = { cvv = it.filter { c -> c.isDigit() }.take(3) },
-                label = { Text("CVV") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.fillMaxWidth(),
-                colors = textFieldColors
-            )
-
-            errorMessage?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp)) // Чуть больше отступ перед кнопкой
-
             Button(
                 onClick = {
                     errorMessage = null
@@ -227,7 +236,9 @@ fun PaymentBottomSheet(
                     }
                 },
                 enabled = !viewModel.paymentInProgress.value && isFormValid,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = ColorBlue,
                     contentColor = Color.White,
@@ -244,9 +255,6 @@ fun PaymentBottomSheet(
                     Text("Оплатить $basePrice ₽")
                 }
             }
-
-            // ✅ Увеличенный отступ снизу, чтобы кнопка не прилипала к краю экрана
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

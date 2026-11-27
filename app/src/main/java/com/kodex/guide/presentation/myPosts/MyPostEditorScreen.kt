@@ -32,6 +32,7 @@ import coil.compose.AsyncImage
 import com.kodex.guide.R
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.PostEditorState
+import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.ui.theme.Orange
 import com.kodex.guide.presentation.components.ActionSheetButton
 import com.kodex.guide.presentation.myPosts.components.AddressSection
@@ -41,6 +42,7 @@ import com.kodex.guide.presentation.myPosts.components.FrameSection
 import com.kodex.guide.presentation.myPosts.components.OptionsSection
 import com.kodex.guide.presentation.myPosts.components.PhotoSection
 import com.kodex.guide.presentation.myPosts.components.PublishPeriodDropdown
+import com.kodex.guide.presentation.myPosts.components.WorkingHoursDropdown
 import com.kodex.guide.presentation.myPosts.components.capitalizeFirst
 import com.kodex.guide.presentation.myPosts.components.decodeBase64ToBitmap
 import com.kodex.guide.ui.theme.ColorBlue
@@ -102,6 +104,18 @@ fun MyPostEditorScreen(
     var location by remember { mutableStateOf(false) }
     var publishPeriod by remember { mutableStateOf(1) }
     var publishPeriodExpanded by remember { mutableStateOf(false) }
+    var openingHoursFrom by remember { mutableStateOf("09:00") }
+    var openingHoursTo by remember { mutableStateOf("20:00") }
+    var openingHoursFromExpanded by remember { mutableStateOf(false) }
+    var openingHoursToExpanded by remember { mutableStateOf(false) }
+
+    fun applyOpeningHours(openingHours: String) {
+        val parts = openingHours.split("-", "–", "—").map { it.trim() }
+        if (parts.size == 2) {
+            openingHoursFrom = parts[0]
+            openingHoursTo = parts[1]
+        }
+    }
 
     // ===== РЕЖИМ РАМКИ =====
     var isFrame by remember { mutableStateOf(false) }
@@ -119,6 +133,8 @@ fun MyPostEditorScreen(
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val isGeneratingDescription by viewModel.isGeneratingDescription.collectAsStateWithLifecycle()
+    val userRole by viewModel.userRole.collectAsStateWithLifecycle()
+    val canEditWorkingHours = userRole.hasAccessTo(UserRole.BUSINESS)
 
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collectLatest { event ->
@@ -144,6 +160,7 @@ fun MyPostEditorScreen(
                     payment = s.payment
                     location = s.location
                     publishPeriod = s.publishPeriod
+                    applyOpeningHours(s.openingHours)
                     existingImageUrl = s.existingImageUrl
                     bannerTextTopLeft = s.bannerTextTopLeft
                     bannerTextTopRight = s.bannerTextTopRight
@@ -184,6 +201,7 @@ fun MyPostEditorScreen(
             house = b.house; flat = b.flat; category = BookCategories.fromId(b.categoryIndex)
             delivery = b.delivery; payment = b.payment; location = b.location
             publishPeriod = b.publishPeriod
+            applyOpeningHours(b.openingHours)
             existingImageUrl = b.imageUrl
 
             // Баннер-поля
@@ -208,6 +226,8 @@ fun MyPostEditorScreen(
     }
 
     val publishPeriodNames = stringArrayResource(id = R.array.publish_period_user)
+    val workingHoursFromNames = stringArrayResource(id = R.array.working_hours_from)
+    val workingHoursToNames = stringArrayResource(id = R.array.working_hours_to)
 // Достаем строку (например, "30 days") и оставляем только цифры
     val publishPeriodText = publishPeriodNames.getOrNull(publishPeriod - 1) ?: "30"
     val publishPeriodDays: Long = publishPeriodText.filter { it.isDigit() }.toLongOrNull() ?: 30L
@@ -382,13 +402,39 @@ fun MyPostEditorScreen(
                 location,
                 { location = it })
 
-            // Период публикации
-            PublishPeriodDropdown(
-                publishPeriod,
-                publishPeriodExpanded,
-                publishPeriodNames,
-                onPeriodChange = { publishPeriod = it; publishPeriodExpanded = false },
-                onExpandedChange = { publishPeriodExpanded = it })
+            // Период публикации + время работы (для BUSINESS/PREMIUM/ADMIN)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(modifier = Modifier.weight(1f)) {
+                    PublishPeriodDropdown(
+                        publishPeriod,
+                        publishPeriodExpanded,
+                        publishPeriodNames,
+                        onPeriodChange = { publishPeriod = it; publishPeriodExpanded = false },
+                        onExpandedChange = { publishPeriodExpanded = it })
+                }
+                if (canEditWorkingHours) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        WorkingHoursDropdown(
+                            value = openingHoursFrom,
+                            label = "с",
+                            names = workingHoursFromNames,
+                            expanded = openingHoursFromExpanded,
+                            onValueChange = { openingHoursFrom = it },
+                            onExpandedChange = { openingHoursFromExpanded = it }
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        WorkingHoursDropdown(
+                            value = openingHoursTo,
+                            label = "до",
+                            names = workingHoursToNames,
+                            expanded = openingHoursToExpanded,
+                            onValueChange = { openingHoursTo = it },
+                            onExpandedChange = { openingHoursToExpanded = it }
+                        )
+                    }
+                }
+            }
 
             OptionsSection(delivery, { delivery = it }, payment, { payment = it })
 
@@ -440,6 +486,11 @@ fun MyPostEditorScreen(
                         payment = payment,
                         location = location,
                         publishPeriod = publishPeriod,
+                        openingHours = if (canEditWorkingHours) {
+                            "$openingHoursFrom - $openingHoursTo"
+                        } else {
+                            editPost?.openingHours ?: ""
+                        },
                         deleteDate = calculatedDeleteDate,
                         imageUri = imageUri,
                         existingImageUrl = existingImageUrl,

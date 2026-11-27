@@ -118,6 +118,14 @@ fun MyPostCard(
                         StatusBadge(isUploaded = book.isUploaded)
                     }
                     Spacer(Modifier.height(4.dp))
+                    if (book.openingHours.isNotBlank()) {
+                        Text(
+                            text = book.openingHours,
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                        Spacer(Modifier.height(4.dp))
+                    }
 
                     // Форматируем дату удаления
 

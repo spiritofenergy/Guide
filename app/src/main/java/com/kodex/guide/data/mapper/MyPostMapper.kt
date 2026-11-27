@@ -12,7 +12,7 @@ object MyPostMapper {
             description = e.description,
             price = e.price,
             telephone = e.telephone,
-            openingHours = "", // Если в Book это поле есть, но в Entity нет — ставим пустую строку
+            openingHours = e.openingHours,
             village = e.village,
             street = e.street,
             house = e.house,
@@ -49,6 +49,7 @@ object MyPostMapper {
             description = b.description,
             price = b.price,
             telephone = b.telephone,
+            openingHours = b.openingHours,
             village = b.village,
             street = b.street,
             house = b.house,
