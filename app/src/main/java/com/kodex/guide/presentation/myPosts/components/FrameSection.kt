@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.unit.dp
 import com.kodex.guide.ui.theme.ColorBlue
 
@@ -40,7 +41,7 @@ fun FrameSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Режим рамки",
+                text = "Поставить рамку",
                 style = MaterialTheme.typography.titleMedium,
                 color = if (isFrame) ColorBlue else MaterialTheme.colorScheme.onSurface
             )
@@ -48,10 +49,17 @@ fun FrameSection(
                 checked = isFrame,
                 onCheckedChange = onIsFrameChange,
                 colors = SwitchDefaults.colors(
+                    checkedThumbColor = White,          // «ползунок» поверх трека
+                    checkedTrackColor = ColorBlue,           // сам трек
+                    checkedBorderColor = ColorBlue,
+                    uncheckedThumbColor = White,
+                    uncheckedTrackColor = ColorBlue.copy(alpha = 0.3f),
+                    uncheckedBorderColor = ColorBlue.copy(alpha = 0.5f)
+                /*colors = SwitchDefaults.colors(
                     checkedThumbColor = ColorBlue,
                     checkedTrackColor = ColorBlue.copy(alpha = 0.3f)
-                )
-            )
+                )*/
+            ))
         }
     }
 }

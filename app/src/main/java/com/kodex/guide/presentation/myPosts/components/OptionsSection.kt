@@ -22,7 +22,8 @@ fun OptionsSection(
             label = "Доставка",
             checked = delivery,
             onCheckedChange = onDeliveryChange,
-            modifier = Modifier.weight(0.45f)
+            modifier = Modifier.weight(0.45f),
+
         )
         OptionSwitchCard(
             label = "Оплата картой",

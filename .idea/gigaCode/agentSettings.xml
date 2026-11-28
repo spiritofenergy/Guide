@@ -24,6 +24,9 @@
         <Execute>
           <option name="pattern" value="cd *" />
         </Execute>
+        <Execute>
+          <option name="pattern" value="E:\24\Guide\gradlew.bat :app:compileDebugKotlin" />
+        </Execute>
       </list>
     </option>
   </component>

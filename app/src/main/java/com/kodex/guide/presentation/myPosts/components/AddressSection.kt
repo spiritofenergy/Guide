@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,12 +37,38 @@ fun AddressSection(
             label = { Text("Станица / населённый пункт") },
             modifier = Modifier.fillMaxWidth(), singleLine = true
         )
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Показать на карте")
+            Switch(
+                checked = location,
+                onCheckedChange = onLocationChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = White,          // «ползунок» поверх трека
+                    checkedTrackColor = ColorBlue,           // сам трек
+                    checkedBorderColor = ColorBlue,
+                    uncheckedThumbColor = White,
+                    uncheckedTrackColor = ColorBlue.copy(alpha = 0.3f),
+                    uncheckedBorderColor = ColorBlue.copy(alpha = 0.5f)
+                )
+            )
+        }
+      /*  Switch(
+            checked = isFrame,
+            onCheckedChange = onIsFrameChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = ColorBlue,
+                checkedTrackColor = ColorBlue.copy(alpha = 0.3f)
+            )
+        )*/
+     /*   Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(checked = location, onCheckedChange = onLocationChange,
                 colors = CheckboxDefaults.colors(checkedColor = ColorBlue))
             Text("Показать на карте")
-        }
+        }*/
 
         OutlinedTextField(
             value = street, onValueChange = onStreetChange,

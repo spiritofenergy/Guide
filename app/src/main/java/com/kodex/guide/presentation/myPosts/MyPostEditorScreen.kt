@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -31,13 +32,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import coil.compose.AsyncImage
 import com.kodex.guide.R
+import com.kodex.guide.presentation.myPosts.components.BannerSection
 import com.kodex.guide.domain.model.BookCategories
 import com.kodex.guide.domain.model.PostEditorState
 import com.kodex.guide.domain.model.UserRole
 import com.kodex.guide.ui.theme.Orange
 import com.kodex.guide.presentation.components.ActionSheetButton
 import com.kodex.guide.presentation.myPosts.components.AddressSection
-import com.kodex.guide.presentation.myPosts.components.BannerSection
 import com.kodex.guide.presentation.myPosts.components.CategoryDropdown
 import com.kodex.guide.presentation.myPosts.components.FrameSection
 import com.kodex.guide.presentation.myPosts.components.OptionsSection
@@ -49,7 +50,7 @@ import com.kodex.guide.presentation.myPosts.components.decodeBase64ToBitmap
 import com.kodex.guide.presentation.payment.PublishPaymentBottomSheet
 import com.kodex.guide.ui.theme.ColorBlue
 import java.io.File
-import com.kodex.guide.BuildConfig  // ВАЖНО: ваш пакет, не чужой!
+//import com.kodex.guide.BuildConfig  // ВАЖНО: ваш пакет, не чужой!
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -160,7 +161,7 @@ fun MyPostEditorScreen(
                     house = s.house
                     flat = s.flat
                     category = s.category
-                    delivery = s.delivery
+                    delivery = false
                     payment = s.payment
                     location = s.location
                     publishPeriod = s.publishPeriod
@@ -171,9 +172,9 @@ fun MyPostEditorScreen(
                     bannerTextBottomLeft = s.bannerTextBottomLeft
                     bannerPublishDate = s.bannerPublishDate
                     bannerExpireDate = s.bannerExpireDate
-                    isBanner = s.isBanner
+                    isBanner = false
                     // Восстанавливаем режим рамки (поле должно быть в PostEditorState)
-                    isFrame = s.frame
+                    isFrame = false
                 }
                 is MyPostsEvent.DescriptionGenerated ->
                     description = event.text.capitalizeFirst()
@@ -288,10 +289,8 @@ fun MyPostEditorScreen(
         }
         AlertDialog(
             onDismissRequest = { pendingPromotion = null },
-            title = { Text("Подключить продвижение?") },
-            text = {
-                Text("Стоимость за 30 дней: $priceForThirtyDays ₽. Подключить $promotionName?")
-            },
+            title = { Text("Подключить $promotionName?") },
+            text = { Text("Стоимость за 30 дней: $priceForThirtyDays ₽.") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -301,7 +300,7 @@ fun MyPostEditorScreen(
                         }
                         pendingPromotion = null
                     }
-                ) { Text("Согласен") }
+                ) { Text("Подключить") }
             },
             dismissButton = {
                 TextButton(onClick = { pendingPromotion = null }) { Text("Отмена") }
@@ -393,16 +392,47 @@ fun MyPostEditorScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
-
-         /*   OutlinedTextField(
-                value = description,
-                onValueChange = { description = it.capitalizeFirst() },
-                label = { Text("Описание") },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp),
-                maxLines = 5
-            )*/
+                    .heightIn(min = 48.dp),
+                horizontalArrangement = if (isGeneratingDescription) {
+                    Arrangement.Center      // спиннер + текст по центру
+                } else {
+                    Arrangement.Start       // кнопка слева
+                },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (isGeneratingDescription) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(28.dp),
+                        strokeWidth = 4.dp,
+                        color = ColorBlue
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Генерация…", color = ColorBlue)
+                } else {
+                    TextButton(
+                        enabled = title.isNotBlank(),
+                        onClick = {
+                            viewModel.generateDescription(
+                                title = title,
+                                imageUri = imageUri,
+                                existingImageUrl = existingImageUrl
+                            )
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = ColorBlue,
+                            disabledContentColor = ColorBlue
+                        )
+                    ) {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                        Spacer(Modifier.width(4.dp))
+                        Text("Сгенерировать описание AI")
+                    }
+                }
+            }
+
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it.capitalizeFirst() },
@@ -413,35 +443,7 @@ fun MyPostEditorScreen(
                 maxLines = 5
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (isGeneratingDescription) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
-                        strokeWidth = 2.dp
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text("Генерация…", style = MaterialTheme.typography.bodySmall)
-                } else {
-                    TextButton(
-                        enabled = title.isNotBlank(),
-                        onClick = {
-                            viewModel.generateDescription(
-                                title = title,
-                                imageUri = imageUri,
-                                existingImageUrl = existingImageUrl
-                            )
-                        }
-                    ) {
-                        Icon(Icons.Default.AutoAwesome, contentDescription = null)
-                        Spacer(Modifier.width(4.dp))
-                        Text("Сгенерировать описание")
-                    }
-                }
-            }
+
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
